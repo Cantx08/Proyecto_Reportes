@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+*.sqlite3
+*.db
+*.csv
+*.xlsx
+*.pdf
+*.aux
+*.out
+*.synctex.gz
+*.texput.log
+*.cls
+*.ldf
+*.sty
+
+# Environment
+.env
+
+# VSCode
+.vscode/
+
+# Latex
+*.aux
+*.log
+*.out
+*.pdf
+*.synctex.gz
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Others
+*.bak
+*.tmp
+*.swp
+*.swo
