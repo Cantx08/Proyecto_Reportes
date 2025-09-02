@@ -1,0 +1,158 @@
+\documentclass[fleqn,10pt]{wlscirep}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{array}
+\usepackage{tabularray}
+\usepackage{stringstrings}
+\input{data}
+
+\renewcommand{\figurename}{Figura}
+\addto\captionsenglish{\renewcommand{\figurename}{Figura}}
+%\DeclareUnicodeCharacter{202F}{$\mu$}
+\renewcommand{\tablename}{Tabla}
+\addto\captionsenglish{\renewcommand{\tablename}{Tabla}}
+
+\title{Certificación de Publicaciones\small\hfill\thedate}
+\author[]{\docente}
+\affil[]{\departamento}
+\affil[]{Escuela Politécnica Nacional}
+
+%\affil[*]{corresponding.author@email.example}
+
+%\affil[+]{these authors contributed equally to this work}
+
+%\keywords{Keyword1, Keyword2, Keyword3}
+
+\begin{abstract}
+\stringlength[q]{\memorando}
+\ifnum\theresult>0 {El presente informe se realiza en base a la solicitud del memorando \memorando, con la finalidad de certificar \ifnum\numTotalPubRegyScopus>1{las publicaciones }\else{la publicación }\fi \ifnum\masculino=1{del profesor }\else{de la profesora }\fi \docente. } \else {El presente informe se realiza con la finalidad de certificar \ifnum\numTotalPubRegyScopus>1{las publicaciones }\else{la publicación}\fi \ifnum\masculino=1{del profesor }\else{de la profesora }\fi \docente.} \fi
+\end{abstract}
+\begin{document}
+
+\flushbottom
+\maketitle
+\noindent{\parbox{\dimexpr\linewidth-2\fboxsep\relax}{\color{color1}\large\sffamily\textbf{INFORME TÉCNICO\\}}}
+% * <john.hammersley@gmail.com> 2015-02-09T12:07:31.197Z:
+%
+%  Click the title above to edit the author information and abstract
+%
+\thispagestyle{empty}
+
+\noindent El presente informe se realiza en base a la información recopilada por la Dirección de Investigación, de \ifnum\numpublicacionesscopus>0{la base de datos científicos Scopus\ifnum\numpublicacionesregionales>0{ y }\fi}\fi \ifnum\numpublicacionesregionales>0{bases de datos indexadas}\fi.
+
+
+\ifnum\numpublicacionesscopus>0{
+\section*{Publicaciones Scopus}
+\subsection*{Tipo y Número de publicaciones Scopus \ifnum\masculino=1{del }\else{de la }\fi \docente}
+\vspace{1mm}
+\ifnum\masculino=1{El }\else{La }\fi \docente, es \cargo  de la Escuela Politécnica Nacional y miembro del \departamento. \\\\Ha  participado  en  un  total  de \numpublicacionesscopus \ifnum\numpublicacionesscopus>1{publicaciones Scopus como \ifnum\masculino=1{autor/co-autor }\else{autora/co-autora }\fi de las mismas, distribuidas en \distribucionArticulosScopus}\else{publicación Scopus como \ifnum\masculino=1{autor/co-autor }\else{autora/co-autora }\fi de la misma, siendo \distribucionArticulosScopus }\fi. Tal como se detalla a continuación:
+\begin{enumerate}
+\detalleScopus
+\end{enumerate}
+\ifnum\onlyEpnScopusAffil=0{Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional. }\fi
+
+\vspace{5mm}
+
+\ifnum\numpublicacionesscopus>1{ \noindent Adicionalmente, en la Figura \ref{fig:gr1} se muestra la tendencia por año de las publicaciones en Scopus \ifnum\masculino=1{del }\else{de la }\fi \docente :
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.95 \linewidth]{gr1}%.8
+\caption{\small Publicaciones Scopus por Año - Fuente web de Scopus.}
+\label{fig:gr1}
+\end{figure}
+}\fi
+\vspace{1mm}
+%\newpage %usar si areas se anteponen al grafico
+\subsection*{Áreas Temáticas de publicaciones Scopus \ifnum\masculino=1{del }\else{de la }\fi \docente}
+\vspace{1mm}
+\ifnum\masculino=1{El }\else{La }\fi \docente, ha publicado en \numAreasTematicas \ifnum\numAreasTematicas>1{áreas temáticas, las cuales se detallan }\else{área temática, la cual se detalla }\fi a continuación:
+\begin{enumerate}
+\areasTematicasITEM
+\end{enumerate}
+}\fi
+
+
+\ifnum\numpublicacionesWos>0{
+\vspace{3mm}
+\section*{Publicaciones Web of Science}
+\subsection*{Tipo y Número de publicaciones Web of Science \ifnum\masculino=1{del }\else{de la }\fi \docente}
+\vspace{1mm}
+Ha  participado  en  un  total  de \numpublicacionesWos \ifnum\numpublicacionesWos>1{publicaciones indexadas en la Web of Science Core Collection como \ifnum\masculino=1{autor/co-autor }\else{autora/co-autora }\fi de las mismas, distribuidas en \distribucionArticulosWos}\else{publicación indexada en la Web of Science Core Colection como \ifnum\masculino=1{autor/co-autor }\else{autora/co-autora }\fi de la misma, siendo \distribucionArticulosScopus }\fi. Tal como se detalla a continuación:
+\begin{enumerate}
+\detalleWos
+\end{enumerate}
+\vspace{2mm}
+\ifnum\onlyEpnScopusAffil=0{Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional.}\fi
+}\fi
+
+
+\ifnum\numpublicacionesregionales>0{
+\section*{Otras Indexaciones}
+\ifnum\numpublicacionesscopus<1{\ifnum\masculino=1{El }\else{La }\fi \docente, es \cargo  de la Escuela Politécnica Nacional y miembro del \departamento. \\\\}\fi
+\ifnum\masculino=1{El }\else{La }\fi \docente, cuenta con \numpublicacionesregionales \ifnum\numpublicacionesregionales>1{indexaciones, como se detallan a continuación}\else{artículo indexado, como se detalla a continuación}\fi:
+\begin{enumerate}
+\detalleRegionales
+\end{enumerate}
+\vspace{0mm}
+}\fi
+\ifnum\onlyEpnRegionalAffil=0{Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional. }\fi
+
+\ifnum\numMemorias>0{
+\section*{Memorias de Eventos Científicos}
+\ifnum\masculino=1{El }\else{La }\fi \docente, cuenta con \numMemorias \ifnum\numMemorias>1{publicaciones en memorias de eventos científicos, como se detallan a continuación}\else{publicación en memorias de eventos científicos, como se detalla a continuación }\fi:
+\begin{enumerate}
+\detalleMemorias
+\end{enumerate}
+\vspace{1mm}
+\ifnum\onlyEpnMemoriasAffil=0{Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional. }\fi
+}\fi
+
+\ifnum\numLibros>0{
+\section*{Libros y Capítulos de Libros}
+\ifnum\masculino=1{El }\else{La }\fi \docente , cuenta con \numLibros \ifnum\numLibros>1{publicaciones en Libros y Capítulos de Libros, como se detallan a continuación}\else{publicación en Libros y Capítulos de Libros, como se detalla a continuación}\fi:
+\begin{enumerate}
+\detalleLibros
+\end{enumerate}
+\vspace{1mm}
+\ifnum\onlyEpnCapsAffil=0{Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional. }\fi
+}\fi
+
+%\newpage
+\section*{Conclusión}
+
+Por los antecedentes expuestos, \ifnum\firmante=1{la Dirección de Investigación }\else{el Vicerrectorado de Investigación, Innovación y Vinculación }\fi de la Institución, certifica que \ifnum\masculino=1{el }\else{la }\fi \docente, cuenta con un total de \numTotalPubRegyScopus \ifnum\numTotalPubRegyScopus>1{publicaciones Scopus.}\fi }\fi \\
+% y \numpublicacionesregionales artículos indexados.}\else{\ifnum\numpublicacionesscopus=1{publicación Scopus.}\fi \ifnum\numpublicacionesregionales=1{artículo regional.}\fi \ifnum\numMemorias=1{ memoria de eventos científicos.}\fi \ifnum\numLibros=1{ Libro, Captítulo de Libro.}\fi }\fi \\
+
+%Por los antecedentes expuestos, \ifnum\firmante=1{la Dirección de Investigación }\else{el Vicerrectorado de Investigación, Innovación y Vinculación }\fi de la Institución, certifica que \ifnum\masculino=1{el }\else{la }\fi \docente, cuenta con un total de \numTotalPubRegyScopus \ifnum\numTotalPubRegyScopus>1{publicaciones, de las cuales \numpublicacionesscopus son Scopus y \numMemorias memoria de eventos científicos.}\else{\ifnum\numpublicacionesscopus=1{publicación Scopus.}\fi \ifnum\numpublicacionesregionales=1{artículo regional.}\fi \ifnum\numMemorias=1{ memoria de eventos científicos.}\fi \ifnum\numLibros=1{ Libro, Captítulo de Libro.}\fi }\fi \\
+
+%Por los antecedentes expuestos, el Vicerrectorado de Investigación, Innovación y Vinculación de la Institución, certifica que \ifnum\masculino=1{el }\else{la }\fi \docente, cuenta con un total de \numTotalPubRegyScopus \ifnum\numTotalPubRegyScopus>1{publicaciones, de las cuales \numpublicacionesscopus son Scopus, \numpublicacionesregionales son artículos regionales, \numMemorias son memorias de eventos científicos, 1 Capítulo de Libro y 1 Libro.}\else{\ifnum\numpublicacionesscopus=1{publicación Scopus.}\fi \ifnum\numpublicacionesregionales=1{artículo regional.}\fi \ifnum\numMemorias=1{ memoria de eventos científicos.}\fi \ifnum\numLibros=1{ Libro, Captítulo de Libro.}\fi }\fi \\
+
+\noindent \ifnum\masculino=1{El }\else{La }\fi \docente\hspace{0.3em}puede hacer uso del presente certificado para lo que considere necesario.
+ \\
+\vfill
+\ifnum\firmante>1{
+\noindent \textbf{Dr. Marco Oswaldo Santórum Gaibor} \\
+\textbf{VICERRECTOR DE INVESTIGACIÓN, INNOVACIÓN Y VINCULACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL}
+}\else{
+\noindent \textbf{Dra. María Monserrate Intriago Pazmiño} \\
+\textbf{DIRECTORA DE INVESTIGACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL}
+}\fi
+\noindent
+\begin{table}[ht]
+\begin{tabular}{|l|l|}
+\hline
+\small Elaborado por: & M. Vásquez\\
+\hline
+\end{tabular}
+\end{table}
+%\begin{tblr} {
+%  colspec = {|Q[c,c]|Q[c,m]|Q[r,10em]|},
+%  stretch = 6pt,
+%  rowsep = 0pt,
+%  hlines = {black, 0.5pt},
+%  vlines = {black, 0.5pt},
+%}
+%Elaborado por: &  R. Villarroel &  \\
+%\end{tblr}
+\end{document}

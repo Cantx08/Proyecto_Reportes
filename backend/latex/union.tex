@@ -1,0 +1,56 @@
+\documentclass[a4paper]{article}
+\usepackage{graphicx}
+\usepackage{pdfpages,picture}
+\usepackage{textpos}
+\pdfximage{main.pdf}
+\begin{document}
+\input{data}
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=1]{main.pdf}
+}]{form.pdf}
+\ifnum\the\pdflastximagepages>1{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=2]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>2{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=3]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>3{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=4]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>4{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=5]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>5{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=6]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>6{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=7]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>7{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=8]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>8{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=9]{main.pdf}
+}]{form.pdf}
+}\fi
+\ifnum\the\pdflastximagepages>9{
+\includepdf[pages={\firmante}, picturecommand={
+  \includegraphics[page=10]{main.pdf}
+}]{form.pdf}
+}\fi
+\end{document}
