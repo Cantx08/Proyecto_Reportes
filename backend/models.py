@@ -1,24 +1,24 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-class Publicacion(BaseModel):
-    titulo: str
-    anio: str
-    fuente: str
-    tipo: str
-    filiacion: str
+class Publication(BaseModel):
+    title: str
+    year: str
+    source: str
+    document_type: str
+    affiliation: str
     doi: str
-    categorias: str = ""
+    categories: str = ""
 
-    def formato_texto(self):
-        return f'({self.anio}) "{self.titulo}". {self.fuente}. Indexada en SCOPUS - {self.categorias}. DOI: {self.doi} ({self.filiacion})'
+    def text_format(self):
+        return f'({self.year}) "{self.title}". {self.source}. Indexada en SCOPUS - {self.categories}. DOI: {self.doi} ({self.affiliation})'
 
-class AutorPublicaciones(BaseModel):
+class Author(BaseModel):
     author_id: str
-    publicaciones: Optional[List[Publicacion]] = None
+    publications: Optional[List[Publication]] = None
     error: Optional[str] = None
 
 
-class RespuestaPublicaciones(BaseModel):
-    publicaciones: List[AutorPublicaciones]
+class PublicationResponses(BaseModel):
+    publicaciones: List[Author]
 
