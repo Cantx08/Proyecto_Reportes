@@ -1,24 +1,21 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 
-class Publication(BaseModel):
-    title: str
-    year: str
-    source: str
-    document_type: str
-    affiliation: str
+class Publicacion(BaseModel):
+    titulo: str
+    anio: str
+    fuente: str
+    tipo_documento: str
+    filiacion: str
     doi: str
-    categories: str = ""
+    categorias: str = ""
 
-    def text_format(self):
-        return f'({self.year}) "{self.title}". {self.source}. Indexada en SCOPUS - {self.categories}. DOI: {self.doi} ({self.affiliation})'
-
-class Author(BaseModel):
-    author_id: str
-    publications: Optional[List[Publication]] = None
+class Autor(BaseModel):
+    id_autor: str
+    lista_publicaciones: Optional[List[Publicacion]] = None
     error: Optional[str] = None
 
 
-class PublicationResponses(BaseModel):
-    publicaciones: List[Author]
+class Publicaciones(BaseModel):
+    publicaciones: List[Autor]
 
