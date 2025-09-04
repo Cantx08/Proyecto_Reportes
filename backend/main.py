@@ -1,43 +1,66 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Depends
 from typing import List
-from models import Publicaciones
-from scopus_api import agrupar_publicaciones_por_autor, obtener_publicaciones, obtener_documentos_por_anio, obtener_areas_tematicas
+from src.dependencies import container
+from src.presentation.dtos import (
+    PublicacionesResponseDTO,
+    DocumentosPorAnioResponseDTO, 
+    AreasTematicasResponseDTO
+)
+from src.presentation.controllers import PublicacionesController, AreasTematicasController
 
-app = FastAPI()
+app = FastAPI(
+    title="Sistema de Publicaciones Académicas",
+    description="API para consultar publicaciones académicas de Scopus",
+    version="2.0.0"
+)
 
-@app.get("/scopus/publications", response_model=Publicaciones)
-def get_publications(ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus")):
+
+def get_publicaciones_controller() -> PublicacionesController:
+    """Dependencia para obtener el controlador de publicaciones."""
+    return container.publicaciones_controller
+
+
+def get_areas_tematicas_controller() -> AreasTematicasController:
+    """Dependencia para obtener el controlador de áreas temáticas."""
+    return container.areas_tematicas_controller
+
+
+@app.get("/scopus/publications", response_model=PublicacionesResponseDTO)
+async def get_publications(
+    ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
+    controller: PublicacionesController = Depends(get_publicaciones_controller)
+):
     """
     Obtiene publicaciones de uno o varios IDs de autor Scopus.
     Agrupa todas las publicaciones bajo un solo autor.
     """
-    scopus_data = obtener_publicaciones(ids)
-    autor_obj = agrupar_publicaciones_por_autor(scopus_data, ids)
-    return Publicaciones(publicaciones=[autor_obj])
+    return await controller.obtener_publicaciones(ids)
 
-@app.get("/scopus/docs_by_year")
-def get_documents_by_year(ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus")):
+
+@app.get("/scopus/docs_by_year", response_model=DocumentosPorAnioResponseDTO)
+async def get_documents_by_year(
+    ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
+    controller: PublicacionesController = Depends(get_publicaciones_controller)
+):
     """
     Obtiene el número de publicaciones por año realizadas por un autor que tiene uno o varios IDs.
     """
-    scopus_data = obtener_publicaciones(ids)
-    publicaciones = []
-    for autor in scopus_data:
-        if "publicaciones" in autor:
-            publicaciones.extend(autor["publicaciones"])
-    conteo = obtener_documentos_por_anio(publicaciones)
-    return conteo
+    return await controller.obtener_documentos_por_anio(ids)
 
-@app.get("/scopus/subject_areas")
-def get_subject_areas(ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus")):
-    """
-    Obtiene las áreas temáticas generales del análisis de resultados de las publicaciones del autor.
-    """
-    scopus_data = obtener_publicaciones(ids)
-    publicaciones = []
-    for autor in scopus_data:
-        if "publicaciones" in autor:
-            publicaciones.extend(autor["publicaciones"])
-    areas = obtener_areas_tematicas(publicaciones)
-    return areas
 
+@app.get("/scopus/subject_areas", response_model=AreasTematicasResponseDTO)
+async def get_subject_areas(
+    ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
+    controller: AreasTematicasController = Depends(get_areas_tematicas_controller)
+):
+    """
+    Obtiene las áreas temáticas generales de las publicaciones del autor.
+    Mapea las subáreas específicas de Scopus a las 27 áreas temáticas generales definidas.
+    """
+    return await controller.obtener_areas_tematicas(ids)
+
+
+@app.get("/health")
+async def health_check():
+    """Endpoint de salud."""
+    return {"status": "healthy", "message": "API funcionando correctamente"}
