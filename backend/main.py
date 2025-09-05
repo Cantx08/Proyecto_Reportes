@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Query, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from src.dependencies import container
 from src.presentation.dtos import (
@@ -12,6 +13,15 @@ app = FastAPI(
     title="Sistema de Publicaciones Académicas",
     description="API para consultar publicaciones académicas de Scopus",
     version="2.0.0"
+)
+
+# Configurar CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -55,7 +65,7 @@ async def get_subject_areas(
 ):
     """
     Obtiene las áreas temáticas generales de las publicaciones del autor.
-    Mapea las subáreas específicas de Scopus a las 27 áreas temáticas generales definidas.
+    Mapea las subáreas específicas de Scopus a las áreas temáticas generales definidas.
     """
     return await controller.obtener_areas_tematicas(ids)
 
