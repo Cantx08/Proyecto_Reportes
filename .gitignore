@@ -70,6 +70,22 @@ next-env.d.ts
 *.out
 *.pdf
 *.synctex.gz
+*.fdb_latexmk
+*.fls
+*.toc
+*.bbl
+*.blg
+*.idx
+*.ind
+*.ilg
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*.auxlock
 
 # OS
 .DS_Store
