@@ -5,6 +5,7 @@ import { scopusApi } from '@/services/scopusApi';
 const initialState: AppState = {
   scopusIds: [''],
   isLoading: false,
+  loadingProgress: null,
   publicaciones: [],
   areasTematicas: [],
   documentosPorAnio: {},
@@ -20,9 +21,17 @@ export const useScopusData = () => {
       return { isValid: false, message: 'El ID no puede estar vacío.' };
     }
     
-    // Validación básica: solo números y mínimo 8 dígitos
-    const idPattern = /^[0-9]{8,}$/;
-    if (!idPattern.test(id.trim())) {
+    // Verificar si contiene caracteres no numéricos
+    const hasNonNumericChars = /[^0-9]/.test(id.trim());
+    if (hasNonNumericChars) {
+      return { 
+        isValid: false, 
+        message: 'Solo se permiten dígitos. No se permiten letras, símbolos o espacios.' 
+      };
+    }
+    
+    // Validación de longitud: mínimo 8 dígitos
+    if (id.trim().length < 8) {
       return { 
         isValid: false, 
         message: 'Debe tener al menos 8 dígitos numéricos.' 
@@ -72,15 +81,23 @@ export const useScopusData = () => {
       return;
     }
 
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    setState(prev => ({ ...prev, isLoading: true, error: null, loadingProgress: 'Iniciando consulta...' }));
 
     try {
-      // Ejecutar todas las consultas en paralelo
-      const [publicacionesResult, documentosResult, areasResult] = await Promise.all([
-        scopusApi.getPublicaciones(validIds),
-        scopusApi.getDocumentosPorAnio(validIds),
-        scopusApi.getAreasTematicas(validIds)
-      ]);
+      // Para consultas grandes, ejecutar secuencialmente para evitar timeouts
+      console.log('Iniciando consulta con', validIds.length, 'IDs...');
+      
+      setState(prev => ({ ...prev, loadingProgress: 'Obteniendo publicaciones...' }));
+      const publicacionesResult = await scopusApi.getPublicaciones(validIds);
+      console.log('Publicaciones obtenidas:', publicacionesResult.publicaciones.length);
+      
+      setState(prev => ({ ...prev, loadingProgress: 'Procesando documentos por año...' }));
+      const documentosResult = await scopusApi.getDocumentosPorAnio(validIds);
+      console.log('Documentos por año procesados');
+      
+      setState(prev => ({ ...prev, loadingProgress: 'Procesando áreas temáticas...' }));
+      const areasResult = await scopusApi.getAreasTematicas(validIds);
+      console.log('Áreas temáticas procesadas');
 
       // Combinar todas las publicaciones
       const todasPublicaciones = publicacionesResult.publicaciones
@@ -91,14 +108,16 @@ export const useScopusData = () => {
         publicaciones: todasPublicaciones,
         areasTematicas: areasResult.areas_tematicas,
         documentosPorAnio: documentosResult.documentos_por_anio,
-        isLoading: false
+        isLoading: false,
+        loadingProgress: null
       }));
 
     } catch (error) {
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error.message : 'Error desconocido.',
-        isLoading: false
+        isLoading: false,
+        loadingProgress: null
       }));
     }
   }, [state.scopusIds, validateScopusId]);
