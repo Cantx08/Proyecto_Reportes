@@ -128,7 +128,7 @@ echo "SJR_CSV_PATH=data/df_sjr_24_04_2025.csv" >> .env
 
 5. **Iniciar la aplicación**
 ```bash
-python main.py
+uvicorn main:app --reload
 ```
 
 La API estará disponible en: `http://localhost:8000`
