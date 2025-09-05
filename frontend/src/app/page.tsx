@@ -12,6 +12,7 @@ export default function HomePage() {
   const {
     scopusIds,
     isLoading,
+    loadingProgress,
     publicaciones,
     areasTematicas,
     documentosPorAnio,
@@ -96,11 +97,16 @@ export default function HomePage() {
         {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
-            <div className="inline-flex items-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-              <span className="text-lg text-gray-600">
+            <div className="inline-flex items-center flex-col">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mb-4" style={{ borderColor: 'rgba(0, 158, 206, 1)' }}></div>
+              <span className="text-lg text-gray-600 mb-2">
                 Procesando datos de Scopus...
               </span>
+              {loadingProgress && (
+                <span className="text-sm text-gray-500">
+                  {loadingProgress}
+                </span>
+              )}
             </div>
           </div>
         )}

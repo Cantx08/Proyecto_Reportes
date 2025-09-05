@@ -64,7 +64,7 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
               {pub.categorias && (
                 <div className="md:col-span-2">
                   <span className="font-medium">Categorías:</span>{' '}
-                  <span className="text-blue-600">{pub.categorias}</span>
+                  <span style={{ color: 'rgba(0, 158, 206, 1)' }}>{pub.categorias}</span>
                 </div>
               )}
               {pub.doi && (
@@ -74,7 +74,8 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
                     href={`https://doi.org/${pub.doi}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
+                    className="hover:underline"
+                    style={{ color: 'rgba(0, 158, 206, 1)' }}
                   >
                     {pub.doi}
                   </a>
