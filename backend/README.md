@@ -123,7 +123,7 @@ pip install -r requirements.txt
 ```bash
 # Crear archivo .env
 echo "SCOPUS_API_KEY=tu_clave_api_scopus" > .env
-echo "SJR_CSV_PATH=data/df_sjr_24_04_2025.csv" >> .env
+echo "SJR_CSV_PATH=data/tu_archivo.csv" >> .env
 ```
 
 5. **Iniciar la aplicación**
@@ -139,23 +139,23 @@ La API estará disponible en: `http://localhost:8000`
 
 #### **📄 Obtener Publicaciones**
 ```http
-GET /scopus/publications?ids=57059780500&ids=12345678901
+GET /scopus/publications?ids=00000000000&ids=12345678901
 ```
 **Respuesta:**
 ```json
 {
   "publicaciones": [
     {
-      "id_autor": "57059780500,12345678901",
+      "id_autor": "00000000000,12345678901",
       "lista_publicaciones": [
         {
           "titulo": "Título de la publicación",
-          "anio": "2023",
-          "fuente": "Journal Name",
-          "tipo_documento": "Article",
-          "filiacion": "Escuela Politécnica Nacional",
+          "anio": "2025",
+          "fuente": "Revista",
+          "tipo_documento": "Articulo/Conferencia",
+          "filiacion": "Institución",
           "doi": "10.1000/xyz123",
-          "categorias": "Engineering (Q1); Computer Science (Q2)"
+          "categorias": "Categoría 1 (Q1); Categoría 2 (Q2)"
         }
       ]
     }
@@ -165,12 +165,12 @@ GET /scopus/publications?ids=57059780500&ids=12345678901
 
 #### **� Estadísticas por Año**
 ```http
-GET /scopus/docs_by_year?ids=57059780500
+GET /scopus/docs_by_year?ids=00000000000
 ```
 **Respuesta:**
 ```json
 {
-  "author_ids": ["57059780500"],
+  "author_ids": ["00000000000"],
   "documentos_por_anio": {
     "2020": 3,
     "2021": 5,
@@ -183,17 +183,17 @@ GET /scopus/docs_by_year?ids=57059780500
 
 #### **🏷️ Áreas Temáticas**
 ```http
-GET /scopus/subject_areas?ids=57059780500
+GET /scopus/subject_areas?ids=00000000000
 ```
 **Respuesta:**
 ```json
 {
-  "author_ids": ["57059780500"],
+  "author_ids": ["00000000000"],
   "subject_areas": [
-    "Computer Science",
-    "Engineering",
-    "Materials Science",
-    "Physics and Astronomy"
+    "Area 1",
+    "Area 2",
+    "Area 3",
+    "Area 4"
   ]
 }
 ```
@@ -222,11 +222,11 @@ GET /health
 | Variable | Descripción | Ejemplo |
 |----------|-------------|---------|
 | `SCOPUS_API_KEY` | Clave API de Scopus | `abc123def456...` |
-| `SJR_CSV_PATH` | Ruta al archivo CSV SJR | `data/df_sjr_24_04_2025.csv` |
+| `SJR_CSV_PATH` | Ruta al archivo CSV SJR | `data/archivo.csv` |
 
 ### 📁 **Archivos de Datos**
 
-- **`data/df_sjr_24_04_2025.csv`**: Datos SJR para categorización de revistas
+- **`data/archivo.csv`**: Datos SJR para categorización de revistas
 - **`data/areas_subareas.csv`**: Mapeo de áreas y subáreas temáticas
 
 ## 🧪 Testing
@@ -269,17 +269,17 @@ pytest tests/
 
 #### **Consulta Simple**
 ```bash
-curl "http://localhost:8000/scopus/publications?ids=57059780500"
+curl "http://localhost:8000/scopus/publications?ids=00000000000"
 ```
 
 #### **Múltiples Autores**
 ```bash
-curl "http://localhost:8000/scopus/subject_areas?ids=57059780500&ids=12345678901"
+curl "http://localhost:8000/scopus/subject_areas?ids=00000000000&ids=12345678901"
 ```
 
 #### **Análisis Temporal**
 ```bash
-curl "http://localhost:8000/scopus/docs_by_year?ids=57059780500"
+curl "http://localhost:8000/scopus/docs_by_year?ids=00000000000"
 ```
 
 ## 🤝 Contribución

@@ -34,6 +34,7 @@ export interface AreasTematicasResponse {
 export interface AppState {
   scopusIds: string[];
   isLoading: boolean;
+  loadingProgress: string | null; // Para mostrar el progreso actual
   publicaciones: Publicacion[];
   areasTematicas: string[];
   documentosPorAnio: Record<string, number>;

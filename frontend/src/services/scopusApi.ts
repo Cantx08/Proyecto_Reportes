@@ -9,7 +9,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 segundos timeout
+  timeout: 120000, // 2 minutos timeout para consultas grandes
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,6 +28,14 @@ export const scopusApi = {
       return response.data;
     } catch (error) {
       console.error('Error al obtener publicaciones:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('La consulta está tomando más tiempo del esperado. Intente con menos IDs o espere un momento.');
+        }
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor. Intente nuevamente en unos minutos.');
+        }
+      }
       throw new Error('Error al conectar con el servidor. Verifique su conexión.');
     }
   },
@@ -44,6 +52,14 @@ export const scopusApi = {
       return response.data;
     } catch (error) {
       console.error('Error al obtener documentos por año:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('Procesando documentos por año... La consulta está tomando más tiempo del esperado.');
+        }
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor al procesar documentos por año.');
+        }
+      }
       throw new Error('Error al obtener estadísticas por año.');
     }
   },
@@ -60,6 +76,14 @@ export const scopusApi = {
       return response.data;
     } catch (error) {
       console.error('Error al obtener áreas temáticas:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('Procesando áreas temáticas... La consulta está tomando más tiempo del esperado.');
+        }
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor al procesar áreas temáticas.');
+        }
+      }
       throw new Error('Error al obtener áreas temáticas.');
     }
   }
