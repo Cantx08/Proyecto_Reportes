@@ -1,13 +1,16 @@
 from fastapi import FastAPI, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from typing import List
 from src.dependencies import container
 from src.presentation.dtos import (
     PublicacionesResponseDTO,
     DocumentosPorAnioResponseDTO, 
-    AreasTematicasResponseDTO
+    AreasTematicasResponseDTO,
+    ReportRequestDTO
 )
 from src.presentation.controllers import PublicacionesController, AreasTematicasController
+from src.presentation.report_controller import ReportController
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
@@ -33,6 +36,11 @@ def get_publicaciones_controller() -> PublicacionesController:
 def get_areas_tematicas_controller() -> AreasTematicasController:
     """Dependencia para obtener el controlador de áreas temáticas."""
     return container.areas_tematicas_controller
+
+
+def get_report_controller() -> ReportController:
+    """Dependencia para obtener el controlador de reportes."""
+    return container.report_controller
 
 
 @app.get("/scopus/publications", response_model=PublicacionesResponseDTO)
@@ -74,3 +82,21 @@ async def get_subject_areas(
 async def health_check():
     """Endpoint de salud."""
     return {"status": "healthy", "message": "API funcionando correctamente"}
+
+
+@app.post("/reports/certificacion", response_class=Response)
+async def generar_reporte_certificacion(
+    request: ReportRequestDTO,
+    controller: ReportController = Depends(get_report_controller)
+):
+    """
+    Genera un reporte de certificación de publicaciones en formato PDF.
+    
+    Incluye:
+    - Información del docente
+    - Publicaciones Scopus, Web of Science, regionales, etc.
+    - Áreas temáticas
+    - Estadísticas por año
+    - Firmas oficiales
+    """
+    return await controller.generar_reporte_certificacion(request)

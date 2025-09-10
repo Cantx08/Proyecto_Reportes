@@ -5,6 +5,17 @@ import type {
   AreasTematicasResponse 
 } from '@/types/api';
 
+export interface ReportRequest {
+  author_ids: string[];
+  docente_nombre: string;
+  docente_genero: 'M' | 'F';
+  departamento: string;
+  cargo: string;
+  memorando?: string;
+  firmante?: number;
+  fecha?: string;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
@@ -85,6 +96,36 @@ export const scopusApi = {
         }
       }
       throw new Error('Error al obtener áreas temáticas.');
+    }
+  },
+
+  /**
+   * Generar reporte de certificación
+   */
+  async generarReporte(reportData: ReportRequest): Promise<Blob> {
+    try {
+      const response = await api.post('/reports/certificacion', reportData, {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error al generar reporte:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('La generación del reporte está tomando más tiempo del esperado.');
+        }
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor al generar el reporte.');
+        }
+        if (error.response?.status === 422) {
+          throw new Error('Datos inválidos para generar el reporte. Verifique la información.');
+        }
+      }
+      throw new Error('Error al generar el reporte.');
     }
   }
 };

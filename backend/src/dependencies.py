@@ -11,6 +11,7 @@ from .infrastructure.sjr_repository import SJRFileRepository
 from .infrastructure.areas_repository import AreasTematicasFileRepository
 from .application.services import PublicacionesService, AreasTematicasService
 from .presentation.controllers import PublicacionesController, AreasTematicasController
+from .presentation.report_controller import ReportController
 
 load_dotenv()
 
@@ -61,6 +62,10 @@ class DependencyContainer:
         # Controladores
         self._publicaciones_controller = PublicacionesController(self._publicaciones_service)
         self._areas_tematicas_controller = AreasTematicasController(self._areas_tematicas_service)
+        self._report_controller = ReportController(
+            self._publicaciones_service,
+            self._areas_tematicas_service
+        )
     
     @property
     def publicaciones_controller(self) -> PublicacionesController:
@@ -71,6 +76,11 @@ class DependencyContainer:
     def areas_tematicas_controller(self) -> AreasTematicasController:
         """Obtiene el controlador de áreas temáticas."""
         return self._areas_tematicas_controller
+    
+    @property
+    def report_controller(self) -> ReportController:
+        """Obtiene el controlador de reportes."""
+        return self._report_controller
 
 
 # Instancia global del contenedor

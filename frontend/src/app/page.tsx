@@ -6,6 +6,7 @@ import { PublicacionesList } from '@/components/PublicacionesList';
 import { AreasTematicas } from '@/components/AreasTematicas';
 import { DocumentosPorAnio } from '@/components/DocumentosPorAnio';
 import { ErrorNotification } from '@/components/ErrorNotification';
+import GeneradorReporte from '@/components/GeneradorReporte';
 import { useScopusData } from '@/hooks/useScopusData';
 
 export default function HomePage() {
@@ -39,7 +40,17 @@ export default function HomePage() {
     clearResults();
   };
 
+  const handleReportError = (error: string) => {
+    // Usar el mismo sistema de error que ya existe
+    clearResults();
+    setTimeout(() => {
+      // Simular un error para mostrarlo en el sistema existente
+      window.dispatchEvent(new CustomEvent('scopus-error', { detail: error }));
+    }, 100);
+  };
+
   const hasResults = publicaciones.length > 0 || areasTematicas.length > 0;
+  const validScopusIds = scopusIds.filter(item => item.trim() !== '').map(item => item.trim());
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,6 +102,16 @@ export default function HomePage() {
             <div className="w-full">
               <DocumentosPorAnio documentosPorAnio={documentosPorAnio} />
             </div>
+
+            {/* Generador de Reportes */}
+            {validScopusIds.length > 0 && (
+              <div className="w-full">
+                <GeneradorReporte 
+                  authorIds={validScopusIds}
+                  onError={handleReportError}
+                />
+              </div>
+            )}
           </div>
         )}
 
