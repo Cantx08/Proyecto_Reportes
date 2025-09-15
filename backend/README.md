@@ -1,17 +1,19 @@
-# 🎓 Sistema de Publicaciones Académicas
+# 🎓 Sistema de Reportes de Publicaciones Académicas - Backend
 
-> **API REST para consultar y analizar publicaciones académicas de Scopus con arquitectura limpia y principios SOLID**
+> **API REST completa para gestión y análisis de publicaciones académicas de Scopus con Clean Architecture, principios SOLID y enfoque corporativo**
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-00a693?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 [![Python](https://img.shields.io/badge/Python-3.9+-3776ab?style=flat&logo=python&logoColor=white)](https://python.org)
 [![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-blue?style=flat)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 [![SOLID](https://img.shields.io/badge/Principles-SOLID-green?style=flat)](https://en.wikipedia.org/wiki/SOLID)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13+-316192?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org)
 
 ## 📋 Tabla de Contenidos
 
 - [🎯 Descripción](#descripción)
 - [✨ Características](#características)
 - [🏗️ Arquitectura](#arquitectura)
+- [🗄️ Modelo de Base de Datos](#modelo-de-base-de-datos)
 - [🎯 Principios Aplicados](#principios-aplicados)
 - [🚀 Instalación](#instalación)
 - [📚 Uso de la API](#uso-de-la-api)
@@ -29,87 +31,228 @@
 
 ## 🎯 Descripción
 
-Este sistema permite consultar y analizar publicaciones académicas de la base de datos **Scopus** de manera eficiente y escalable. Desarrollado con **Clean Architecture** y principios **SOLID**, proporciona endpoints REST para:
+Sistema integral para la gestión y análisis de publicaciones académicas que permite consultar la base de datos **Scopus**, gestionar autores, sincronizar publicaciones y generar reportes académicos automatizados. Desarrollado con **Clean Architecture** y principios **SOLID** para garantizar escalabilidad, mantenibilidad y extensibilidad.
 
-- 📄 Obtener publicaciones de autores
-- 📊 Generar estadísticas por año
-- 🏷️ Extraer áreas temáticas (subject areas)
-- 📈 Analizar tendencias de investigación
+### Funcionalidades Principales
+
+- 👤 **Gestión de Autores**: CRUD completo con soporte para múltiples IDs de Scopus
+- 📄 **Gestión de Publicaciones**: Sincronización automática con Scopus y edición manual
+- � **Búsqueda Avanzada**: Por ID de Scopus o nombre en base de datos local
+- 📊 **Análisis Estadístico**: Tendencias por año, áreas temáticas y cuartiles SJR
+- 📋 **Generación de Reportes**: Borradores y reportes finales en PDF
+- � **Sincronización Inteligente**: Actualización incremental desde Scopus
+- 🏷️ **Categorización Automática**: Mapeo con datos SJR y áreas temáticas
 
 ---
 
 ## ✨ Características
 
-### Funcionalidades Principales
+### Arquitectura y Calidad de Código
 
-- **Consulta de Publicaciones**: Obtiene publicaciones completas de uno o múltiples autores
-- **Análisis Temporal**: Estadísticas de publicaciones por año con rangos completos
-- **Categorización Temática**: Extracción de subject areas de publicaciones
-- **Enriquecimiento de Datos**: Integración con datos SJR para categorías de revistas
-- **Manejo de Múltiples IDs**: Soporte para autores con múltiples identificadores Scopus
+- **Clean Architecture**: Separación clara de responsabilidades en 4 capas
+- **Principios SOLID**: Código mantenible, extensible y testeable
+- **Inyección de Dependencias**: Desacoplamiento total entre capas
+- **Domain-Driven Design**: Modelado rico del dominio académico
+- **Repository Pattern**: Abstracción completa del acceso a datos
+- **Use Cases**: Lógica de negocio encapsulada y reutilizable
 
-### Arquitectura y Calidad
+### Funcionalidades Técnicas
 
-- **Clean Architecture**: Separación clara de responsabilidades por capas
-- **Principios SOLID**: Código mantenible y extensible
-- **Inyección de Dependencias**: Desacoplamiento y testabilidad
-- **Documentación Automática**: Swagger UI integrado
-- **Manejo de Errores**: Gestión robusta de excepciones
-- **Código Autodocumentado**: Nombres descriptivos y funciones enfocadas
+- **API REST Completa**: Endpoints para todas las operaciones CRUD
+- **Documentación Automática**: Swagger UI y ReDoc integrados
+- **Validación Robusta**: Schemas Pydantic para entrada y salida
+- **Manejo de Errores**: Gestión centralizada de excepciones
+- **Logging Estructurado**: Trazabilidad completa de operaciones
+- **Caching Inteligente**: Optimización de consultas frecuentes
 
 ---
 
 ## 🏗️ Arquitectura
 
+### Estructura del Proyecto
+
 La aplicación sigue los principios de **Clean Architecture** con las siguientes capas:
 
 ```
-backend/src/
-├── domain/              # Capa de Dominio (Entidades y Reglas de Negocio)
-│   ├── entities.py      # Entidades del dominio
-│   ├── value_objects.py # Value Objects inmutables
-│   ├── interfaces.py    # Contratos/Interfaces
-│   └── repositories.py  # Interfaces de repositorios
-├── application/         # Capa de Aplicación (Casos de Uso)
-│   ├── services.py      # Servicios de aplicación existentes
-│   └── report_application_service.py # Nuevo servicio de reportes
-├── infrastructure/     # Capa de Infraestructura (Implementaciones)
-│   ├── chart_generator.py       # Generador de gráficos (matplotlib)
-│   ├── style_manager.py         # Manejador de estilos (ReportLab)
-│   ├── publication_formatter.py # Formateador de publicaciones
-│   ├── content_builder.py       # Constructor de contenido
-│   ├── pdf_generator.py         # Generador principal de PDF
-│   └── ... (otros repositorios)
-└── presentation/       # Capa de Presentación (Controladores/API)
-    ├── controllers.py
-    ├── report_controller.py # Controlador refactorizado
-    └── dtos.py
+backend/
+├── src/
+│   ├── domain/                     # 🏛️ Capa de Dominio (Entities, Value Objects, Business Rules)
+│   │   ├── entities/               # Entidades del dominio
+│   │   │   ├── author.py          # Entidad Autor
+│   │   │   ├── publication.py     # Entidad Publicación
+│   │   │   ├── journal.py         # Entidad Revista
+│   │   │   ├── report.py          # Entidad Reporte
+│   │   │   ├── department.py      # Entidad Departamento
+│   │   │   ├── scopus_account.py  # Entidad Cuenta Scopus
+│   │   │   └── subject_area.py    # Entidad Área Temática
+│   │   ├── value_objects/          # Value Objects inmutables
+│   │   │   ├── scopus_id.py       # ID de Scopus
+│   │   │   ├── doi.py             # DOI
+│   │   │   ├── email.py           # Email
+│   │   │   ├── publication_year.py # Año de publicación
+│   │   │   └── quartile.py        # Cuartil SJR
+│   │   ├── repositories/           # Interfaces de repositorios
+│   │   │   ├── author_repository.py
+│   │   │   ├── publication_repository.py
+│   │   │   ├── journal_repository.py
+│   │   │   ├── sjr_repository.py
+│   │   │   └── report_repository.py
+│   │   ├── services/               # Servicios del dominio
+│   │   ├── exceptions/             # Excepciones del dominio
+│   │   │   ├── author_exceptions.py
+│   │   │   └── publication_exceptions.py
+│   │   ├── enums.py                # Enumeraciones del dominio
+│   │   └── interfaces/             # Interfaces de servicios externos
+│   │       └── external_services.py
+│   │
+│   ├── application/                # 🚀 Capa de Aplicación (Use Cases, DTOs)
+│   │   ├── use_cases/             # Casos de uso por entidad
+│   │   │   ├── author/
+│   │   │   │   ├── create_author.py
+│   │   │   │   ├── search_authors.py
+│   │   │   │   └── sync_scopus_data.py
+│   │   │   ├── publication/
+│   │   │   │   ├── search_scopus_publications.py
+│   │   │   │   ├── sync_publications.py
+│   │   │   │   └── edit_publication_data.py
+│   │   │   └── report/
+│   │   │       └── generate_report.py
+│   │   ├── dtos/                  # Data Transfer Objects
+│   │   ├── interfaces/            # Interfaces de servicios externos
+│   │   │   └── external_services.py
+│   │   └── main_application_service.py
+│   │
+│   ├── infrastructure/            # 🔧 Capa de Infraestructura (External APIs, Database, Files)
+│   │   ├── database/              # Configuración de base de datos
+│   │   │   ├── connection.py
+│   │   │   └── models/            # Modelos SQLAlchemy (14 tablas)
+│   │   ├── repositories/          # Implementaciones de repositorios
+│   │   │   ├── author_repository_impl.py
+│   │   │   ├── publication_repository_impl.py
+│   │   │   └── report_repository_impl.py
+│   │   ├── external_services/     # Servicios externos
+│   │   │   ├── scopus_api_service.py
+│   │   │   ├── pdf_generator_service.py
+│   │   │   └── chart_generator_service.py
+│   │   └── csv_loaders/           # Cargadores de datos CSV
+│   │       ├── sjr_loader.py
+│   │       └── areas_loader.py
+│   │
+│   └── presentation/              # 🌐 Capa de Presentación (Controllers, Routes, DTOs)
+│       ├── api/                   # API REST
+│       │   └── v1/                # Versión 1 de la API
+│       │       ├── authors.py     # Endpoints de autores
+│       │       ├── publications.py # Endpoints de publicaciones
+│       │       ├── reports.py     # Endpoints de reportes
+│       │       └── health.py      # Health check
+│       ├── schemas/               # Schemas de validación (Pydantic)
+│       │   ├── author_schemas.py
+│       │   ├── publication_schemas.py
+│       │   └── report_schemas.py
+│       └── dependencies/          # Dependency injection
+├── config/
+│   ├── database.py               # Configuración de BD
+│   ├── scopus.py                # Configuración de Scopus API
+│   └── settings.py              # Configuración general
+├── tests/                       # Tests por capas
+│   ├── unit/
+│   │   ├── domain/
+│   │   ├── application/
+│   │   └── infrastructure/
+│   ├── integration/
+│   └── e2e/
+├── requirements.txt
+├── alembic.ini                  # Configuración de migraciones
+├── docker-compose.yml           # Para desarrollo local
+├── Dockerfile
+└── main.py                      # Punto de entrada
 ```
+
+### Flujo de Dependencias
+
+```
+Presentation → Application → Domain
+     ↓              ↓
+Infrastructure → Domain
+```
+
+- **Presentation** llama a **Application**
+- **Application** orquesta **Domain** y define casos de uso
+- **Infrastructure** implementa interfaces del **Domain**
+- **Domain** no depende de nada (núcleo de la arquitectura)
+
+---
+
+## 🗄️ Modelo de Base de Datos
+
+### Diseño Relacional
+
+El sistema utiliza un modelo relacional normalizado con **14 tablas principales** que cubren todos los aspectos de la gestión académica:
+
+#### Entidades Principales
+
+1. **DEPARTMENTS** - Departamentos y facultades
+2. **AUTHORS** - Autores/Docentes con información completa
+3. **SCOPUS_ACCOUNTS** - Múltiples cuentas Scopus por autor
+4. **SUBJECT_AREAS** - Áreas temáticas principales (ASJC)
+5. **SUBJECT_SUBAREAS** - Subáreas temáticas específicas
+6. **JOURNALS** - Revistas científicas
+7. **SJR_RANKINGS** - Rankings SJR históricos por año
+8. **CATEGORIES** - Categorías de clasificación SJR
+9. **SJR_CATEGORIES** - Relación categorías-rankings con cuartiles
+10. **PUBLICATIONS** - Publicaciones con metadatos completos
+11. **PUBLICATION_AUTHORS** - Relación muchos a muchos autores-publicaciones
+12. **PUBLICATION_SUBJECT_AREAS** - Áreas temáticas por publicación
+13. **REPORTS** - Reportes generados
+14. **REPORT_PUBLICATIONS** - Publicaciones incluidas en reportes
+
+#### Características del Diseño
+
+- **✅ Normalización Completa**: Evita redundancia de datos
+- **✅ Soporte Multi-Scopus**: Múltiples IDs por autor
+- **✅ Histórico SJR**: Datos temporales de rankings
+- **✅ Flexibilidad de Fuentes**: Scopus, WOS, regionales
+- **✅ Auditoría Completa**: Timestamps en todas las tablas
+- **✅ Integridad Referencial**: Claves foráneas y constraints
+- **✅ Escalabilidad**: Índices optimizados para consultas
+
+#### Casos de Uso Cubiertos
+
+- 🔍 Búsqueda por ID Scopus o nombre
+- 👤 Gestión completa de autores y afiliaciones
+- 📄 Sincronización incremental de publicaciones
+- 🏷️ Categorización automática por áreas temáticas
+- 📊 Análisis temporal y estadístico
+- 📋 Generación de reportes personalizados
+- ✏️ Edición manual de datos para reportes
+- 🔄 Actualización desde múltiples fuentes
 
 ---
 
 ## 🎯 Principios Aplicados
 
-### Clean Code
+### Clean Architecture
 
-- **Nombres descriptivos**: Métodos y clases con nombres que expresan su intención (`obtener_subject_areas` vs `get_data`)
-- **Funciones pequeñas**: Cada método hace una sola cosa
-- **Comentarios mínimos**: El código se autodocumenta
-- **Manejo consistente de errores**: Validaciones explícitas y excepciones específicas
+1. **Independencia de Frameworks**: El dominio no depende de FastAPI, SQLAlchemy o cualquier framework
+2. **Independencia de UI**: La lógica de negocio está separada de la presentación
+3. **Independencia de Base de Datos**: Los repositorios abstraen el acceso a datos
+4. **Independencia de Agencias Externas**: Scopus API y servicios están abstraídos
+5. **Testeable**: Cada capa se puede testear independientemente
 
 ### SOLID Principles
 
-1. **Single Responsibility Principle (SRP)**: Cada clase tiene una única responsabilidad bien definida
-2. **Open/Closed Principle (OCP)**: Las interfaces permiten extensión sin modificación
-3. **Liskov Substitution Principle (LSP)**: Las implementaciones son intercambiables a través de sus interfaces
-4. **Interface Segregation Principle (ISP)**: Interfaces específicas y cohesivas
-5. **Dependency Inversion Principle (DIP)**: Dependencias hacia abstracciones, no hacia concreciones
+1. **Single Responsibility (SRP)**: Cada clase tiene una única responsabilidad
+2. **Open/Closed (OCP)**: Abierto para extensión, cerrado para modificación
+3. **Liskov Substitution (LSP)**: Las implementaciones son intercambiables
+4. **Interface Segregation (ISP)**: Interfaces específicas y cohesivas
+5. **Dependency Inversion (DIP)**: Dependencias hacia abstracciones
 
-### Clean Architecture
+### Clean Code
 
-- **Independencia de frameworks**: Lógica de negocio sin dependencias externas
-- **Testabilidad**: Cada capa puede testearse independientemente
-- **Flexibilidad**: Cambio de implementaciones sin afectar el negocio
+- **Nombres Descriptivos**: Métodos y clases expresan su intención
+- **Funciones Pequeñas**: Cada método hace una sola cosa
+- **Comentarios Mínimos**: El código se autodocumenta
+- **Manejo Consistente de Errores**: Validaciones explícitas y excepciones específicas
 
 ---
 
@@ -383,23 +526,9 @@ Usa el [sistema de issues](https://github.com/Cantx08/Proyecto_Reportes/issues) 
 
 ---
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
 ## 👥 Autores
 
-- **Cantx08** - *Desarrollo inicial* - [GitHub](https://github.com/Cantx08)
-
----
-
-## 🙏 Agradecimientos
-
-- **Elsevier/Scopus** - Por proporcionar la API de datos académicos
-- **SCImago Journal Rank** - Por los datos de clasificación de revistas
-- **FastAPI Community** - Por el excelente framework web
+- **Andrés Cantuña** - *Desarrollo inicial* - [GitHub](https://github.com/Cantx08)
 
 ---
 
