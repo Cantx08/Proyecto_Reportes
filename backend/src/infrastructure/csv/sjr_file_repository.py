@@ -1,10 +1,7 @@
-"""
-Implementación del repositorio SJR para categorías de revistas.
-"""
 import unicodedata
 import pandas as pd
 from typing import Optional
-from ..domain.repositories import SJRRepository
+from ...domain import SJRRepository
 
 
 class SJRFileRepository(SJRRepository):
@@ -13,9 +10,9 @@ class SJRFileRepository(SJRRepository):
     def __init__(self, csv_path: str):
         self._csv_path = csv_path
         self._df: Optional[pd.DataFrame] = None
-        self._cargar_datos()
+        self._load_data()
     
-    def _cargar_datos(self) -> None:
+    def _load_data(self) -> None:
         """Carga los datos del archivo CSV."""
         try:
             self._df = pd.read_csv(self._csv_path, sep=';')

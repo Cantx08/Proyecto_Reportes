@@ -3,14 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from typing import List
 from src.dependencies import container
-from src.presentation.dtos import (
-    PublicacionesResponseDTO,
-    DocumentosPorAnioResponseDTO, 
-    AreasTematicasResponseDTO,
-    ReportRequestDTO
-)
-from src.presentation.controllers import PublicacionesController, AreasTematicasController
-from src.presentation.report_controller import ReportController
+from backend.src.infrastructure.dtos.report_dto import ReportRequestDTO
+from backend.src.infrastructure.dtos.subject_area_dto import SubjectAreaResponseDTO
+from backend.src.infrastructure.dtos.publication_dto import PublicationsResponseDTO, DocumentsByYearResponseDTO
+from backend.src.infrastructure.controllers.subject_area_controller import SubjectAreaController
+from backend.src.infrastructure.controllers.publication_controller import PublicationController
+from backend.src.infrastructure.controllers.report_controller import ReportController
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
@@ -28,12 +26,12 @@ app.add_middleware(
 )
 
 
-def get_publicaciones_controller() -> PublicacionesController:
+def get_publicaciones_controller() -> PublicationController:
     """Dependencia para obtener el controlador de publicaciones."""
     return container.publicaciones_controller
 
 
-def get_areas_tematicas_controller() -> AreasTematicasController:
+def get_areas_tematicas_controller() -> SubjectAreaController:
     """Dependencia para obtener el controlador de áreas temáticas."""
     return container.areas_tematicas_controller
 
@@ -43,10 +41,10 @@ def get_report_controller() -> ReportController:
     return container.report_controller
 
 
-@app.get("/scopus/publications", response_model=PublicacionesResponseDTO)
+@app.get("/scopus/publications", response_model=PublicationsResponseDTO)
 async def get_publications(
     ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
-    controller: PublicacionesController = Depends(get_publicaciones_controller)
+    controller: PublicationController = Depends(get_publicaciones_controller)
 ):
     """
     Obtiene publicaciones de uno o varios IDs de autor Scopus.
@@ -55,10 +53,10 @@ async def get_publications(
     return await controller.obtener_publicaciones(ids)
 
 
-@app.get("/scopus/docs_by_year", response_model=DocumentosPorAnioResponseDTO)
+@app.get("/scopus/docs_by_year", response_model=DocumentsByYearResponseDTO)
 async def get_documents_by_year(
     ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
-    controller: PublicacionesController = Depends(get_publicaciones_controller)
+    controller: PublicationController = Depends(get_publicaciones_controller)
 ):
     """
     Obtiene el número de publicaciones por año realizadas por un autor que tiene uno o varios IDs.
@@ -66,16 +64,16 @@ async def get_documents_by_year(
     return await controller.obtener_documentos_por_anio(ids)
 
 
-@app.get("/scopus/subject_areas", response_model=AreasTematicasResponseDTO)
+@app.get("/scopus/subject_areas", response_model=SubjectAreaResponseDTO)
 async def get_subject_areas(
     ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
-    controller: AreasTematicasController = Depends(get_areas_tematicas_controller)
+    controller: SubjectAreaController = Depends(get_areas_tematicas_controller)
 ):
     """
     Obtiene las áreas temáticas generales de las publicaciones del autor.
     Mapea las subáreas específicas de Scopus a las áreas temáticas generales definidas.
     """
-    return await controller.obtener_areas_tematicas(ids)
+    return await controller.fetch_subject_areas(ids)
 
 
 @app.get("/health")
@@ -99,4 +97,4 @@ async def generar_reporte_certificacion(
     - Estadísticas por año
     - Firmas oficiales
     """
-    return await controller.generar_reporte_certificacion(request)
+    return await controller.generate_report(request)

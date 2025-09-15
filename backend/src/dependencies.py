@@ -5,13 +5,16 @@ import os
 from functools import lru_cache
 from pathlib import Path
 from dotenv import load_dotenv
-
-from .infrastructure.scopus_repository import ScopusApiClient, ScopusPublicacionesRepository, ScopusAreasTematicasRepository
-from .infrastructure.sjr_repository import SJRFileRepository
-from .infrastructure.areas_repository import AreasTematicasFileRepository
-from .application.services import PublicacionesService, AreasTematicasService
-from .presentation.controllers import PublicacionesController, AreasTematicasController
-from .presentation.report_controller import ReportController
+from .application.services.subject_area_service import SubjectAreaService
+from .application.services.publication_service import PublicationService
+from .infrastructure.controllers.report_controller import ReportController
+from .infrastructure.controllers.subject_area_controller import SubjectAreaController
+from .infrastructure.controllers.publication_controller import PublicationController
+from .infrastructure.csv.sjr_file_repository import SJRFileRepository
+from .infrastructure.csv.subject_areas_file_repository import SubjectAreasFileRepository
+from .infrastructure.external_services.scopus_api_client import ScopusApiClient
+from .infrastructure.repositories.scopus_publication_repository import ScopusPublicationsRepository
+from .infrastructure.repositories.scopus_subject_areas_repository import ScopusSubjectAreasRepository
 
 load_dotenv()
 
@@ -44,36 +47,36 @@ class DependencyContainer:
         self._scopus_client = ScopusApiClient(self._settings.scopus_api_key)
         
         # Repositorios
-        self._publicaciones_repo = ScopusPublicacionesRepository(self._scopus_client)
-        self._areas_tematicas_repo_scopus = ScopusAreasTematicasRepository(self._scopus_client)
-        self._sjr_repo = SJRFileRepository(self._settings.sjr_csv_path)
-        self._areas_tematicas_repo = AreasTematicasFileRepository(self._settings.areas_csv_path)
+        self._scopus_publications_repository = ScopusPublicationsRepository(self._scopus_client)
+        self._scopus_subject_areas_repository = ScopusSubjectAreasRepository(self._scopus_client)
+        self._sjr_file_repository = SJRFileRepository(self._settings.sjr_csv_path)
+        self._subject_areas_repo = SubjectAreasFileRepository(self._settings.areas_csv_path)
         
         # Servicios de aplicación
-        self._publicaciones_service = PublicacionesService(
-            self._publicaciones_repo,
-            self._sjr_repo
+        self._publication_service = PublicationService(
+            self._scopus_publications_repository,
+            self._sjr_file_repository
         )
-        self._areas_tematicas_service = AreasTematicasService(
-            self._areas_tematicas_repo_scopus,  # Para obtener datos de Scopus
-            self._areas_tematicas_repo  # Para mapear usando CSV
+        self._subject_area_service = SubjectAreaService(
+            self._scopus_subject_areas_repository,  # Para obtener datos de Scopus
+            self._subject_areas_repo  # Para mapear usando CSV
         )
         
         # Controladores
-        self._publicaciones_controller = PublicacionesController(self._publicaciones_service)
-        self._areas_tematicas_controller = AreasTematicasController(self._areas_tematicas_service)
+        self._publication_controller = PublicationController(self._publication_service)
+        self._subject_area_controller = SubjectAreaController(self._subject_area_service)
         self._report_controller = ReportController(
-            self._publicaciones_service,
-            self._areas_tematicas_service
+            self._publication_service,
+            self._subject_area_service
         )
     
     @property
-    def publicaciones_controller(self) -> PublicacionesController:
+    def publication_controller(self) -> PublicationController:
         """Obtiene el controlador de publicaciones."""
-        return self._publicaciones_controller
+        return self._publication_controller
     
     @property
-    def areas_tematicas_controller(self) -> AreasTematicasController:
+    def subject_area_controller(self) -> SubjectAreaController:
         """Obtiene el controlador de áreas temáticas."""
         return self._areas_tematicas_controller
     

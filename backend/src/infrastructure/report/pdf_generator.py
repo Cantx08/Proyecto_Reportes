@@ -1,15 +1,11 @@
-"""
-Generador principal de reportes PDF usando ReportLab.
-"""
 import io
 from typing import List, Any
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
-
-from ..domain.interfaces import IReportGenerator, IContentBuilder
-from ..domain.value_objects import DocenteInfo, ConfiguracionReporte, ColeccionesPublicaciones, EstadisticasPublicaciones
+from ...application.interfaces.i_report import IReportGenerator, IContentBuilder
+from ...domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationCollections, PublicationsStatistics
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -47,15 +43,13 @@ class ReportLabReportGenerator(IReportGenerator):
     def __init__(self, content_builder: IContentBuilder):
         self._content_builder = content_builder
     
-    def generar_reporte(self, docente: DocenteInfo, config: ConfiguracionReporte,
-                       publicaciones: ColeccionesPublicaciones, 
-                       estadisticas: EstadisticasPublicaciones) -> bytes:
+    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> bytes:
         """Genera el reporte completo en formato PDF."""
         buffer = io.BytesIO()
-        doc = self._crear_documento(buffer)
+        doc = self._create_document(buffer)
         
         # Construir el contenido del documento
-        story = self._construir_story(docente, config, publicaciones, estadisticas)
+        story = self._merge_sections(author, config, publications, statistics)
         
         # Construir PDF con numeración de páginas
         doc.build(story, canvasmaker=NumberedCanvas)
@@ -64,7 +58,7 @@ class ReportLabReportGenerator(IReportGenerator):
         
         return pdf_bytes
     
-    def _crear_documento(self, buffer: io.BytesIO) -> SimpleDocTemplate:
+    def _create_document(self, buffer: io.BytesIO) -> SimpleDocTemplate:
         """Crea el documento PDF con configuración básica."""
         return SimpleDocTemplate(
             buffer,
@@ -75,25 +69,23 @@ class ReportLabReportGenerator(IReportGenerator):
             bottomMargin=2*cm
         )
     
-    def _construir_story(self, docente: DocenteInfo, config: ConfiguracionReporte,
-                        publicaciones: ColeccionesPublicaciones, 
-                        estadisticas: EstadisticasPublicaciones) -> List[Any]:
+    def _merge_sections(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> List[Any]:
         """Construye la historia completa del documento."""
         story = []
         
         # Título principal
-        story.extend(self._content_builder.construir_encabezado(docente, config))
+        story.extend(self._content_builder.generate_header(author, config))
         
         # Sección Resumen
-        story.extend(self._content_builder.construir_resumen(docente, config, publicaciones))
+        story.extend(self._content_builder.generate_summary(author, config, publications))
         
         # Sección Informe Técnico
-        story.extend(self._content_builder.construir_informe_tecnico(docente, publicaciones, estadisticas))
+        story.extend(self._content_builder.generate_technical_report(author, publications, statistics))
         
         # Sección Conclusión
-        story.extend(self._content_builder.construir_conclusion(docente, config, publicaciones))
+        story.extend(self._content_builder.generate_conclusion(author, config, publications))
         
         # Firmas y tabla al final
-        story.extend(self._content_builder.construir_firmas(config))
+        story.extend(self._content_builder.get_signature_section(config))
         
         return story

@@ -1,15 +1,11 @@
-"""
-Generador de gráficos usando matplotlib.
-"""
 import io
 from typing import Dict
 from matplotlib import pyplot as plt
 import matplotlib
+from ...application.interfaces.i_report import IChartGenerator
 
-from ..domain.interfaces import IChartGenerator
 
 matplotlib.use('Agg')  # Use non-interactive backend
-
 
 class MatplotlibChartGenerator(IChartGenerator):
     """Implementación de generador de gráficos usando matplotlib."""
@@ -21,14 +17,14 @@ class MatplotlibChartGenerator(IChartGenerator):
         """Configura matplotlib con ajustes por defecto."""
         plt.style.use('default')
     
-    def generar_grafico_tendencias(self, documentos_por_anio: Dict[str, int], docente_nombre: str) -> bytes:
+    def generate_line_chart(self, documents_by_year: Dict[str, int], author_name: str) -> bytes:
         """Genera un gráfico de tendencias por año."""
         # Crear figura
         plt.figure(figsize=(8, 4))
         
         # Preparar datos
-        years = sorted([int(year) for year in documentos_por_anio.keys()])
-        counts = [documentos_por_anio[str(year)] for year in years]
+        years = sorted([int(year) for year in documents_by_year.keys()])
+        counts = [documents_by_year[str(year)] for year in years]
         
         # Crear gráfico de línea con colores personalizados
         plt.plot(years, counts, marker='o', linewidth=2, markersize=6, color='#009ece')

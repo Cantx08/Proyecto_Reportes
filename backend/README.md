@@ -275,7 +275,7 @@ class DocenteInfo:
 ### Interfaces
 ```python
 class IReportGenerator(ABC):
-    """Interface principal para generación de reportes."""
+    """Interfaz principal para generación de reportes."""
     
     @abstractmethod
     def generar_reporte(self, docente: DocenteInfo, ...) -> bytes:
