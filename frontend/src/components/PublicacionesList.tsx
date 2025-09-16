@@ -3,13 +3,13 @@
 import React from 'react';
 
 interface Publicacion {
-  titulo: string;
-  anio: string;
-  fuente: string;
-  tipo_documento: string;
-  filiacion: string;
+  title: string;           // Cambio: titulo -> title
+  year: string;           // Cambio: anio -> year
+  source: string;         // Cambio: fuente -> source
+  document_type: string;  // Cambio: tipo_documento -> document_type
+  affiliation: string;    // Cambio: filiacion -> affiliation
   doi: string;
-  categorias: string;
+  categories: string;     // Cambio: categorias -> categories
 }
 
 interface PublicacionesListProps {
@@ -45,26 +45,26 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
             className="border border-gray-200 rounded-md p-4 hover:shadow-sm transition-shadow"
           >
             <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-              {pub.titulo}
+              {pub.title}
             </h4>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
               <div>
-                <span className="font-medium">Año:</span> {pub.anio}
+                <span className="font-medium">Año:</span> {pub.year}
               </div>
               <div>
-                <span className="font-medium">Tipo:</span> {pub.tipo_documento}
+                <span className="font-medium">Tipo:</span> {pub.document_type}
               </div>
               <div className="md:col-span-2">
-                <span className="font-medium">Fuente:</span> {pub.fuente}
+                <span className="font-medium">Fuente:</span> {pub.source}
               </div>
               <div className="md:col-span-2">
-                <span className="font-medium">Filiación:</span> {pub.filiacion}
+                <span className="font-medium">Filiación:</span> {pub.affiliation}
               </div>
-              {pub.categorias && (
+              {pub.categories && (
                 <div className="md:col-span-2">
                   <span className="font-medium">Categorías:</span>{' '}
-                  <span style={{ color: 'rgba(0, 158, 206, 1)' }}>{pub.categorias}</span>
+                  <span style={{ color: 'rgba(0, 158, 206, 1)' }}>{pub.categories}</span>
                 </div>
               )}
               {pub.doi && (

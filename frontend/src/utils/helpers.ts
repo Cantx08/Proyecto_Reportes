@@ -111,3 +111,23 @@ export const slugify = (text: string): string => {
     .replace(/[\s_-]+/g, '-') // Reemplazar espacios y guiones con un solo guión
     .replace(/^-+|-+$/g, ''); // Remover guiones al inicio y final
 };
+
+/**
+ * Formatea una fecha del formato ISO (YYYY-MM-DD) al formato español (dd de mes de yyyy)
+ */
+export const formatDateToSpanish = (isoDate: string): string => {
+  if (!isoDate) return '';
+  
+  const months = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+  
+  // Dividir la fecha manualmente para evitar problemas de zona horaria
+  const [year, month, day] = isoDate.split('-').map(num => parseInt(num, 10));
+  
+  // Los meses en JavaScript son 0-indexados, por eso restamos 1
+  const monthName = months[month - 1];
+  
+  return `${day} de ${monthName} de ${year}`;
+};

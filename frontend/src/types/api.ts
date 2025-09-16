@@ -1,33 +1,33 @@
 // Tipos para las respuestas de la API del backend
 
 export interface Publicacion {
-  titulo: string;
-  anio: string;
-  fuente: string;
-  tipo_documento: string;
-  filiacion: string;
+  title: string;           // Cambio: titulo -> title
+  year: string;           // Cambio: anio -> year  
+  source: string;         // Cambio: fuente -> source
+  document_type: string;  // Cambio: tipo_documento -> document_type
+  affiliation: string;    // Cambio: filiacion -> affiliation
   doi: string;
-  categorias: string;
+  categories: string;     // Cambio: categorias -> categories
 }
 
 export interface Autor {
-  id_autor: string;
-  lista_publicaciones: Publicacion[];
+  author_id: string;             // Cambio: id_autor -> author_id
+  publications_list: Publicacion[]; // Cambio: lista_publicaciones -> publications_list
   error?: string;
 }
 
 export interface PublicacionesResponse {
-  publicaciones: Autor[];
+  publications: Autor[];        // Cambio: publicaciones -> publications
 }
 
 export interface DocumentosPorAnioResponse {
   author_ids: string[];
-  documentos_por_anio: Record<string, number>;
+  documents_by_year: Record<string, number>;  // Cambio: documentos_por_anio -> documents_by_year
 }
 
 export interface AreasTematicasResponse {
   author_ids: string[];
-  areas_tematicas: string[];
+  subject_areas: string[];                    // Cambio: areas_tematicas -> subject_areas
 }
 
 // Tipos para el estado del componente principal

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
+import { formatDateToSpanish } from '@/utils/helpers';
 
 interface GeneradorReporteProps {
   authorIds: string[];
@@ -50,7 +51,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
         cargo: formData.cargo!,
         memorando: formData.memorando || undefined,
         firmante: formData.firmante || 1,
-        fecha: formData.fecha || undefined,
+        fecha: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
       };
 
       const blob = await scopusApi.generarReporte(reportRequest);
@@ -169,6 +170,12 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
             value={formData.fecha}
             onChange={(e) => handleInputChange('fecha', e.target.value)}
           />
+          {formData.fecha && (
+            <p className="mt-2 text-sm text-gray-600">
+              <span className="font-medium">En el reporte aparecerá como:</span>{' '}
+              <span className="text-blue-600">{formatDateToSpanish(formData.fecha)}</span>
+            </p>
+          )}
         </div>
       </div>
 

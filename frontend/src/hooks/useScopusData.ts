@@ -89,7 +89,7 @@ export const useScopusData = () => {
       
       setState(prev => ({ ...prev, loadingProgress: 'Obteniendo publicaciones...' }));
       const publicacionesResult = await scopusApi.getPublicaciones(validIds);
-      console.log('Publicaciones obtenidas:', publicacionesResult.publicaciones.length);
+      console.log('Publicaciones obtenidas:', publicacionesResult.publications.length);
       
       setState(prev => ({ ...prev, loadingProgress: 'Procesando documentos por año...' }));
       const documentosResult = await scopusApi.getDocumentosPorAnio(validIds);
@@ -100,14 +100,14 @@ export const useScopusData = () => {
       console.log('Áreas temáticas procesadas');
 
       // Combinar todas las publicaciones
-      const todasPublicaciones = publicacionesResult.publicaciones
-        .flatMap(autor => autor.lista_publicaciones);
+      const todasPublicaciones = publicacionesResult.publications
+        .flatMap(autor => autor.publications_list || []);
 
       setState(prev => ({
         ...prev,
         publicaciones: todasPublicaciones,
-        areasTematicas: areasResult.areas_tematicas,
-        documentosPorAnio: documentosResult.documentos_por_anio,
+        areasTematicas: areasResult.subject_areas,
+        documentosPorAnio: documentosResult.documents_by_year,
         isLoading: false,
         loadingProgress: null
       }));
