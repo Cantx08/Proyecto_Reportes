@@ -5,10 +5,10 @@ from ...application.services.publication_service import PublicationService
 from ...application.services.subject_area_service import SubjectAreaService
 from ...application.services.report_service import ReportService
 from ...domain.entities.publication import Publication
-from ..dtos.publication_dto import ReportRequestDTO
+from ..dtos import ReportRequestDTO
 
 
-class ReportController:
+class ReportsController:
     """Controlador para endpoints de generación de reportes."""
     def __init__(self, publication_service: PublicationService, subject_area_service: SubjectAreaService):
         self._publication_service = publication_service
@@ -69,7 +69,8 @@ class ReportController:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error generando el reporte: {str(e)}")
 
-    def _filter_by_type(self, publications: List[Publication], type: str) -> List[Publication]:
+    @staticmethod
+    def _filter_by_type(publications: List[Publication], source_name: str) -> List[Publication]:
         """Filtra publicaciones por tipo/fuente."""
         filtered = []
         
@@ -78,7 +79,7 @@ class ReportController:
             document_type_lower = (pub.document_type or "").lower()
             categories_lower = (pub.categories or "").lower()
             
-            if type == "scopus":
+            if source_name == "scopus":
                 # Publicaciones indexadas en Scopus - criterio más amplio
                 if (any(keyword in source_lower for keyword in 
                        ["elsevier", "springer", "ieee", "nature", "science", "journal", "review"]) or
@@ -87,20 +88,20 @@ class ReportController:
                     pub.doi):  # La mayoría de publicaciones Scopus tienen DOI
                     filtered.append(pub)
             
-            elif type == "wos":
+            elif source_name == "wos":
                 # Publicaciones Web of Science - criterio específico
                 if ("web of science" in source_lower or 
                     "wos" in source_lower or
                     "conference proceedings citation index" in categories_lower):
                     filtered.append(pub)
             
-            elif type == "regional":
+            elif source_name == "regional":
                 # Publicaciones regionales/locales
                 if any(keyword in source_lower for keyword in 
                       ["scielo", "redalyc", "latindex"]):
                     filtered.append(pub)
             
-            elif type == "memoria":
+            elif source_name == "memoria":
                 # Memorias de eventos/conferencias - solo las que NO son Scopus
                 if (("proceeding" in source_lower or
                      "symposium" in source_lower or
@@ -110,7 +111,7 @@ class ReportController:
                     not pub.doi):
                     filtered.append(pub)
             
-            elif type == "libro":
+            elif source_name == "libro":
                 # Libros y capítulos
                 if ("book" in document_type_lower or 
                     "chapter" in document_type_lower or 

@@ -12,7 +12,7 @@ class ScopusPublicationsRepository(PublicationsRepository):
         self._client = scopus_client
     
     def _transform_entry_to_publication(self, entry: dict) -> Optional[Publication]:
-        """Convierte un entry de Scopus a una entidad Publicacion."""
+        """Convierte un entry de Scopus a una entidad Publication."""
         try:
             title = entry.get("dc:title", "")
             year = self._get_year_from_date(entry.get("prism:coverDate", ""))
@@ -28,14 +28,16 @@ class ScopusPublicationsRepository(PublicationsRepository):
                 affiliation=affiliation,
                 doi=doi
             )
-        except Exception:
+        except RuntimeError:
             return None
     
-    def _get_year_from_date(self, publication_date: str) -> str:
+    @staticmethod
+    def _get_year_from_date(publication_date: str) -> str:
         """Extrae el año de una fecha."""
         return publication_date[:4] if publication_date else ""
     
-    def _retrieve_affiliation(self, entry: dict) -> str:
+    @staticmethod
+    def _retrieve_affiliation(entry: dict) -> str:
         """Extrae la afiliación de un entry."""
         if "affiliation" in entry and entry["affiliation"]:
             affiliation = entry["affiliation"][0].get("affilname", "")
@@ -45,7 +47,7 @@ class ScopusPublicationsRepository(PublicationsRepository):
     
     async def get_publications_by_author(self, author_id: str) -> List[Publication]:
         """Obtiene las publicaciones de un autor específico."""
-        data = self._client.get_publications_by_autor(author_id)
+        data = self._client.get_publications_by_author(author_id)
         entries = data.get("search-results", {}).get("entry", [])
         
         publication_list = []
@@ -60,5 +62,5 @@ class ScopusPublicationsRepository(PublicationsRepository):
         """Obtiene los detalles completos de una publicación."""
         try:
             return self._client.get_publication_details(scopus_id)
-        except Exception:
+        except RuntimeError:
             return None

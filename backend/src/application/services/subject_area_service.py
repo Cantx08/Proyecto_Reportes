@@ -1,6 +1,3 @@
-"""
-Servicios de aplicación que orquestan la lógica de negocio.
-"""
 from typing import List
 from ...application.repositories.subject_areas_repository import SubjectAreasRepository
 

@@ -23,17 +23,17 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         elements.append(Spacer(1, 15))
         return elements
     
-    def _generate_publications_list(self, pub: Publication, num: int, type: str) -> str:
+    def _generate_publications_list(self, pub: Publication, num: int, db_name: str) -> str:
         """Construye el texto formateado de una publicación."""
         pub_text = f"{num}. ({pub.year}) \"{pub.title}\". {pub.source}."
         
         # Agregar información de categorías e indexación
         if pub.categories:
             journal_categories = self._format_categories(pub.categories)
-            format_type = "SCOPUS" if type == "Scopus" else type
+            format_type = "SCOPUS" if db_name == "Scopus" else db_name
             pub_text += f" <b>Indexada en {format_type} - {journal_categories}</b>."
         else:
-            format_type = "SCOPUS" if type == "Scopus" else type
+            format_type = "SCOPUS" if db_name == "Scopus" else db_name
             pub_text += f" <b>Indexada en {format_type}</b>."
         
         # Agregar DOI si existe
@@ -46,7 +46,8 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         
         return pub_text
     
-    def _format_categories(self, categories: Any) -> str:
+    @staticmethod
+    def _format_categories(categories: Any) -> str:
         """Formatea las categorías de una publicación."""
         if isinstance(categories, str):
             return categories
@@ -62,15 +63,15 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         """Obtiene la distribución de tipos de documentos."""
         count_types = {}
         for pub in publications:
-            type = pub.document_type or "Artículo"
-            count_types[type] = count_types.get(type, 0) + 1
+            source_type = pub.document_type or "Artículo"
+            count_types[source_type] = count_types.get(source_type, 0) + 1
         
         distributions = []
-        for type, count in count_types.items():
+        for source_type, count in count_types.items():
             if count > 1:
-                distributions.append(f"{count} {type}s")
+                distributions.append(f"{count} {source_type}s")
             else:
-                distributions.append(f"{count} {type}")
+                distributions.append(f"{count} {source_type}")
         
         if len(distributions) > 1:
             return " y ".join([", ".join(distributions[:-1]), distributions[-1]])

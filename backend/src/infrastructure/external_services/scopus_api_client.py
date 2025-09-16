@@ -12,7 +12,7 @@ class ScopusApiClient:
             "X-ELS-APIKey": self._api_key
         }
     
-    def get_publications_by_autor(self, author_id: str, count: int = 100) -> Dict[str, Any]:
+    def get_publications_by_author(self, author_id: str, count: int = 100) -> Dict[str, Any]:
         """Busca publicaciones de un autor en Scopus."""
         url = f"{self._base_url}/content/search/scopus"
         params = {

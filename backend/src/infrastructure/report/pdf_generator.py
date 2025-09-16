@@ -58,7 +58,8 @@ class ReportLabReportGenerator(IReportGenerator):
         
         return pdf_bytes
     
-    def _create_document(self, buffer: io.BytesIO) -> SimpleDocTemplate:
+    @staticmethod
+    def _create_document(buffer: io.BytesIO) -> SimpleDocTemplate:
         """Crea el documento PDF con configuración básica."""
         return SimpleDocTemplate(
             buffer,

@@ -2,24 +2,26 @@
 Data Transfer Objects para la API.
 """
 from pydantic import BaseModel
-from typing import List
-from .author_dto import AuthorDTO
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .author_dto import AuthorDTO
 
 
 class PublicationDTO(BaseModel):
     """DTO para publicación."""
     title: str
-    anio: str
-    fuente: str
-    tipo_documento: str
-    filiacion: str
+    year: str
+    source: str
+    document_type: str
+    affiliation: str
     doi: str
-    categorias: str = ""
+    categories: str = ""
 
 
 class PublicationsResponseDTO(BaseModel):
     """DTO para respuesta de publicaciones."""
-    publications: List[AuthorDTO]
+    publications: List["AuthorDTO"]
 
 
 class DocumentsByYearResponseDTO(BaseModel):

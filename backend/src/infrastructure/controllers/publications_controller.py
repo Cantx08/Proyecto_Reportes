@@ -1,10 +1,10 @@
 from typing import List
-from ..dtos.publication_dto import AuthorDTO, DocumentsByYearResponseDTO, PublicationDTO, PublicationsResponseDTO
+from ..dtos import AuthorDTO, DocumentsByYearResponseDTO, PublicationDTO, PublicationsResponseDTO
 from ...domain.entities.author import Author
 from ...application.services.publication_service import PublicationService
 
 
-class PublicationController:
+class PublicationsController:
     """Controlador para endpoints de publicaciones."""
     
     def __init__(self, publication_service: PublicationService):
@@ -30,7 +30,8 @@ class PublicationController:
             documents_by_year=statistics
         )
     
-    def _map_author_to_dto(self, author: Author) -> AuthorDTO:
+    @staticmethod
+    def _map_author_to_dto(author: Author) -> AuthorDTO:
         """Convierte una entidad Autor a DTO."""
         publications_dto = []
         

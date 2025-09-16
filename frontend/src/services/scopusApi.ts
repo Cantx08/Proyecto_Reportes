@@ -104,7 +104,7 @@ export const scopusApi = {
    */
   async generarReporte(reportData: ReportRequest): Promise<Blob> {
     try {
-      const response = await api.post('/reports/certificacion', reportData, {
+      const response = await api.post('/reports/inform', reportData, {
         responseType: 'blob',
         headers: {
           'Content-Type': 'application/json',

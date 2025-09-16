@@ -5,11 +5,12 @@ import os
 from functools import lru_cache
 from pathlib import Path
 from dotenv import load_dotenv
+
 from .application.services.subject_area_service import SubjectAreaService
 from .application.services.publication_service import PublicationService
-from .infrastructure.controllers.report_controller import ReportController
-from .infrastructure.controllers.subject_area_controller import SubjectAreaController
-from .infrastructure.controllers.publication_controller import PublicationController
+from .infrastructure.controllers.reports_controller import ReportsController
+from .infrastructure.controllers.subject_areas_controller import SubjectAreasController
+from .infrastructure.controllers.publications_controller import PublicationsController
 from .infrastructure.csv.sjr_file_repository import SJRFileRepository
 from .infrastructure.csv.subject_areas_file_repository import SubjectAreasFileRepository
 from .infrastructure.external_services.scopus_api_client import ScopusApiClient
@@ -63,25 +64,25 @@ class DependencyContainer:
         )
         
         # Controladores
-        self._publication_controller = PublicationController(self._publication_service)
-        self._subject_area_controller = SubjectAreaController(self._subject_area_service)
-        self._report_controller = ReportController(
+        self._publication_controller = PublicationsController(self._publication_service)
+        self._subject_area_controller = SubjectAreasController(self._subject_area_service)
+        self._report_controller = ReportsController(
             self._publication_service,
             self._subject_area_service
         )
     
     @property
-    def publication_controller(self) -> PublicationController:
+    def publications_controller(self) -> PublicationsController:
         """Obtiene el controlador de publicaciones."""
         return self._publication_controller
     
     @property
-    def subject_area_controller(self) -> SubjectAreaController:
+    def subject_areas_controller(self) -> SubjectAreasController:
         """Obtiene el controlador de áreas temáticas."""
-        return self._areas_tematicas_controller
+        return self._subject_area_controller
     
     @property
-    def report_controller(self) -> ReportController:
+    def reports_controller(self) -> ReportsController:
         """Obtiene el controlador de reportes."""
         return self._report_controller
 

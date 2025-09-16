@@ -29,7 +29,7 @@ class PublicationService:
                     if not pub.categories:
                         pub.categories = self._sjr_repository.get_journal_categories(pub.source, pub.year)
 
-                author = Author(author_id=author_id, publications=publication_list)
+                author = Author(author_id=author_id, publications_list=publication_list)
                 authors.append(author)
                 
             except Exception as e:

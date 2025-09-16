@@ -1,9 +1,9 @@
 from typing import List
 from ...application.services.subject_area_service import SubjectAreaService
-from ..dtos.publication_dto import SubjectAreaResponseDTO
+from ..dtos import SubjectAreaResponseDTO
 
 
-class SubjectAreaController:
+class SubjectAreasController:
     """Controlador para endpoints de áreas temáticas."""
     
     def __init__(self, subject_area_service: SubjectAreaService):

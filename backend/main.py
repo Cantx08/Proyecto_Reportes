@@ -3,12 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from typing import List
 from src.dependencies import container
-from backend.src.infrastructure.dtos.report_dto import ReportRequestDTO
-from backend.src.infrastructure.dtos.subject_area_dto import SubjectAreaResponseDTO
-from backend.src.infrastructure.dtos.publication_dto import PublicationsResponseDTO, DocumentsByYearResponseDTO
-from backend.src.infrastructure.controllers.subject_area_controller import SubjectAreaController
-from backend.src.infrastructure.controllers.publication_controller import PublicationController
-from backend.src.infrastructure.controllers.report_controller import ReportController
+from src.infrastructure.dtos import ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO, DocumentsByYearResponseDTO
+from src.infrastructure.controllers.subject_areas_controller import SubjectAreasController
+from src.infrastructure.controllers.publications_controller import PublicationsController
+from src.infrastructure.controllers.reports_controller import ReportsController
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
@@ -26,48 +24,48 @@ app.add_middleware(
 )
 
 
-def get_publicaciones_controller() -> PublicationController:
+def get_publications_controller() -> PublicationsController:
     """Dependencia para obtener el controlador de publicaciones."""
-    return container.publicaciones_controller
+    return container.publications_controller
 
 
-def get_areas_tematicas_controller() -> SubjectAreaController:
+def get_subject_areas_controller() -> SubjectAreasController:
     """Dependencia para obtener el controlador de áreas temáticas."""
-    return container.areas_tematicas_controller
+    return container.subject_areas_controller
 
 
-def get_report_controller() -> ReportController:
+def get_reports_controller() -> ReportsController:
     """Dependencia para obtener el controlador de reportes."""
-    return container.report_controller
+    return container.reports_controller
 
 
 @app.get("/scopus/publications", response_model=PublicationsResponseDTO)
 async def get_publications(
     ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
-    controller: PublicationController = Depends(get_publicaciones_controller)
+    controller: PublicationsController = Depends(get_publications_controller)
 ):
     """
-    Obtiene publicaciones de uno o varios IDs de autor Scopus.
+    Obtiene publicaciones de uno o varios ID de autor Scopus.
     Agrupa todas las publicaciones bajo un solo autor.
     """
-    return await controller.obtener_publicaciones(ids)
+    return await controller.get_publications(ids)
 
 
 @app.get("/scopus/docs_by_year", response_model=DocumentsByYearResponseDTO)
 async def get_documents_by_year(
     ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
-    controller: PublicationController = Depends(get_publicaciones_controller)
+    controller: PublicationsController = Depends(get_publications_controller)
 ):
     """
-    Obtiene el número de publicaciones por año realizadas por un autor que tiene uno o varios IDs.
+    Obtiene el número de publicaciones por año realizadas por un autor que tiene uno o varios ID.
     """
-    return await controller.obtener_documentos_por_anio(ids)
+    return await controller.get_documents_by_year(ids)
 
 
 @app.get("/scopus/subject_areas", response_model=SubjectAreaResponseDTO)
 async def get_subject_areas(
     ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
-    controller: SubjectAreaController = Depends(get_areas_tematicas_controller)
+    controller: SubjectAreasController = Depends(get_subject_areas_controller)
 ):
     """
     Obtiene las áreas temáticas generales de las publicaciones del autor.
@@ -82,10 +80,10 @@ async def health_check():
     return {"status": "healthy", "message": "API funcionando correctamente"}
 
 
-@app.post("/reports/certificacion", response_class=Response)
-async def generar_reporte_certificacion(
+@app.post("/reports/inform", response_class=Response)
+async def generar_informe(
     request: ReportRequestDTO,
-    controller: ReportController = Depends(get_report_controller)
+    controller: ReportsController = Depends(get_reports_controller)
 ):
     """
     Genera un reporte de certificación de publicaciones en formato PDF.

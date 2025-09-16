@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from typing import List
-from .author import Author
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .author import Author
 
 
 @dataclass
@@ -25,7 +27,7 @@ class Publication:
 @dataclass
 class PublicationsCollection:
     """Colección de publicaciones con métodos de análisis."""
-    authors: List[Author]
+    authors: List["Author"]
 
     def get_all_publications(self) -> List[Publication]:
         """Obtiene todas las publicaciones de todos los autores."""

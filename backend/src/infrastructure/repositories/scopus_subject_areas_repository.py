@@ -36,7 +36,7 @@ class ScopusSubjectAreasRepository(SubjectAreasRepository):
                         areas.append(SubjectArea(name=area_name))
 
             return areas
-        except Exception:
+        except RuntimeError:
             return []
         
     async def get_subject_areas_by_author(self, author_id: str) -> List[SubjectArea]:
@@ -55,7 +55,7 @@ class ScopusSubjectAreasRepository(SubjectAreasRepository):
     def get_all_subject_areas(self) -> List[SubjectArea]:
         """
         Obtiene todas las áreas temáticas disponibles.
-        Implementación básica - devuelve lista vacía ya que Scopus no provee un endpoint directo.
+        Implementación básica - devuelve lista vacía, ya que Scopus no provee un endpoint directo.
         """
         return []
     

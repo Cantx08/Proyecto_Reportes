@@ -1,6 +1,3 @@
-"""
-Value Objects para el dominio de reportes.
-"""
 from dataclasses import dataclass
 from typing import List, Dict
 from datetime import datetime
@@ -56,11 +53,11 @@ class ReportConfiguration:
 class PublicationsStatistics:
     """Value Object para las estadísticas de publicaciones."""
     subject_areas: List[str]
-    documents_by_year: Dict[str, int]
+    publications_by_year: Dict[str, int]
     
     def has_sufficient_data_for_graph(self) -> bool:
         """Verifica si hay suficientes datos para mostrar un gráfico."""
-        return len(self.documents_by_year) > 1
+        return len(self.publications_by_year) > 1
 
 
 @dataclass(frozen=True)

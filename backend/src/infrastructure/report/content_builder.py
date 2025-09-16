@@ -157,7 +157,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         # Generar gráfico
         chart_bytes = self._chart_generator.generate_line_chart(
-            statistics.documents_by_year, author_name)
+            statistics.publications_by_year, author_name)
         
         # Crear imagen
         img_buffer = io.BytesIO(chart_bytes)
@@ -229,22 +229,21 @@ class ReportLabContentBuilder(IContentBuilder):
         justified_style = self._style_manager.fetch_style('Justified')
         
         regional_section.append(Paragraph("Otras Indexaciones", subtitle_style))
-        
+
         num_regionals = len(publications.regional_publications)
-        
+
         if num_regionals > 1:
             text = f"{author.get_article()} {author.name}, cuenta con {num_regionals} indexaciones, como se detallan a continuación:"
         else:
             text = f"{author.get_article()} {author.name}, cuenta con {num_regionals} artículo indexado, como se detalla a continuación:"
-        
+
         regional_section.append(Paragraph(text, justified_style))
         regional_section.append(Spacer(1, 15))
-        
-        # Lista de publicaciones
+
         regional_section.extend(self._publication_formatter.format_publication_list(publications.regional_publications, "Regional"))
-        
+
         return regional_section
-    
+
     def _generate_memories_section(self, author: AuthorInfo, publications: PublicationCollections) -> List[Any]:
         """Construye la sección de memorias de eventos científicos."""
         memories_section = []
@@ -262,8 +261,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         memories_section.append(Paragraph(text, justified_style))
         memories_section.append(Spacer(1, 15))
-        
-        # Lista de publicaciones
+
         memories_section.extend(self._publication_formatter.format_publication_list(publications.memories, "Memorias"))
         
         return memories_section
@@ -285,8 +283,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         books_section.append(Paragraph(text, justified_style))
         books_section.append(Spacer(1, 15))
-        
-        # Lista de publicaciones
+
         books_section.extend(self._publication_formatter.format_publication_list(publications.books, "Libros"))
         
         return books_section
@@ -328,7 +325,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         # Espaciado antes de las firmas
         elements.append(Spacer(1, 40))
-        
+
         # Información del firmante
         if config.signatory == Authority.DIRECTORA_INVESTIGACION:
             authority = "Dra. María Monserrate Intriago Pazmiño"
@@ -337,13 +334,13 @@ class ReportLabContentBuilder(IContentBuilder):
             authority = "Dr. Marco Oswaldo Santórum Gaibor"
             signatory_role = "VICERRECTOR DE INVESTIGACIÓN, INNOVACIÓN Y VINCULACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
         
-        signature_style = self._style_manager.fetch_style('Firma')
+        signature_style = self._style_manager.fetch_style('Signature')
         elements.append(Paragraph(f"<b>{authority}</b>", signature_style))
         elements.append(Paragraph(f"<b>{signatory_role}</b>", signature_style))
         elements.append(Spacer(1, 10))
         
         # Tabla de elaboración
-        table_style = self._style_manager.fetch_style('TablaElaboracion')
+        table_style = self._style_manager.fetch_style('AuthorTable')
         table_details = [
             [Paragraph("Elaborado por:", table_style), Paragraph("M. Vásquez", table_style)]
         ]

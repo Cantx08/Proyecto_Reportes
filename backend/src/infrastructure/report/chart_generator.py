@@ -13,7 +13,8 @@ class MatplotlibChartGenerator(IChartGenerator):
     def __init__(self):
         self._configure_matplotlib()
     
-    def _configure_matplotlib(self) -> None:
+    @staticmethod
+    def _configure_matplotlib() -> None:
         """Configura matplotlib con ajustes por defecto."""
         plt.style.use('default')
     

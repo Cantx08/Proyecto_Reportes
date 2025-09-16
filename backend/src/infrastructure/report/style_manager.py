@@ -6,7 +6,7 @@ from ...application.interfaces.i_report import IStyleManager
 
 
 class ReportLabStyleManager(IStyleManager):
-    """Implementación de manejador de estilos usando ReportLab."""
+    """Implementación de gestor de estilos usando ReportLab."""
     
     def __init__(self):
         self._styles = getSampleStyleSheet()
@@ -53,10 +53,10 @@ class ReportLabStyleManager(IStyleManager):
     
     def _stylize_signatory(self) -> None:
         """Crea el estilo para firmas."""
-        self._styles.add(ParagraphStyle(name='Firma', parent=self._styles['Normal'], fontSize=12, alignment=TA_LEFT, 
+        self._styles.add(ParagraphStyle(name='Signature', parent=self._styles['Normal'], fontSize=12, alignment=TA_LEFT,
                                         fontName='Times-Roman', textColor=colors.black))
     
     def _stylize_author_table(self) -> None:
         """Crea el estilo para la tabla de elaboración."""
-        self._styles.add(ParagraphStyle(name='TablaElaboracion', parent=self._styles['Normal'], fontSize=9,
+        self._styles.add(ParagraphStyle(name='AuthorTable', parent=self._styles['Normal'], fontSize=9,
                                         alignment=TA_LEFT, fontName='Times-Roman', textColor=colors.black))
