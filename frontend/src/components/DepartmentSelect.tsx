@@ -123,8 +123,6 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
           <div className="text-gray-500 text-sm">
             No se encontraron departamentos que coincidan con "{value}".
-            <br />
-            <span className="text-blue-600 font-medium">Puede escribir el nombre personalizado.</span>
           </div>
         </div>
       )}

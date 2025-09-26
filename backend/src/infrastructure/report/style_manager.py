@@ -38,12 +38,12 @@ class ReportLabStyleManager(IStyleManager):
     
     def _stylize_justified_text(self) -> None:
         """Crea el estilo para texto justificado."""
-        self._styles.add(ParagraphStyle(name='Justified', parent=self._styles['Normal'], fontSize=12,
+        self._styles.add(ParagraphStyle(name='Justified', parent=self._styles['Normal'], fontSize=11,
                                         alignment=TA_JUSTIFY, spaceAfter=6, fontName='Times-Roman'))
     
     def _stylize_publications(self) -> None:
         """Crea el estilo para publicaciones."""
-        self._styles.add(ParagraphStyle(name='Publication', parent=self._styles['Normal'], fontSize=12, leftIndent=20,
+        self._styles.add(ParagraphStyle(name='Publication', parent=self._styles['Normal'], fontSize=11, leftIndent=20,
                                         spaceAfter=8, alignment=TA_JUSTIFY, fontName='Times-Roman'))
     
     def _stylize_caption(self) -> None:
@@ -53,7 +53,7 @@ class ReportLabStyleManager(IStyleManager):
     
     def _stylize_signatory(self) -> None:
         """Crea el estilo para firmas."""
-        self._styles.add(ParagraphStyle(name='Signature', parent=self._styles['Normal'], fontSize=12, alignment=TA_LEFT,
+        self._styles.add(ParagraphStyle(name='Signature', parent=self._styles['Normal'], fontSize=11, alignment=TA_LEFT,
                                         fontName='Times-Roman', textColor=colors.black))
     
     def _stylize_author_table(self) -> None:

@@ -3,6 +3,7 @@ uvicorn
 python-dotenv
 pandas
 pydantic
+pypdf
 requests
 reportlab
 matplotlib

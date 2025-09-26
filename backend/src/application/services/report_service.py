@@ -41,6 +41,7 @@ class ReportService:
             signatory: Union[int, str] = 1,
             signatory_name: str = "",
             report_date: str = "",
+            es_borrador: bool = True,
 
             # Publicaciones
             scopus_publications: List[Publication] = None,
@@ -65,6 +66,7 @@ class ReportService:
             signatory: Tipo de firmante (1: Directora, 2: Vicerrector, o cargo personalizado)
             signatory_name: Nombre del firmante (requerido para firmantes personalizados)
             report_date: Fecha del reporte (opcional, usa fecha actual si no se proporciona)
+            es_borrador: True para generar borrador, False para certificado final con plantilla
             scopus_publications: Lista de publicaciones Scopus
             wos_publications: Lista de publicaciones WOS
             regional_publications: Lista de publicaciones regionales
@@ -92,7 +94,7 @@ class ReportService:
         statistics = self._generate_publication_statistics(subject_areas, documents_by_year)
 
         # Generar reporte
-        return self._report_generator.generate_report(author_info, config, publications, statistics)
+        return self._report_generator.generate_report(author_info, config, publications, statistics, es_borrador)
 
     @staticmethod
     def _check_input_data(name: str, gender: str, department: str, role: str) -> None:

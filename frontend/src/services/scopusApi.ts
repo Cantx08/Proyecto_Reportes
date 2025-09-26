@@ -17,6 +17,7 @@ export interface ReportRequest {
   firmante?: number | string; // Cambiado para permitir texto libre
   firmante_nombre?: string; // Nuevo campo para nombre de firmante personalizado
   fecha?: string;
+  es_borrador?: boolean; // Nuevo campo para indicar si es borrador o certificado final
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';

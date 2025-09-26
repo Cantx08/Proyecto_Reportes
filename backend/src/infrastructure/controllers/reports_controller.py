@@ -50,6 +50,7 @@ class ReportsController:
                 signatory=request.firmante,
                 signatory_name=request.firmante_nombre or "",
                 report_date=request.fecha or "",
+                es_borrador=request.es_borrador,
                 scopus_publications=scopus_pubs,
                 wos_publications=wos_pubs,
                 regional_publications=regional_pubs,
@@ -60,7 +61,8 @@ class ReportsController:
             )
             
             # Crear nombre del archivo
-            file_name = f"certificacion_{request.docente_nombre.replace(' ', '_')}.pdf"
+            tipo_doc = "borrador" if request.es_borrador else "certificado_final"
+            file_name = f"{tipo_doc}_{request.docente_nombre.replace(' ', '_')}.pdf"
             
             return Response(content=pdf_bytes, media_type="application/pdf", 
                             headers={"Content-Disposition": f"attachment; filename={file_name}"})

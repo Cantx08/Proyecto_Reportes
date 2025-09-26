@@ -12,3 +12,4 @@ class ReportRequestDTO(BaseModel):
     firmante: Union[int, str] = Field(1, description="Tipo de firmante (1: Directora, 2: Vicerrector, o cargo personalizado)")
     firmante_nombre: Optional[str] = Field(None, description="Nombre del firmante (requerido para firmantes personalizados)")
     fecha: Optional[str] = Field(None, description="Fecha del reporte (opcional, usa fecha actual si no se especifica)")
+    es_borrador: bool = Field(False, description="True para generar borrador, False para certificado final con plantilla")

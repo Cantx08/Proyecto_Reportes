@@ -327,12 +327,19 @@ class ReportLabContentBuilder(IContentBuilder):
         return conclusion
     
     def get_signature_section(self, config: ReportConfiguration) -> List[Any]:
-        """Construye la sección de firmas."""
+        """Construye la sección de firmas en la parte inferior de la última página."""
+        from reportlab.platypus import PageBreak, KeepTogether
+        
         elements = []
         
-        # Espaciado antes de las firmas
-        elements.append(Spacer(1, 40))
-
+        # Crear un espaciador que empuje las firmas hacia el final de la página
+        # Usamos un Spacer grande para simular \vfill de LaTeX
+        # Esto empujará las firmas hacia la parte inferior de la página
+        elements.append(Spacer(1, 60))  # Espaciado que empuja hacia abajo
+        
+        # Crear los elementos de firma como un grupo que se mantiene junto
+        signature_elements = []
+        
         # Información del firmante
         if isinstance(config.signatory, Authority):
             if config.signatory == Authority.DIRECTORA_INVESTIGACION:
@@ -351,9 +358,9 @@ class ReportLabContentBuilder(IContentBuilder):
             signatory_role = "AUTORIDAD DESIGNADA DE LA ESCUELA POLITÉCNICA NACIONAL"
         
         signature_style = self._style_manager.fetch_style('Signature')
-        elements.append(Paragraph(f"<b>{authority}</b>", signature_style))
-        elements.append(Paragraph(f"<b>{signatory_role}</b>", signature_style))
-        elements.append(Spacer(1, 10))
+        signature_elements.append(Paragraph(f"<b>{authority}</b>", signature_style))
+        signature_elements.append(Paragraph(f"<b>{signatory_role}</b>", signature_style))
+        signature_elements.append(Spacer(1, 10))
         
         # Tabla de elaboración
         table_style = self._style_manager.fetch_style('AuthorTable')
@@ -370,5 +377,9 @@ class ReportLabContentBuilder(IContentBuilder):
             ('RIGHTPADDING', (0, 0), (-1, -1), 2),
         ]))
         
-        elements.append(author_table)
+        signature_elements.append(author_table)
+        
+        # Mantener los elementos de firma juntos y añadirlos
+        elements.append(KeepTogether(signature_elements))
+        
         return elements

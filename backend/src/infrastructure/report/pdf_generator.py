@@ -6,6 +6,7 @@ from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 from ...application.interfaces.i_report import IReportGenerator, IContentBuilder
 from ...domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationCollections, PublicationsStatistics
+from .template_overlay_service import TemplateOverlayService
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -42,8 +43,9 @@ class ReportLabReportGenerator(IReportGenerator):
     
     def __init__(self, content_builder: IContentBuilder):
         self._content_builder = content_builder
+        self._template_service = TemplateOverlayService()
     
-    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> bytes:
+    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics, es_borrador: bool = True) -> bytes:
         """Genera el reporte completo en formato PDF."""
         buffer = io.BytesIO()
         doc = self._create_document(buffer)
@@ -56,6 +58,10 @@ class ReportLabReportGenerator(IReportGenerator):
         pdf_bytes = buffer.getvalue()
         buffer.close()
         
+        # Si no es borrador, aplicar plantilla
+        if not es_borrador:
+            pdf_bytes = self._template_service.overlay_content_on_template(pdf_bytes)
+        
         return pdf_bytes
     
     @staticmethod
@@ -66,8 +72,8 @@ class ReportLabReportGenerator(IReportGenerator):
             pagesize=A4,
             rightMargin=2*cm,
             leftMargin=2*cm,
-            topMargin=2*cm,
-            bottomMargin=2*cm
+            topMargin=3*cm,
+            bottomMargin=2.5*cm
         )
     
     def _merge_sections(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> List[Any]:

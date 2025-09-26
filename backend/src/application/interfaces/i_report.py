@@ -56,7 +56,7 @@ class IContentBuilder(ABC):
 class IReportGenerator(ABC):
     """Interfaz principal para generación de reportes."""
     @abstractmethod
-    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> bytes:
+    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics, es_borrador: bool = True) -> bytes:
         """Genera el reporte completo en formato PDF."""
         pass
 
