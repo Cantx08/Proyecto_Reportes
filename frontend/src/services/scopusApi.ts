@@ -2,17 +2,20 @@ import axios from 'axios';
 import type { 
   PublicacionesResponse, 
   DocumentosPorAnioResponse, 
-  AreasTematicasResponse 
+  AreasTematicasResponse,
+  DepartmentsResponse,
+  CargosResponse 
 } from '@/types/api';
 
 export interface ReportRequest {
   author_ids: string[];
   docente_nombre: string;
-  docente_genero: 'M' | 'F';
+  docente_genero: string; // Cambiado de 'M' | 'F' a string para permitir texto libre
   departamento: string;
   cargo: string;
   memorando?: string;
-  firmante?: number;
+  firmante?: number | string; // Cambiado para permitir texto libre
+  firmante_nombre?: string; // Nuevo campo para nombre de firmante personalizado
   fecha?: string;
 }
 
@@ -96,6 +99,42 @@ export const scopusApi = {
         }
       }
       throw new Error('Error al obtener áreas temáticas.');
+    }
+  },
+
+  /**
+   * Obtener lista de departamentos
+   */
+  async getDepartments(): Promise<DepartmentsResponse> {
+    try {
+      const response = await api.get<DepartmentsResponse>('/departments');
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener departamentos:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor al obtener departamentos.');
+        }
+      }
+      throw new Error('Error al conectar con el servidor para obtener departamentos.');
+    }
+  },
+
+  /**
+   * Obtener lista de cargos
+   */
+  async getCargos(): Promise<CargosResponse> {
+    try {
+      const response = await api.get<CargosResponse>('/cargos');
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener cargos:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor al obtener cargos.');
+        }
+      }
+      throw new Error('Error al conectar con el servidor para obtener cargos.');
     }
   },
 

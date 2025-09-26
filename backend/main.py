@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from typing import List
 from src.dependencies import container
-from src.infrastructure.dtos import ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO, DocumentsByYearResponseDTO
+from src.infrastructure.dtos import ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO, DocumentsByYearResponseDTO, DepartmentsResponseDTO, CargosResponseDTO
 from src.infrastructure.controllers.subject_areas_controller import SubjectAreasController
 from src.infrastructure.controllers.publications_controller import PublicationsController
 from src.infrastructure.controllers.reports_controller import ReportsController
+from src.infrastructure.controllers.departments_controller import DepartmentsController
+from src.infrastructure.controllers.cargos_controller import CargosController
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
@@ -37,6 +39,16 @@ def get_subject_areas_controller() -> SubjectAreasController:
 def get_reports_controller() -> ReportsController:
     """Dependencia para obtener el controlador de reportes."""
     return container.reports_controller
+
+
+def get_departments_controller() -> DepartmentsController:
+    """Dependencia para obtener el controlador de departamentos."""
+    return container.departments_controller
+
+
+def get_cargos_controller() -> CargosController:
+    """Dependencia para obtener el controlador de cargos."""
+    return container.cargos_controller
 
 
 @app.get("/scopus/publications", response_model=PublicationsResponseDTO)
@@ -72,6 +84,26 @@ async def get_subject_areas(
     Mapea las subáreas específicas de Scopus a las áreas temáticas generales definidas.
     """
     return await controller.fetch_subject_areas(ids)
+
+
+@app.get("/departments", response_model=DepartmentsResponseDTO)
+async def get_departments(
+    controller: DepartmentsController = Depends(get_departments_controller)
+):
+    """
+    Obtiene la lista de todos los departamentos disponibles.
+    """
+    return await controller.get_departments()
+
+
+@app.get("/cargos", response_model=CargosResponseDTO)
+async def get_cargos(
+    controller: CargosController = Depends(get_cargos_controller)
+):
+    """
+    Obtiene la lista de todos los cargos disponibles.
+    """
+    return await controller.get_cargos()
 
 
 @app.get("/health")

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from ...domain.entities.publication import Publication
 from ..interfaces.i_report import IReportGenerator
 from ...domain.value_objects.report import (AuthorInfo, ReportConfiguration, PublicationCollections,
@@ -38,7 +38,8 @@ class ReportService:
 
             # Configuración del reporte
             memorandum: str = "",
-            signatory: int = 1,
+            signatory: Union[int, str] = 1,
+            signatory_name: str = "",
             report_date: str = "",
 
             # Publicaciones
@@ -57,11 +58,12 @@ class ReportService:
         
         Args:
             author_name: Nombre completo del docente
-            author_gender: Género del docente ("M" o "F")
+            author_gender: Género del docente ("M", "F" o texto personalizado)
             department: Departamento al que pertenece
             role: Cargo del docente
             memorandum: Número del memorando (opcional)
-            signatory: Tipo de firmante (1: Directora, 2: Vicerrector)
+            signatory: Tipo de firmante (1: Directora, 2: Vicerrector, o cargo personalizado)
+            signatory_name: Nombre del firmante (requerido para firmantes personalizados)
             report_date: Fecha del reporte (opcional, usa fecha actual si no se proporciona)
             scopus_publications: Lista de publicaciones Scopus
             wos_publications: Lista de publicaciones WOS
@@ -82,7 +84,7 @@ class ReportService:
 
         # Crear value objects
         author_info = self._create_author_profile(author_name, author_gender, department, role)
-        config = self._create_report_configuration(memorandum, signatory, report_date)
+        config = self._create_report_configuration(memorandum, signatory, signatory_name, report_date)
         publications = self._create_publication_collections(
             scopus_publications, wos_publications, regional_publications,
             event_memory, book_chapters
@@ -110,18 +112,31 @@ class ReportService:
     @staticmethod
     def _create_author_profile(name: str, gender: str, department: str, role: str) -> AuthorInfo:
         """Crea el value object DocenteInfo."""
-        gender_enum = Gender.MASCULINO if gender == "M" else Gender.FEMENINO
+        # Si es un valor de enum conocido, usar enum; si no, usar el string personalizado
+        if gender in ["M", "F"]:
+            gender_value = Gender.MASCULINO if gender == "M" else Gender.FEMENINO
+        else:
+            gender_value = gender  # Usar el string personalizado
+            
         return AuthorInfo(
             name=name.strip(),
-            gender=gender_enum,
+            gender=gender_value,
             department=department.strip(),
             role=role.strip()
         )
 
     @staticmethod
-    def _create_report_configuration(memorandum: str, signatory: int, date: str) -> ReportConfiguration:
+    def _create_report_configuration(memorandum: str, signatory: Union[int, str], signatory_name: str, date: str) -> ReportConfiguration:
         """Crea el value object ReportConfiguration."""
-        signatory_type = Authority.DIRECTORA_INVESTIGACION if signatory == 1 else Authority.VICERRECTOR_INVESTIGACION
+        # Si es un número, mapear a enum; si es string, crear objeto personalizado
+        if isinstance(signatory, int):
+            signatory_type = Authority.DIRECTORA_INVESTIGACION if signatory == 1 else Authority.VICERRECTOR_INVESTIGACION
+        else:
+            # Para firmantes personalizados, crear un diccionario con cargo y nombre
+            signatory_type = {
+                'cargo': signatory,
+                'nombre': signatory_name.strip() if signatory_name else signatory
+            }
 
         if date and date.strip():
             return ReportConfiguration(memorandum.strip(), signatory_type, date.strip())

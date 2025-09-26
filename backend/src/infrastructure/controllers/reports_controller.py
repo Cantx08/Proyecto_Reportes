@@ -48,6 +48,7 @@ class ReportsController:
                 role=request.cargo,
                 memorandum=request.memorando or "",
                 signatory=request.firmante,
+                signatory_name=request.firmante_nombre or "",
                 report_date=request.fecha or "",
                 scopus_publications=scopus_pubs,
                 wos_publications=wos_pubs,

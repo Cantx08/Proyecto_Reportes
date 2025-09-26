@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Union
 from datetime import datetime
 from enum import Enum
 
@@ -22,28 +22,46 @@ class Authority(Enum):
 class AuthorInfo:
     """Value Object para la información básica del docente."""
     name: str
-    gender: Gender
+    gender: Union[Gender, str]  # Permite tanto enum como string personalizado
     department: str
     role: str
     
     def get_article(self) -> str:
         """Retorna el artículo apropiado según el género."""
-        return "El" if self.gender == Gender.MASCULINO else "La"
+        if isinstance(self.gender, Gender):
+            return "El" if self.gender == Gender.MASCULINO else "La"
+        # Para géneros personalizados, usar artículo neutro
+        gender_str = str(self.gender).upper()
+        if gender_str in ['M', 'MASCULINO', 'HOMBRE']:
+            return "El"
+        elif gender_str in ['F', 'FEMENINO', 'MUJER']:
+            return "La"
+        else:
+            return "El/La"  # Artículo neutro para casos personalizados
     
     def get_author_coauthor(self) -> str:
         """Retorna la forma apropiada de autor/coautor según el género."""
-        return "autor/co-autor" if self.gender == Gender.MASCULINO else "autora/co-autora"
+        if isinstance(self.gender, Gender):
+            return "autor/co-autor" if self.gender == Gender.MASCULINO else "autora/co-autora"
+        # Para géneros personalizados
+        gender_str = str(self.gender).upper()
+        if gender_str in ['M', 'MASCULINO', 'HOMBRE']:
+            return "autor/co-autor"
+        elif gender_str in ['F', 'FEMENINO', 'MUJER']:
+            return "autora/co-autora"
+        else:
+            return "autor/co-autor"  # Forma por defecto para casos personalizados
 
 
 @dataclass(frozen=True)
 class ReportConfiguration:
     """Value Object para la configuración del reporte."""
     memorandum: str
-    signatory: Authority
+    signatory: Union[Authority, str, Dict[str, str]]  # Enum, string o dict con cargo/nombre
     report_date: str
     
     @classmethod
-    def generate_with_current_date(cls, memorandum: str = "", signatory: Authority = Authority.DIRECTORA_INVESTIGACION):
+    def generate_with_current_date(cls, memorandum: str = "", signatory: Union[Authority, str, Dict[str, str]] = Authority.DIRECTORA_INVESTIGACION):
         """Factory method para crear configuración con fecha actual."""
         report_date = datetime.now().strftime("%d de %B de %Y")
         return cls(memorandum, signatory, report_date)

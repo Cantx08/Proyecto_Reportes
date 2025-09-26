@@ -6,6 +6,9 @@ from reportlab.lib import colors
 from ...application.interfaces.i_report import IContentBuilder, IStyleManager, IChartGenerator, IPublicationFormatter
 from ...domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections, Authority
 
+DIRECCION_DI = "Dra. María Monserrate Intriago Pazmiño"
+VICERRECTORADO_IIV = "Dra. Sandra Patricia Sánchez Gordón"
+AUTHOR_REPORT = "M. Vásquez"
 
 class ReportLabContentBuilder(IContentBuilder):
     """Constructor de contenido usando ReportLab."""
@@ -299,10 +302,14 @@ class ReportLabContentBuilder(IContentBuilder):
         author_text_line = "el" if author.gender.value == "M" else "la"
         publication_count = publications.get_total_publications()
         
-        if config.signatory == Authority.DIRECTORA_INVESTIGACION:
-            signatory_entity = "la Dirección de Investigación"
+        if isinstance(config.signatory, Authority):
+            if config.signatory == Authority.DIRECTORA_INVESTIGACION:
+                signatory_entity = "la Dirección de Investigación"
+            else:
+                signatory_entity = "el Vicerrectorado de Investigación, Innovación y Vinculación"
         else:
-            signatory_entity = "el Vicerrectorado de Investigación, Innovación y Vinculación"
+            # Para firmantes personalizados (dict o string), usar texto genérico
+            signatory_entity = "la autoridad competente"
         
         text = f"Por los antecedentes expuestos, {signatory_entity} de la Institución, certifica que {author_text_line} {author.name}, cuenta con un total de {publication_count} "
         
@@ -327,12 +334,21 @@ class ReportLabContentBuilder(IContentBuilder):
         elements.append(Spacer(1, 40))
 
         # Información del firmante
-        if config.signatory == Authority.DIRECTORA_INVESTIGACION:
-            authority = "Dra. María Monserrate Intriago Pazmiño"
-            signatory_role = "DIRECTORA DE INVESTIGACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
+        if isinstance(config.signatory, Authority):
+            if config.signatory == Authority.DIRECTORA_INVESTIGACION:
+                authority = DIRECCION_DI
+                signatory_role = "DIRECTORA DE INVESTIGACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
+            else:
+                authority = VICERRECTORADO_IIV
+                signatory_role = "VICERRECTORA DE INVESTIGACIÓN, INNOVACIÓN Y VINCULACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
+        elif isinstance(config.signatory, dict):
+            # Firmante personalizado con nombre y cargo separados
+            authority = config.signatory.get('nombre', config.signatory.get('cargo', 'AUTORIDAD DESIGNADA'))
+            signatory_role = config.signatory.get('cargo', 'AUTORIDAD DESIGNADA DE LA ESCUELA POLITÉCNICA NACIONAL').upper()
         else:
-            authority = "Dr. Marco Oswaldo Santórum Gaibor"
-            signatory_role = "VICERRECTOR DE INVESTIGACIÓN, INNOVACIÓN Y VINCULACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
+            # Firmante personalizado (string simple)
+            authority = str(config.signatory)
+            signatory_role = "AUTORIDAD DESIGNADA DE LA ESCUELA POLITÉCNICA NACIONAL"
         
         signature_style = self._style_manager.fetch_style('Signature')
         elements.append(Paragraph(f"<b>{authority}</b>", signature_style))
@@ -342,7 +358,7 @@ class ReportLabContentBuilder(IContentBuilder):
         # Tabla de elaboración
         table_style = self._style_manager.fetch_style('AuthorTable')
         table_details = [
-            [Paragraph("Elaborado por:", table_style), Paragraph("M. Vásquez", table_style)]
+            [Paragraph("Elaborado por:", table_style), Paragraph(AUTHOR_REPORT, table_style)]
         ]
         author_table = Table(table_details, colWidths=[3*cm, 3*cm])
         author_table.setStyle(TableStyle([

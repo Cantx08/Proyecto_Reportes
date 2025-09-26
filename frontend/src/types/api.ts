@@ -30,6 +30,29 @@ export interface AreasTematicasResponse {
   subject_areas: string[];                    // Cambio: areas_tematicas -> subject_areas
 }
 
+export interface Department {
+  sigla: string;
+  nombre: string;
+  facultad: string;
+}
+
+export interface DepartmentsResponse {
+  success: boolean;
+  data: Department[];
+  message: string;
+}
+
+export interface Cargo {
+  cargo: string;
+  tiempo: string;
+}
+
+export interface CargosResponse {
+  success: boolean;
+  data: Cargo[];
+  message: string;
+}
+
 // Tipos para el estado del componente principal
 export interface AppState {
   scopusIds: string[];

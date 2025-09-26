@@ -3,6 +3,10 @@
 import React, { useState } from 'react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
+import DepartmentSelect from './DepartmentSelect';
+import CargoSelect from './CargoSelect';
+import GenderSelect from './GenderSelect';
+import FirmanteSelect from './FirmanteSelect';
 
 interface GeneradorReporteProps {
   authorIds: string[];
@@ -18,6 +22,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
     cargo: '',
     memorando: '',
     firmante: 1,
+    firmante_nombre: '',
     fecha: '',
   });
 
@@ -46,11 +51,12 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
       const reportRequest: ReportRequest = {
         author_ids: authorIds,
         docente_nombre: formData.docente_nombre!,
-        docente_genero: formData.docente_genero as 'M' | 'F',
+        docente_genero: formData.docente_genero!,
         departamento: formData.departamento!,
         cargo: formData.cargo!,
         memorando: formData.memorando || undefined,
         firmante: formData.firmante || 1,
+        firmante_nombre: formData.firmante_nombre || undefined,
         fecha: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
       };
 
@@ -97,26 +103,21 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Género
           </label>
-          <select
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={formData.docente_genero}
-            onChange={(e) => handleInputChange('docente_genero', e.target.value)}
-          >
-            <option value="M">Masculino</option>
-            <option value="F">Femenino</option>
-          </select>
+          <GenderSelect
+            value={formData.docente_genero || ''}
+            onChange={(value) => handleInputChange('docente_genero', value)}
+            placeholder="Escriba o seleccione un género"
+          />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Departamento *
           </label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Departamento de Ciencias Nucleares"
-            value={formData.departamento}
-            onChange={(e) => handleInputChange('departamento', e.target.value)}
+          <DepartmentSelect
+            value={formData.departamento || ''}
+            onChange={(value) => handleInputChange('departamento', value)}
+            placeholder="Seleccione un departamento"
           />
         </div>
 
@@ -124,12 +125,10 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Cargo *
           </label>
-          <input
-            type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Profesor Agregado a Tiempo Completo"
-            value={formData.cargo}
-            onChange={(e) => handleInputChange('cargo', e.target.value)}
+          <CargoSelect
+            value={formData.cargo || ''}
+            onChange={(value) => handleInputChange('cargo', value)}
+            placeholder="Seleccione un cargo"
           />
         </div>
 
@@ -150,14 +149,13 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Firmante
           </label>
-          <select
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            value={formData.firmante}
-            onChange={(e) => handleInputChange('firmante', parseInt(e.target.value))}
-          >
-            <option value={1}>Directora de Investigación</option>
-            <option value={2}>Vicerrector de Investigación</option>
-          </select>
+          <FirmanteSelect
+            cargoValue={formData.firmante || 1}
+            nombreValue={formData.firmante_nombre || ''}
+            onCargoChange={(value) => handleInputChange('firmante', value)}
+            onNombreChange={(value) => handleInputChange('firmante_nombre', value)}
+            placeholder="Escriba o seleccione un firmante"
+          />
         </div>
 
         <div>
