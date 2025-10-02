@@ -30,13 +30,9 @@ export const AreasTematicas: React.FC<AreasTematicasProps> = ({ areas }) => {
         {areas.map((area, index) => (
           <div
             key={index}
-            className="px-3 py-2 text-white rounded-md text-sm border"
-            style={{
-              backgroundColor: 'rgba(0, 158, 206, 1)',
-              borderColor: 'rgba(0, 158, 206, 1)'
-            }}
+            className="px-3 py-2 text-gray-500 text-sm"
           >
-            {area}
+            - {area}
           </div>
         ))}
       </div>

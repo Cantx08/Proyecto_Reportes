@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
 import DepartmentSelect from './DepartmentSelect';
-import CargoSelect from './CargoSelect';
+import CargoSelect from './PositionSelect';
 import GenderSelect from './GenderSelect';
-import FirmanteSelect from './FirmanteSelect';
+import FirmanteSelect from './SignatorySelect';
 
 interface GeneradorReporteProps {
   authorIds: string[];

@@ -79,8 +79,8 @@ export const ScopusIdInput: React.FC<ScopusIdInputProps> = ({
           disabled={isLoading}
           className="px-4 py-2 border rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            color: 'rgba(0, 158, 206, 1)',
-            borderColor: 'rgba(0, 158, 206, 0.3)'
+            color: 'rgba(4, 42, 83, 1)',
+            borderColor: 'rgba(4, 42, 83, 0.3)'
           }}
         >
           + Agregar ID
@@ -91,7 +91,7 @@ export const ScopusIdInput: React.FC<ScopusIdInputProps> = ({
           disabled={isLoading}
           className="px-6 py-2 text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           style={{
-            backgroundColor: 'rgba(0, 158, 206, 1)'
+            backgroundColor: 'rgba(4, 42, 83, 1)'
           }}
         >
           {isLoading ? (

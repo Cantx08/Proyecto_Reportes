@@ -1,167 +1,182 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { ScopusIdInput } from '@/components/ScopusIdInput';
-import { PublicacionesList } from '@/components/PublicacionesList';
-import { AreasTematicas } from '@/components/AreasTematicas';
-import { DocumentosPorAnio } from '@/components/DocumentosPorAnio';
-import { ErrorNotification } from '@/components/ErrorNotification';
-import GeneradorReporte from '@/components/GeneradorReporte';
-import { useScopusData } from '@/hooks/useScopusData';
+import React from 'react';
+import Link from 'next/link';
+import { 
+  Users, 
+  Building2, 
+  FileText, 
+  FileEdit, 
+  ClipboardCheck,
+  TrendingUp,
+  Calendar,
+  Target,
+  Award
+} from 'lucide-react';
+
+const modules = [
+  {
+    name: 'Gestión de Autores',
+    description: 'Administrar y consultar información de autores y investigadores',
+    href: '/author_page',
+    icon: Users,
+    color: 'text-white',
+    bgColor: '#042a53',
+    stats: '1,234 autores',
+    recent: 'Último acceso: hace 2 horas'
+  },
+  {
+    name: 'Departamentos',
+    description: 'Gestionar departamentos, cargos y estructura organizacional',
+    href: '/departments_page',
+    icon: Building2,
+    color: 'text-white',
+    bgColor: '#042a53',
+    stats: '45 departamentos',
+    recent: 'Actualizado ayer'
+  },
+  {
+    name: 'Publicaciones',
+    description: 'Búsqueda y análisis de publicaciones académicas',
+    href: '/publications_page',
+    icon: FileText,
+    color: 'text-white',
+    bgColor: '#042a53',
+    stats: '5,678 publicaciones',
+    recent: 'Sincronizado hace 1 hora'
+  },
+  {
+    name: 'Generar Borradores',
+    description: 'Crear versiones preliminares de reportes para revisión',
+    href: '/borradores',
+    icon: FileEdit,
+    color: 'text-white',
+    bgColor: '#042a53',
+    stats: '23 borradores',
+    recent: 'Último borrador: hoy'
+  },
+  {
+    name: 'Informes Finales',
+    description: 'Generar reportes oficiales con encabezados institucionales',
+    href: '/reports_page',
+    icon: ClipboardCheck,
+    color: 'text-white',
+    bgColor: '#042a53',
+    stats: '156 informes',
+    recent: 'Último informe: hace 3 días'
+  }
+];
+
+const quickStats = [
+  { name: 'Publicaciones este mes', value: '89', change: '+12%', icon: TrendingUp, color: '#042a53' },
+  { name: 'Reportes generados', value: '34', change: '+8%', icon: ClipboardCheck, color: '#042a53' },
+  { name: 'Autores activos', value: '1,234', change: '+3%', icon: Users, color: '#042a53' },
+  { name: 'Índice de productividad', value: '94%', change: '+5%', icon: Award, color: '#042a53' }
+];
 
 export default function HomePage() {
-  const {
-    scopusIds,
-    isLoading,
-    loadingProgress,
-    publicaciones,
-    areasTematicas,
-    documentosPorAnio,
-    error,
-    validateScopusId,
-    addScopusId,
-    removeScopusId,
-    updateScopusId,
-    searchScopusData,
-    clearResults,
-  } = useScopusData();
-
-  // Limpiar error después de 5 segundos
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        clearResults();
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, clearResults]);
-
-  const dismissError = () => {
-    clearResults();
-  };
-
-  const handleReportError = (error: string) => {
-    // Usar el mismo sistema de error que ya existe
-    clearResults();
-    setTimeout(() => {
-      // Simular un error para mostrarlo en el sistema existente
-      window.dispatchEvent(new CustomEvent('scopus-error', { detail: error }));
-    }, 100);
-  };
-
-  const hasResults = publicaciones.length > 0 || areasTematicas.length > 0;
-  const validScopusIds = scopusIds.filter(item => item.trim() !== '').map(item => item.trim());
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">
-              Análisis de Publicaciones Scopus
+    <div className="max-w-7xl mx-auto">
+      {/* Welcome Section */}
+      <div className="bg-white p-6 mb-8 text-gray-900">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-[#042a53] text-2xl rounded-lg font-bold mb-2">
+              Bienvenido/a al Sistema de Certificaciones de Publicaciones EPN
             </h1>
-            <p className="mt-2 text-lg text-gray-600">
-              Ingresa los IDs de Scopus para analizar publicaciones, áreas temáticas y estadísticas
+            <p className="text-[#2c5f7f] text-lg">
+              Sistema gestor de publicaciones, autores y genera certificaciones institucionales
             </p>
           </div>
+          <div className="text-right">
+            <div className="text-gray-600 text-center text-3xl font-bold">{new Date().toLocaleDateString('es-ES', { day: 'numeric' })}</div>
+            <div className="text-gray-600">{new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</div>
+          </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Input Section */}
-        <ScopusIdInput
-          scopusIds={scopusIds}
-          onAddId={addScopusId}
-          onRemoveId={removeScopusId}
-          onUpdateId={updateScopusId}
-          onSearch={searchScopusData}
-          onClear={clearResults}
-          isLoading={isLoading}
-          validateScopusId={validateScopusId}
-        />
-
-        {/* Results Section */}
-        {hasResults && (
-          <div className="space-y-6">
-            {/* Grid Layout for Results */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Publicaciones - Ocupa 2 columnas */}
-              <div className="lg:col-span-2">
-                <PublicacionesList publicaciones={publicaciones} />
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {quickStats.map((stat) => (
+          <div key={stat.name} className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">{stat.name}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                <p className="text-sm flex items-center mt-1" style={{ color: stat.color }}>
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  {stat.change}
+                </p>
               </div>
-
-              {/* Sidebar - Áreas Temáticas */}
-              <div className="space-y-6">
-                <AreasTematicas areas={areasTematicas} />
+              <div className="p-3 rounded-lg" style={{ backgroundColor: `${stat.color}20` }}>
+                <stat.icon className="h-6 w-6" style={{ color: stat.color }} />
               </div>
-            </div>
-
-            {/* Gráfico de Documentos por Año - Ancho completo */}
-            <div className="w-full">
-              <DocumentosPorAnio documentosPorAnio={documentosPorAnio} />
-            </div>
-
-            {/* Generador de Reportes */}
-            {validScopusIds.length > 0 && (
-              <div className="w-full">
-                <GeneradorReporte 
-                  authorIds={validScopusIds}
-                  onError={handleReportError}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center flex-col">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mb-4" style={{ borderColor: 'rgba(0, 158, 206, 1)' }}></div>
-              <span className="text-lg text-gray-600 mb-2">
-                Procesando datos de Scopus...
-              </span>
-              {loadingProgress && (
-                <span className="text-sm text-gray-500">
-                  {loadingProgress}
-                </span>
-              )}
             </div>
           </div>
-        )}
+        ))}
+      </div>
 
-        {/* Empty State */}
-        {!hasResults && !isLoading && (
-          <div className="text-center py-12">
-            <div className="max-w-md mx-auto">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
-                Sin resultados
+      {/* Main Modules */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {modules.map((module) => (
+          <Link key={module.name} href={module.href}>
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 rounded-lg" style={{ backgroundColor: module.bgColor }}>
+                  <module.icon className={`h-6 w-6 ${module.color}`} />
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900">{module.stats}</div>
+                  <div className="text-xs text-gray-500">{module.recent}</div>
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {module.name}
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Ingresa uno o más IDs de Scopus para comenzar el análisis
+              <p className="text-gray-600 text-sm">
+                {module.description}
               </p>
             </div>
-          </div>
-        )}
-      </main>
+          </Link>
+        ))}
+      </div>
 
-      {/* Error Notification */}
-      <ErrorNotification error={error} onDismiss={dismissError} />
+      {/* Recent Activity */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+            <Calendar className="h-5 w-5 mr-2" />
+            Actividad Reciente
+          </h2>
+        </div>
+        <div className="divide-y divide-gray-200">
+          {[
+            { action: 'Reporte generado', target: 'Dr. Juan Pérez', time: 'hace 2 horas', type: 'success' },
+            { action: 'Borrador creado', target: 'Dra. María García', time: 'hace 4 horas', type: 'info' },
+            { action: 'Publicaciones sincronizadas', target: 'Sistema Scopus', time: 'hace 6 horas', type: 'info' },
+            { action: 'Nuevo autor registrado', target: 'Dr. Carlos López', time: 'ayer', type: 'success' },
+            { action: 'Departamento actualizado', target: 'Ingeniería Civil', time: 'hace 2 días', type: 'warning' }
+          ].map((activity, index) => (
+            <div key={index} className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <div className={`h-2 w-2 rounded-full mr-3 ${
+                  activity.type === 'success' ? 'bg-green-400' :
+                  activity.type === 'warning' ? 'bg-yellow-400' : 'bg-[#042a53]'
+                }`}></div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {activity.action}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {activity.target}
+                  </p>
+                </div>
+              </div>
+              <span className="text-sm text-gray-500">{activity.time}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

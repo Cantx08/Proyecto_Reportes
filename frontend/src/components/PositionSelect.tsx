@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useCargos } from '@/hooks/useCargos';
+import { useCargos } from '@/hooks/usePositions';
 import type { Cargo } from '@/types/api';
 
 interface CargoSelectProps {

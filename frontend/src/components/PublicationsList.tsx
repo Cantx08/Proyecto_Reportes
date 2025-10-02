@@ -64,7 +64,7 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
               {pub.categories && (
                 <div className="md:col-span-2">
                   <span className="font-medium">Categorías:</span>{' '}
-                  <span style={{ color: 'rgba(0, 158, 206, 1)' }}>{pub.categories}</span>
+                  <span style={{ color: '#2c5f7f' }}>{pub.categories}</span>
                 </div>
               )}
               {pub.doi && (
@@ -75,7 +75,7 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline"
-                    style={{ color: 'rgba(0, 158, 206, 1)' }}
+                    style={{ color: '#2c5f7f' }}
                   >
                     {pub.doi}
                   </a>
