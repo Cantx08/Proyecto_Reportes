@@ -45,7 +45,7 @@ from .author import (
     AuthorModel,
     ScopusAccountModel,
     SubjectAreaModel,
-    SubjectSubareaModel
+    SubjectCategoryModel
 )
 
 # ============================================================================
@@ -98,7 +98,7 @@ __all__ = [
     "AuthorModel",
     "ScopusAccountModel",
     "SubjectAreaModel",
-    "SubjectSubareaModel",
+    "SubjectCategoryModel",
     
     # Modelos de journals y SJR
     "JournalModel",

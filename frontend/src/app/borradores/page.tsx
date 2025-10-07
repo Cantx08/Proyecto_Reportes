@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
-import DepartmentSelect from '@/components/DepartmentSelect';
+import DepartmentSelect from '@/components/DepartmentSelectNew';
 import CargoSelect from '@/components/PositionSelect';
 import GenderSelect from '@/components/GenderSelect';
 import FirmanteSelect from '@/components/SignatorySelect';

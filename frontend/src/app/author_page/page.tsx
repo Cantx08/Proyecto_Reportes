@@ -102,7 +102,7 @@ export default function AutoresPage() {
               Gestión de Autores
             </h1>
             <p className="text-gray-600 mt-1">
-              Administra la información de autores y sus publicaciones académicas
+              Administra la información de autores y sus cuentas Scopus asociadas.
             </p>
           </div>
           <div className="flex space-x-3">

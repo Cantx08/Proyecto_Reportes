@@ -1,5 +1,5 @@
-from src.infrastructure.csv.cargos_file_repository import CargosFileRepository
-from src.infrastructure.dtos.cargo_dto import CargosResponseDTO
+from ...infrastructure.repositories.cargos_file_repository import CargosFileRepository
+from ..dtos.cargo_dto import CargosResponseDTO
 
 class CargoService:
     """Servicio para manejar operaciones relacionadas con cargos."""

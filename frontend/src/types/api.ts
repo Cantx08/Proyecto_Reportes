@@ -30,6 +30,9 @@ export interface AreasTematicasResponse {
   subject_areas: string[];                    // Cambio: areas_tematicas -> subject_areas
 }
 
+// ===========================
+// TIPOS LEGACY (mantener para compatibilidad)
+// ===========================
 export interface Department {
   sigla: string;
   nombre: string;
@@ -51,6 +54,144 @@ export interface CargosResponse {
   success: boolean;
   data: Cargo[];
   message: string;
+}
+
+// ===========================
+// NUEVOS TIPOS REFACTORIZADOS
+// ===========================
+
+// Autor
+export interface Author {
+  author_id: string;
+  name: string;
+  surname: string;
+  title: string;
+  birth_date?: string;
+  gender: string;
+  position: string;
+  department: string;
+}
+
+export interface AuthorCreateRequest {
+  author_id: string;
+  name: string;
+  surname: string;
+  title: string;
+  birth_date?: string;
+  gender: string;
+  position: string;
+  department: string;
+}
+
+export interface AuthorUpdateRequest {
+  name?: string;
+  surname?: string;
+  title?: string;
+  birth_date?: string;
+  gender?: string;
+  position?: string;
+  department?: string;
+}
+
+export interface AuthorResponse {
+  author_id: string;
+  name: string;
+  surname: string;
+  title: string;
+  birth_date?: string;
+  gender: string;
+  position: string;
+  department: string;
+}
+
+export interface AuthorsResponse {
+  authors: AuthorResponse[];
+}
+
+// Departamento (nuevo)
+export interface NewDepartment {
+  dep_id: string;
+  dep_code: string;
+  dep_name: string;
+  fac_name: string;
+}
+
+export interface DepartmentCreateRequest {
+  dep_id: string;
+  dep_code: string;
+  dep_name: string;
+  fac_name: string;
+}
+
+export interface DepartmentUpdateRequest {
+  dep_code?: string;
+  dep_name?: string;
+  fac_name?: string;
+}
+
+export interface DepartmentResponse {
+  dep_id: string;
+  dep_code: string;
+  dep_name: string;
+  fac_name: string;
+}
+
+// Posición/Cargo (nuevo)
+export interface Position {
+  pos_id: string;
+  pos_name: string;
+}
+
+export interface PositionCreateRequest {
+  pos_id: string;
+  pos_name: string;
+}
+
+export interface PositionUpdateRequest {
+  pos_name?: string;
+}
+
+export interface PositionResponse {
+  pos_id: string;
+  pos_name: string;
+}
+
+export interface PositionsResponse {
+  positions: PositionResponse[];
+}
+
+// Cuenta Scopus
+export interface ScopusAccount {
+  scopus_id: string;
+  scopus_user: string;
+  author_id: string;
+}
+
+export interface ScopusAccountCreateRequest {
+  scopus_id: string;
+  scopus_user: string;
+  author_id: string;
+}
+
+export interface ScopusAccountUpdateRequest {
+  scopus_user?: string;
+  author_id?: string;
+}
+
+export interface ScopusAccountResponse {
+  scopus_id: string;
+  scopus_user: string;
+  author_id: string;
+}
+
+export interface ScopusAccountsResponse {
+  scopus_accounts: ScopusAccountResponse[];
+}
+
+export interface LinkAuthorScopusRequest {
+  author_id: string;
+  scopus_id: string;
+  scopus_user?: string;
 }
 
 // Tipos para el estado del componente principal

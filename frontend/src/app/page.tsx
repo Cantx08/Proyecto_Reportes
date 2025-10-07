@@ -10,14 +10,13 @@ import {
   ClipboardCheck,
   TrendingUp,
   Calendar,
-  Target,
   Award
 } from 'lucide-react';
 
 const modules = [
   {
-    name: 'Gestión de Autores',
-    description: 'Administrar y consultar información de autores y investigadores',
+    name: 'Autores',
+    description: 'Gestión y búsqueda de información de investigadores.',
     href: '/author_page',
     icon: Users,
     color: 'text-white',
@@ -27,7 +26,7 @@ const modules = [
   },
   {
     name: 'Departamentos',
-    description: 'Gestionar departamentos, cargos y estructura organizacional',
+    description: 'Gestión de departamentos institucionales y cargos académicos.',
     href: '/departments_page',
     icon: Building2,
     color: 'text-white',
@@ -37,7 +36,7 @@ const modules = [
   },
   {
     name: 'Publicaciones',
-    description: 'Búsqueda y análisis de publicaciones académicas',
+    description: 'Búsqueda y análisis de publicaciones indexadas en Scopus.',
     href: '/publications_page',
     icon: FileText,
     color: 'text-white',
@@ -57,7 +56,7 @@ const modules = [
   },
   {
     name: 'Informes Finales',
-    description: 'Generar reportes oficiales con encabezados institucionales',
+    description: 'Generación de certificados finales de publicaciones.',
     href: '/reports_page',
     icon: ClipboardCheck,
     color: 'text-white',
@@ -82,11 +81,8 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-[#042a53] text-2xl rounded-lg font-bold mb-2">
-              Bienvenido/a al Sistema de Certificaciones de Publicaciones EPN
+              Sistema de Certificaciones de Publicaciones EPN
             </h1>
-            <p className="text-[#2c5f7f] text-lg">
-              Sistema gestor de publicaciones, autores y genera certificaciones institucionales
-            </p>
           </div>
           <div className="text-right">
             <div className="text-gray-600 text-center text-3xl font-bold">{new Date().toLocaleDateString('es-ES', { day: 'numeric' })}</div>

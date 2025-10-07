@@ -4,7 +4,7 @@ import type {
   DocumentosPorAnioResponse, 
   AreasTematicasResponse,
   DepartmentsResponse,
-  CargosResponse 
+
 } from '@/types/api';
 
 export interface ReportRequest {
@@ -121,23 +121,7 @@ export const scopusApi = {
     }
   },
 
-  /**
-   * Obtener lista de cargos
-   */
-  async getCargos(): Promise<CargosResponse> {
-    try {
-      const response = await api.get<CargosResponse>('/cargos');
-      return response.data;
-    } catch (error) {
-      console.error('Error al obtener cargos:', error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 500) {
-          throw new Error('Error interno del servidor al obtener cargos.');
-        }
-      }
-      throw new Error('Error al conectar con el servidor para obtener cargos.');
-    }
-  },
+
 
   /**
    * Generar reporte de certificación

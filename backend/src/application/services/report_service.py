@@ -1,13 +1,13 @@
 from typing import List, Union
 from ...domain.entities.publication import Publication
-from ..interfaces.i_report import IReportGenerator
+from ...domain.repositories.i_report import IReportGenerator
 from ...domain.value_objects.report import (AuthorInfo, ReportConfiguration, PublicationCollections,
                                             PublicationsStatistics, Gender, Authority)
-from ...infrastructure.report.style_manager import ReportLabStyleManager
-from ...infrastructure.report.chart_generator import MatplotlibChartGenerator
-from ...infrastructure.report.publication_formatter import ReportLabPublicationFormatter
-from ...infrastructure.report.content_builder import ReportLabContentBuilder
-from ...infrastructure.report.pdf_generator import ReportLabReportGenerator
+from ...infrastructure.repositories.report.style_manager import ReportLabStyleManager
+from ...infrastructure.repositories.report.chart_generator import MatplotlibChartGenerator
+from ...infrastructure.repositories.report.publication_formatter import ReportLabPublicationFormatter
+from ...infrastructure.repositories.report.content_builder import ReportLabContentBuilder
+from ...infrastructure.repositories.report.pdf_generator import ReportLabReportGenerator
 
 
 class ReportService:

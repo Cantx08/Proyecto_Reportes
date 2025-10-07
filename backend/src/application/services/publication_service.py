@@ -1,8 +1,8 @@
 from typing import List
 from ...domain.entities.author import Author
 from ...domain.entities.publication import PublicationsCollection
-from ...application.repositories.publications_repository import PublicationsRepository
-from ...application.repositories.sjr_repository import SJRRepository
+from ...domain.repositories.publications_repository import PublicationsRepository
+from ...domain.repositories.sjr_repository import SJRRepository
 
 
 class PublicationService:

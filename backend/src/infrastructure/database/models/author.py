@@ -89,12 +89,12 @@ class SubjectAreaModel(Base):
     created_at = Column(DateTime, default=func.now())
     
     # Relaciones
-    subareas = relationship("SubjectSubareaModel", back_populates="area")
+    categories = relationship("SubjectCategoryModel", back_populates="area")
 
 
-class SubjectSubareaModel(Base):
+class SubjectCategoryModel(Base):
     """Modelo para subáreas temáticas."""
-    __tablename__ = 'subject_subareas'
+    __tablename__ = 'subject_category'
     
     id = Column(Integer, primary_key=True)
     area_id = Column(Integer, ForeignKey('subject_areas.id'), nullable=False)
@@ -104,4 +104,4 @@ class SubjectSubareaModel(Base):
     created_at = Column(DateTime, default=func.now())
     
     # Relaciones
-    area = relationship("SubjectAreaModel", back_populates="subareas")
+    area = relationship("SubjectAreaModel", back_populates="categories")

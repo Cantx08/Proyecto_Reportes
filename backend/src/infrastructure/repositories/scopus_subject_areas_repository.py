@@ -1,7 +1,7 @@
 from typing import List
 from ...domain.entities.subject_area import SubjectArea
-from ..external_services.scopus_api_client import ScopusApiClient
-from ...application.repositories.subject_areas_repository import SubjectAreasRepository
+from ..external.scopus_api_client import ScopusApiClient
+from ...domain.repositories.subject_areas_repository import SubjectAreasRepository
 
 
 class ScopusSubjectAreasRepository(SubjectAreasRepository):
@@ -59,9 +59,9 @@ class ScopusSubjectAreasRepository(SubjectAreasRepository):
         """
         return []
     
-    def map_subarea_to_area(self, subarea: str) -> str:
+    def map_category_to_area(self, category: str) -> str:
         """
         Mapeo básico de subáreas - debe ser sobrescrito por el repositorio de archivos.
         Esta implementación devuelve la misma subárea.
         """
-        return subarea
+        return category

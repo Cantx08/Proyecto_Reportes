@@ -255,7 +255,7 @@ GET /health
 ### Archivos de Datos
 
 - **`data/archivo.csv`**: Datos SJR para categorización de revistas
-- **`data/areas_subareas.csv`**: Mapeo de áreas y subáreas temáticas
+- **`data/areas_categories.csv`**: Mapeo de áreas y subáreas temáticas
 
 ---
 

@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from ...domain.entities.publication import Publication
-from ..external_services.scopus_api_client import ScopusApiClient
-from ...application.repositories.publications_repository import PublicationsRepository
+from ..external.scopus_api_client import ScopusApiClient
+from ...domain.repositories.publications_repository import PublicationsRepository
 
 
 class ScopusPublicationsRepository(PublicationsRepository):
