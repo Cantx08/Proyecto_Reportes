@@ -2,7 +2,7 @@ import io
 from typing import Dict
 from matplotlib import pyplot as plt
 import matplotlib
-from ....domain.repositories.i_report import IChartGenerator
+from ....domain.repositories.report_repository import IChartGenerator
 
 
 matplotlib.use('Agg')  # Use non-interactive backend

@@ -164,7 +164,7 @@ export default function InformesPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center">
               <ClipboardCheck className="h-6 w-6 mr-3 text-[#042a53]']" />
-              Informes Finales
+              Generación de Certificaciones
             </h1>
             <p className="text-gray-600 mt-1">
               Procesa borradores de reportes para generar informes oficiales con encabezados institucionales

@@ -165,10 +165,13 @@ class ScopusAccountsController:
     async def link_author_to_scopus(self, link_data: LinkAuthorScopusDTO) -> ScopusAccountsResponseDTO:
         """Vincula un autor con múltiples cuentas Scopus."""
         try:
-            created_accounts = await self.scopus_account_service.link_author_to_scopus(
+            created_accounts, existing_scopus_ids = await self.scopus_account_service.link_author_to_scopus(
                 link_data.author_id, 
                 link_data.scopus_ids
             )
+            
+            # Obtener todas las cuentas del autor para retornar el estado completo
+            all_accounts = await self.scopus_account_service.get_accounts_by_author_id(link_data.author_id)
             
             accounts_dto = [
                 ScopusAccountDTO(
@@ -176,24 +179,39 @@ class ScopusAccountsController:
                     scopus_user=account.scopus_user,
                     author_id=account.author_id
                 )
-                for account in created_accounts
+                for account in all_accounts
             ]
+            
+            # Crear mensaje descriptivo
+            message_parts = []
+            if created_accounts:
+                message_parts.append(f"Created {len(created_accounts)} new Scopus accounts")
+            if existing_scopus_ids:
+                message_parts.append(f"{len(existing_scopus_ids)} accounts already existed")
+            
+            message = ". ".join(message_parts) if message_parts else "No changes made"
+            message += f" for author {link_data.author_id}"
             
             return ScopusAccountsResponseDTO(
                 success=True,
                 data=accounts_dto,
-                message=f"Successfully linked {len(created_accounts)} Scopus accounts to author {link_data.author_id}",
-                total=len(created_accounts)
+                message=message,
+                total=len(accounts_dto)
             )
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e
     
-    async def get_scopus_ids_by_author(self, author_id: str) -> List[str]:
+    async def get_scopus_ids_by_author(self, author_id: str) -> dict:
         """Obtiene los ID de Scopus asociados a un autor."""
         try:
             scopus_ids = await self.scopus_account_service.get_scopus_ids_by_author_id(author_id)
-            return scopus_ids
+            return {
+                "success": True,
+                "data": scopus_ids,
+                "message": f"Found {len(scopus_ids)} Scopus IDs for author {author_id}",
+                "total": len(scopus_ids)
+            }
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e)) from e

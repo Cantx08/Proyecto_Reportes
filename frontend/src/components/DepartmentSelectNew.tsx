@@ -27,7 +27,7 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
 
   // Filtrar departamentos basado en el texto ingresado
   useEffect(() => {
-    if (!departments.length) return;
+    if (!departments || !departments.length) return;
     
     if (!value.trim()) {
       setFilteredDepartments(departments);

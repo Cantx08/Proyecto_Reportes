@@ -16,7 +16,6 @@ from .department_dto import (
     DepartmentDTO, DepartmentCreateDTO, DepartmentUpdateDTO,
     DepartmentsResponseDTO, DepartmentResponseDTO
 )
-from .legacy_department_dto import LegacyDepartmentsResponseDTO
 from .position_dto import (
     PositionDTO, PositionCreateDTO, PositionUpdateDTO,
     PositionsResponseDTO, PositionResponseDTO
@@ -25,7 +24,6 @@ from .scopus_account_dto import (
     ScopusAccountDTO, ScopusAccountCreateDTO, ScopusAccountUpdateDTO,
     ScopusAccountsResponseDTO, ScopusAccountResponseDTO, LinkAuthorScopusDTO
 )
-from .cargo_dto import CargoDTO, CargosResponseDTO
 
 # Resolver referencias circulares después de importar todos los modelos
 AuthorDTO.model_rebuild()
@@ -40,7 +38,7 @@ __all__ = [
     "PublicationDTO", "PublicationsResponseDTO", "DocumentsByYearResponseDTO",
     # Department DTOs
     "DepartmentDTO", "DepartmentCreateDTO", "DepartmentUpdateDTO",
-    "DepartmentsResponseDTO", "DepartmentResponseDTO", "LegacyDepartmentsResponseDTO",
+    "DepartmentsResponseDTO", "DepartmentResponseDTO",
     # Position DTOs
     "PositionDTO", "PositionCreateDTO", "PositionUpdateDTO",
     "PositionsResponseDTO", "PositionResponseDTO",
@@ -48,5 +46,5 @@ __all__ = [
     "ScopusAccountDTO", "ScopusAccountCreateDTO", "ScopusAccountUpdateDTO",
     "ScopusAccountsResponseDTO", "ScopusAccountResponseDTO", "LinkAuthorScopusDTO",
     # Legacy DTOs
-    "SubjectAreaResponseDTO", "ReportRequestDTO", "CargoDTO", "CargosResponseDTO"
+    "SubjectAreaResponseDTO", "ReportRequestDTO"
 ]

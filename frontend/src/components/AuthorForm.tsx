@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Author, Department, Position } from '@/types/api';
 import DepartmentSelectNew from './DepartmentSelectNew';
 import PositionSelectNew from './PositionSelectNew';
@@ -25,6 +25,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
   const [formData, setFormData] = useState({
     name: author?.name || '',
     surname: author?.surname || '',
+    dni: author?.dni || '',
     title: author?.title || '',
     birth_date: author?.birth_date || '',
     gender: author?.gender || 'M',
@@ -33,6 +34,35 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Actualizar formData cuando cambie el autor (para modo edición)
+  useEffect(() => {
+    if (author) {
+      setFormData({
+        name: author.name || '',
+        surname: author.surname || '',
+        dni: author.dni || '',
+        title: author.title || '',
+        birth_date: author.birth_date || '',
+        gender: author.gender || 'M',
+        position: author.position || '',
+        department: author.department || ''
+      });
+    } else {
+      // Reset form para nuevo autor
+      setFormData({
+        name: '',
+        surname: '',
+        dni: '',
+        title: '',
+        birth_date: '',
+        gender: 'M',
+        position: '',
+        department: ''
+      });
+    }
+    setErrors({});
+  }, [author]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -59,6 +89,10 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
 
     if (!formData.surname.trim()) {
       newErrors.surname = 'El apellido es requerido';
+    }
+
+    if (!formData.dni.trim()) {
+      newErrors.dni = 'El DNI/Cédula es requerido';
     }
 
     if (!formData.birth_date) {
@@ -128,6 +162,24 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             placeholder="Ingrese el apellido"
           />
           {errors.surname && <p className="mt-1 text-sm text-red-600">{errors.surname}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">
+            DNI/Cédula *
+          </label>
+          <input
+            type="text"
+            id="dni"
+            name="dni"
+            value={formData.dni}
+            onChange={handleChange}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+              errors.dni ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="Ingrese el DNI o cédula"
+          />
+          {errors.dni && <p className="mt-1 text-sm text-red-600">{errors.dni}</p>}
         </div>
 
         <div>

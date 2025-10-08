@@ -1,7 +1,7 @@
 from typing import List, Any
 from reportlab.platypus import Paragraph, Spacer
 from ....domain.entities.publication import Publication
-from ....domain.repositories.i_report import IPublicationFormatter, IStyleManager
+from ....domain.repositories.report_repository import IPublicationFormatter, IStyleManager
 
 
 class ReportLabPublicationFormatter(IPublicationFormatter):

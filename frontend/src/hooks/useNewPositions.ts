@@ -45,7 +45,7 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
       const response = await positionsApi.getAll();
       setState(prev => ({
         ...prev,
-        positions: response.positions,
+        positions: response?.positions || [],
         loading: false,
       }));
     } catch (error) {
@@ -54,6 +54,7 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
         ...prev,
         loading: false,
         error: errorMessage,
+        positions: [], // Asegurar que positions sea un array vacío en caso de error
       }));
     }
   }, []);
@@ -75,7 +76,7 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
       const newPosition = await positionsApi.create(positionData);
       setState(prev => ({
         ...prev,
-        positions: [...prev.positions, newPosition],
+        positions: [...(prev.positions || []), newPosition],
         creating: false,
       }));
       return newPosition;
@@ -96,7 +97,7 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
       const updatedPosition = await positionsApi.update(posId, positionData);
       setState(prev => ({
         ...prev,
-        positions: prev.positions.map(pos => 
+        positions: (prev.positions || []).map(pos => 
           pos.pos_id === posId ? updatedPosition : pos
         ),
         updating: false,
@@ -119,7 +120,7 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
       await positionsApi.delete(posId);
       setState(prev => ({
         ...prev,
-        positions: prev.positions.filter(pos => pos.pos_id !== posId),
+        positions: (prev.positions || []).filter(pos => pos.pos_id !== posId),
         deleting: false,
       }));
       return true;

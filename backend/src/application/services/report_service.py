@@ -1,6 +1,6 @@
 from typing import List, Union
 from ...domain.entities.publication import Publication
-from ...domain.repositories.i_report import IReportGenerator
+from ...domain.repositories.report_repository import IReportGenerator
 from ...domain.value_objects.report import (AuthorInfo, ReportConfiguration, PublicationCollections,
                                             PublicationsStatistics, Gender, Authority)
 from ...infrastructure.repositories.report.style_manager import ReportLabStyleManager

@@ -27,7 +27,7 @@ const PositionSelect: React.FC<PositionSelectProps> = ({
 
   // Filtrar posiciones basado en el texto ingresado
   useEffect(() => {
-    if (!positions.length) return;
+    if (!positions || !positions.length) return;
     
     if (!value.trim()) {
       setFilteredPositions(positions);

@@ -207,8 +207,8 @@ export const scopusAccountsApi = {
    * Obtener cuentas Scopus por autor
    */
   async getByAuthor(authorId: string): Promise<ScopusAccountResponse[]> {
-    const response = await api.get<ScopusAccountResponse[]>(`/scopus-accounts/by-author/${authorId}`);
-    return response.data;
+    const response = await api.get<ScopusAccountsResponse>(`/scopus-accounts/by-author/${authorId}`);
+    return response.data.data; // Acceder a la propiedad 'data' de la respuesta estructurada
   },
 
   /**

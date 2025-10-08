@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
 import DepartmentSelect from './DepartmentSelectNew';
-import CargoSelect from './PositionSelect';
+import PositionSelect from './PositionSelectNew';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
 
@@ -128,7 +128,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Cargo *
           </label>
-          <CargoSelect
+          <PositionSelect
             value={formData.cargo || ''}
             onChange={(value) => handleInputChange('cargo', value)}
             placeholder="Seleccione un cargo"

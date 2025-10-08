@@ -18,7 +18,7 @@ import {
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
 import DepartmentSelect from '@/components/DepartmentSelectNew';
-import CargoSelect from '@/components/PositionSelect';
+import PositionSelect from '@/components/PositionSelectNew';
 import GenderSelect from '@/components/GenderSelect';
 import FirmanteSelect from '@/components/SignatorySelect';
 
@@ -450,7 +450,7 @@ export default function BorradoresPage() {
                 <label className="block text-sm font-medium text-gray-700">
                   Cargo *
                 </label>
-                <CargoSelect
+                <PositionSelect
                   value={formData.cargo || ''}
                   onChange={(value) => handleInputChange('cargo', value)}
                 />

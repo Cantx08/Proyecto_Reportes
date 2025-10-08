@@ -65,6 +65,7 @@ export interface Author {
   author_id: string;
   name: string;
   surname: string;
+  dni: string;
   title: string;
   birth_date?: string;
   gender: string;
@@ -76,6 +77,7 @@ export interface AuthorCreateRequest {
   author_id: string;
   name: string;
   surname: string;
+  dni: string;
   title: string;
   birth_date?: string;
   gender: string;
@@ -86,6 +88,7 @@ export interface AuthorCreateRequest {
 export interface AuthorUpdateRequest {
   name?: string;
   surname?: string;
+  dni?: string;
   title?: string;
   birth_date?: string;
   gender?: string;
@@ -97,6 +100,7 @@ export interface AuthorResponse {
   author_id: string;
   name: string;
   surname: string;
+  dni: string;
   title: string;
   birth_date?: string;
   gender: string;
@@ -185,7 +189,10 @@ export interface ScopusAccountResponse {
 }
 
 export interface ScopusAccountsResponse {
-  scopus_accounts: ScopusAccountResponse[];
+  success: boolean;
+  data: ScopusAccountResponse[];
+  message: string;
+  total: number;
 }
 
 export interface LinkAuthorScopusRequest {

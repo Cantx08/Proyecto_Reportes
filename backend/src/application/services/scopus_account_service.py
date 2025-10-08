@@ -73,16 +73,28 @@ class ScopusAccountService:
         
         return await self._scopus_account_repository.delete_by_author_id(author_id)
     
-    async def link_author_to_scopus(self, author_id: str, scopus_ids: List[str]) -> List[ScopusAccount]:
-        """Vincula un autor con múltiples cuentas Scopus."""
+    async def link_author_to_scopus(self, author_id: str, scopus_ids: List[str]) -> tuple[List[ScopusAccount], List[str]]:
+        """Vincula un autor con múltiples cuentas Scopus.
+        
+        Returns:
+            tuple: (created_accounts, existing_scopus_ids)
+        """
         if not author_id:
             raise ValueError("Author ID is required")
         if not scopus_ids:
             raise ValueError("At least one Scopus ID is required")
         
         created_accounts = []
+        existing_scopus_ids = []
+        
         for scopus_id in scopus_ids:
             try:
+                # Verificar si ya existe
+                existing_account = await self._scopus_account_repository.get_by_scopus_id(scopus_id)
+                if existing_account and existing_account.author_id == author_id:
+                    existing_scopus_ids.append(scopus_id)
+                    continue
+                
                 account = ScopusAccount(
                     scopus_id=scopus_id,
                     scopus_user=f"user_{scopus_id}",
@@ -93,10 +105,11 @@ class ScopusAccountService:
             except ValueError as e:
                 # Si ya existe, continuar con el siguiente
                 if "already exists" in str(e):
+                    existing_scopus_ids.append(scopus_id)
                     continue
                 raise e
         
-        return created_accounts
+        return created_accounts, existing_scopus_ids
     
     async def get_scopus_ids_by_author_id(self, author_id: str) -> List[str]:
         """Obtiene los IDs de Scopus asociados a un autor."""

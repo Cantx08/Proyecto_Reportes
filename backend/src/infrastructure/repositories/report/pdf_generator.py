@@ -4,7 +4,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
-from ....domain.repositories.i_report import IReportGenerator, IContentBuilder
+from ....domain.repositories.report_repository import IReportGenerator, IContentBuilder
 from ....domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationCollections, PublicationsStatistics
 from .template_overlay_service import TemplateOverlayService
 

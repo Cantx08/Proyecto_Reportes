@@ -11,6 +11,7 @@ class AuthorDTO(BaseModel):
     author_id: str = Field(..., description="ID único del autor")
     name: str = Field(..., description="Nombre del autor")
     surname: str = Field(..., description="Apellido del autor")
+    dni: str = Field(..., description="Documento Nacional de Identidad")
     title: str = Field("", description="Título académico (Dr., PhD., Ing., etc.)")
     birth_date: Optional[date] = Field(None, description="Fecha de nacimiento")
     gender: str = Field("M", description="Género del autor")
@@ -28,6 +29,7 @@ class AuthorCreateDTO(BaseModel):
     author_id: str = Field(..., description="ID único del autor")
     name: str = Field(..., description="Nombre del autor")
     surname: str = Field(..., description="Apellido del autor")
+    dni: str = Field(..., description="Documento Nacional de Identidad")
     title: str = Field("", description="Título académico")
     birth_date: Optional[date] = Field(None, description="Fecha de nacimiento")
     gender: str = Field("M", description="Género del autor")
@@ -39,6 +41,7 @@ class AuthorUpdateDTO(BaseModel):
     """DTO para actualizar un autor."""
     name: Optional[str] = Field(None, description="Nombre del autor")
     surname: Optional[str] = Field(None, description="Apellido del autor")
+    dni: Optional[str] = Field(None, description="Documento Nacional de Identidad")
     title: Optional[str] = Field(None, description="Título académico")
     birth_date: Optional[date] = Field(None, description="Fecha de nacimiento")
     gender: Optional[str] = Field(None, description="Género del autor")

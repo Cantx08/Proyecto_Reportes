@@ -45,7 +45,7 @@ export function useNewDepartments(): UseNewDepartmentsState & UseNewDepartmentsA
       const departments = await newDepartmentsApi.getAll();
       setState(prev => ({
         ...prev,
-        departments,
+        departments: departments || [],
         loading: false,
       }));
     } catch (error) {
@@ -54,6 +54,7 @@ export function useNewDepartments(): UseNewDepartmentsState & UseNewDepartmentsA
         ...prev,
         loading: false,
         error: errorMessage,
+        departments: [], // Asegurar que departments sea un array vacío en caso de error
       }));
     }
   }, []);
@@ -86,7 +87,7 @@ export function useNewDepartments(): UseNewDepartmentsState & UseNewDepartmentsA
       const newDepartment = await newDepartmentsApi.create(departmentData);
       setState(prev => ({
         ...prev,
-        departments: [...prev.departments, newDepartment],
+        departments: [...(prev.departments || []), newDepartment],
         creating: false,
       }));
       return newDepartment;
@@ -107,7 +108,7 @@ export function useNewDepartments(): UseNewDepartmentsState & UseNewDepartmentsA
       const updatedDepartment = await newDepartmentsApi.update(depId, departmentData);
       setState(prev => ({
         ...prev,
-        departments: prev.departments.map(dept => 
+        departments: (prev.departments || []).map(dept => 
           dept.dep_id === depId ? updatedDepartment : dept
         ),
         updating: false,
@@ -130,7 +131,7 @@ export function useNewDepartments(): UseNewDepartmentsState & UseNewDepartmentsA
       await newDepartmentsApi.delete(depId);
       setState(prev => ({
         ...prev,
-        departments: prev.departments.filter(dept => dept.dep_id !== depId),
+        departments: (prev.departments || []).filter(dept => dept.dep_id !== depId),
         deleting: false,
       }));
       return true;

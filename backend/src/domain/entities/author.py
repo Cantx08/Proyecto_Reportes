@@ -12,6 +12,7 @@ class Author:
     author_id: str
     name: str
     surname: str
+    dni: str  # Documento Nacional de Identidad
     title: str  # Dr., PhD., Ing., etc.
     birth_date: Optional[date]
     gender: str  # M, F, u otro valor personalizado
@@ -26,8 +27,8 @@ class Author:
             self.publications_list = []
         
         # Validaciones de campos requeridos
-        if not self.author_id or not self.name or not self.surname:
-            raise ValueError("author_id, name y surname son requeridos")
+        if not self.author_id or not self.name or not self.surname or not self.dni:
+            raise ValueError("author_id, name, surname y dni son requeridos")
 
     def get_full_name(self) -> str:
         """Retorna el nombre completo del autor."""

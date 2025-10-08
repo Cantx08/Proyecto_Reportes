@@ -46,7 +46,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
       const response = await authorsApi.getAll();
       setState(prev => ({
         ...prev,
-        authors: response.authors,
+        authors: response?.authors || [],
         loading: false,
       }));
     } catch (error) {
@@ -55,6 +55,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
         ...prev,
         loading: false,
         error: errorMessage,
+        authors: [], // Asegurar que authors sea un array vacío en caso de error
       }));
     }
   }, []);
@@ -76,7 +77,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
       const newAuthor = await authorsApi.create(authorData);
       setState(prev => ({
         ...prev,
-        authors: [...prev.authors, newAuthor],
+        authors: [...(prev.authors || []), newAuthor],
         creating: false,
       }));
       return newAuthor;
@@ -97,7 +98,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
       const updatedAuthor = await authorsApi.update(authorId, authorData);
       setState(prev => ({
         ...prev,
-        authors: prev.authors.map(author => 
+        authors: (prev.authors || []).map(author => 
           author.author_id === authorId ? updatedAuthor : author
         ),
         updating: false,
@@ -120,7 +121,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
       await authorsApi.delete(authorId);
       setState(prev => ({
         ...prev,
-        authors: prev.authors.filter(author => author.author_id !== authorId),
+        authors: (prev.authors || []).filter(author => author.author_id !== authorId),
         deleting: false,
       }));
       return true;

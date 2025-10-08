@@ -19,11 +19,11 @@ const Breadcrumb: React.FC = () => {
     const breadcrumbs: BreadcrumbItem[] = [{ name: 'Home', href: '/', icon: Home }];
     
     const routeNames: { [key: string]: string } = {
-      'author_page': 'Autores',
-      'departments_page': 'Departamentos', 
-      'publications_page': 'Publicaciones',
+      'authors': 'Autores',
+      'departments': 'Departamentos',
+      'publications': 'Publicaciones',
       'borradores': 'Borradores',
-      'reports_page': 'Informes Finales'
+      'reports': 'Certificaciones'
     };
     
     let currentPath = '';
