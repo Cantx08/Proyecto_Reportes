@@ -5,7 +5,7 @@ from ....application.services.publication_service import PublicationService
 from ....application.services.subject_area_service import SubjectAreaService
 from ....application.services.report_service import ReportService
 from ....domain.entities.publication import Publication
-from ....application.dtos import ReportRequestDTO
+from ....application.dto import ReportRequestDTO
 
 
 class ReportsController:

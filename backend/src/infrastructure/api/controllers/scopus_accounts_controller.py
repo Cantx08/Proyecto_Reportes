@@ -2,7 +2,7 @@ from typing import List
 from fastapi import HTTPException
 from ....application.services.scopus_account_service import ScopusAccountService
 from ....domain.entities.scopus_account import ScopusAccount
-from ....application.dtos import (
+from ....application.dto import (
     ScopusAccountDTO, ScopusAccountCreateDTO, ScopusAccountUpdateDTO,
     ScopusAccountsResponseDTO, ScopusAccountResponseDTO, LinkAuthorScopusDTO
 )

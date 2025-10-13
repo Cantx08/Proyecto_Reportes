@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from typing import List
 from src.dependencies import container
-from src.application.dtos import (
+from src.application.dto import (
     ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO,
     DocumentsByYearResponseDTO,
     AuthorDTO, AuthorCreateDTO, AuthorUpdateDTO, AuthorsResponseDTO, AuthorResponseDTO,

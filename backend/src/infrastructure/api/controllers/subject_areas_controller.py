@@ -1,6 +1,6 @@
 from typing import List
 from ....application.services.subject_area_service import SubjectAreaService
-from ....application.dtos import SubjectAreaResponseDTO
+from ....application.dto import SubjectAreaResponseDTO
 
 
 class SubjectAreasController:

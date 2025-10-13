@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from ....application.dtos import (
+from ....application.dto import (
     AuthorDTO, AuthorCreateDTO, AuthorUpdateDTO,
     AuthorsResponseDTO, AuthorResponseDTO
 )

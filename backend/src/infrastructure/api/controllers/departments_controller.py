@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 
 from ....application.services.department_service import DepartmentService
 from ....domain.entities.department import Department
-from ....application.dtos.department_dto import (
+from ....application.dto.department_dto import (
     DepartmentCreateDTO,
     DepartmentUpdateDTO,
     DepartmentResponseDTO,

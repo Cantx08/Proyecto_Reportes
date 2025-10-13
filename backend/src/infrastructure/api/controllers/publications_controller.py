@@ -1,5 +1,5 @@
 from typing import List
-from ....application.dtos import AuthorDTO, DocumentsByYearResponseDTO, PublicationDTO, PublicationsResponseDTO
+from ....application.dto import AuthorDTO, DocumentsByYearResponseDTO, PublicationDTO, PublicationsResponseDTO
 from ....application.services.publication_service import PublicationService
 from ....domain.entities.author import Author
 
