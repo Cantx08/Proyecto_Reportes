@@ -33,7 +33,7 @@ class ReportModel(Base):
     signatory = Column(String(255))
     generated_by = Column(Integer, ForeignKey('authors.id'))
     file_path = Column(String(500))
-    metadata = Column(JSON)
+    report_metadata = Column(JSON)  # Renombrado de 'metadata' a 'report_metadata' (metadata es reservado)
     status = Column(SQLEnum(ReportStatusEnum), default=ReportStatusEnum.GENERATING)
     error_message = Column(Text)
     created_at = Column(DateTime, default=func.now())
@@ -41,5 +41,15 @@ class ReportModel(Base):
     generated_at = Column(DateTime)
     
     # Relaciones
-    author = relationship("AuthorModel", back_populates="reports")
+    # Especificamos foreign_keys para ambas relaciones ya que hay 2 FKs a authors
+    author = relationship(
+        "AuthorModel", 
+        foreign_keys=[author_id], 
+        back_populates="reports"
+    )
+    generator = relationship(
+        "AuthorModel",
+        foreign_keys=[generated_by],
+        back_populates="generated_reports"
+    )
     publications = relationship("PublicationModel", secondary=report_publications, back_populates="reports")

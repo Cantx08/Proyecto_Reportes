@@ -1,24 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthors } from '@/hooks/useAuthors';
 import { useNewDepartments } from '@/hooks/useNewDepartments';
 import { usePositions } from '@/hooks/useNewPositions';
-import { ArrowLeft, Save, Loader2, User } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import ScopusAccountsManager from '@/components/ScopusAccountsManager';
 
-export default function EditarAutorPage() {
+export default function NuevoAutorPage() {
   const router = useRouter();
-  const params = useParams();
-  const authorId = params?.id as string;
-
-  const { getAuthor, updateAuthor, updating, error } = useAuthors();
+  const { createAuthor, creating, error } = useAuthors();
   const { departments, loading: loadingDepartments } = useNewDepartments();
   const { positions, loading: loadingPositions } = usePositions();
 
-  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
@@ -42,38 +38,6 @@ export default function EditarAutorPage() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  // Cargar datos del autor
-  useEffect(() => {
-    const loadAuthor = async () => {
-      if (!authorId) {
-        router.push('/authors');
-        return;
-      }
-
-      setLoading(true);
-      const author = await getAuthor(authorId);
-      
-      if (author) {
-        setFormData({
-          name: author.name || '',
-          surname: author.surname || '',
-          dni: author.dni || '',
-          title: author.title || '',
-          birth_date: author.birth_date ? author.birth_date.split('T')[0] : '',
-          gender: author.gender || 'M',
-          position: author.position || '',
-          department: author.department || ''
-        });
-      } else {
-        setSubmitError('No se pudo cargar el autor');
-      }
-      
-      setLoading(false);
-    };
-
-    loadAuthor();
-  }, [authorId, getAuthor, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -127,24 +91,24 @@ export default function EditarAutorPage() {
       return;
     }
 
-    const updatedAuthor = await updateAuthor(authorId, formData);
+    const newAuthor = await createAuthor(formData);
 
-    if (updatedAuthor) {
+    if (newAuthor) {
       setSubmitSuccess(true);
       setTimeout(() => {
         router.push('/authors');
       }, 1500);
     } else {
-      setSubmitError(error || 'Error al actualizar el autor');
+      setSubmitError(error || 'Error al crear el autor');
     }
   };
 
-  if (loading || loadingDepartments || loadingPositions) {
+  if (loadingDepartments || loadingPositions) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" style={{ color: '#042a53' }} />
-          <p className="text-gray-600">Cargando datos del autor...</p>
+          <p className="text-gray-600">Cargando datos...</p>
         </div>
       </div>
     );
@@ -153,11 +117,11 @@ export default function EditarAutorPage() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8">        
         <div className="flex items-center">
-          <User className="h-8 w-8 mr-3" style={{ color: '#042a53' }} />
+          <UserPlus className="h-8 w-8 mr-3" style={{ color: '#042a53' }} />
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Editar Autor</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Agregar Autor</h1>
           </div>
         </div>
       </div>
@@ -190,7 +154,7 @@ export default function EditarAutorPage() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800">¡Éxito!</h3>
-              <p className="mt-2 text-sm text-green-700">El autor se actualizó correctamente. Redirigiendo...</p>
+              <p className="mt-2 text-sm text-green-700">El autor se creó correctamente. Redirigiendo...</p>
             </div>
           </div>
         </div>
@@ -370,7 +334,6 @@ export default function EditarAutorPage() {
             
             {/* Cuentas Scopus */}
             <ScopusAccountsManager
-              authorId={authorId ? parseInt(authorId) : undefined}
               initialAccounts={scopusAccounts}
               onChange={setScopusAccounts}
             />
@@ -388,19 +351,19 @@ export default function EditarAutorPage() {
             </Link>
             <button
               type="submit"
-              disabled={updating}
+              disabled={creating}
               className="px-6 py-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               style={{ backgroundColor: '#042a53' }}
             >
-              {updating ? (
+              {creating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Actualizando...
+                  Creando...
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  Actualizar Autor
+                  Crear Autor
                 </>
               )}
             </button>

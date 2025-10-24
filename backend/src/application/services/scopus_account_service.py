@@ -97,8 +97,8 @@ class ScopusAccountService:
                 
                 account = ScopusAccount(
                     scopus_id=scopus_id,
-                    scopus_user=f"user_{scopus_id}",
-                    author_id=author_id
+                    author_id=author_id,
+                    is_active=True
                 )
                 created_account = await self.create_account(account)
                 created_accounts.append(created_account)

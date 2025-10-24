@@ -136,7 +136,7 @@ export default function AuthorsManager() {
           </div>
           <button
             onClick={() => setShowCreateForm(true)}
-            className=\"bg-[#042a53] text-white px-4 py-2 rounded-lg hover:bg-[#063870] flex items-center\"
+            className=\"bg-[#1f2937] text-white px-4 py-2 rounded-lg hover:bg-[#063870] flex items-center\"
           >
             <Plus className=\"h-4 w-4 mr-2\" />
             Nuevo Autor

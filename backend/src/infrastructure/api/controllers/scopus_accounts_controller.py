@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import HTTPException
 from ....application.services.scopus_account_service import ScopusAccountService
 from ....domain.entities.scopus_account import ScopusAccount
@@ -27,8 +26,8 @@ class ScopusAccountsController:
             
             account_dto = ScopusAccountDTO(
                 scopus_id=account.scopus_id,
-                scopus_user=account.scopus_user,
-                author_id=account.author_id
+                author_id=account.author_id,
+                is_active=account.is_active
             )
             
             return ScopusAccountResponseDTO(
@@ -47,8 +46,8 @@ class ScopusAccountsController:
             accounts_dto = [
                 ScopusAccountDTO(
                     scopus_id=account.scopus_id,
-                    scopus_user=account.scopus_user,
-                    author_id=account.author_id
+                    author_id=account.author_id,
+                    is_active=account.is_active
                 )
                 for account in accounts
             ]
@@ -70,8 +69,8 @@ class ScopusAccountsController:
             accounts_dto = [
                 ScopusAccountDTO(
                     scopus_id=account.scopus_id,
-                    scopus_user=account.scopus_user,
-                    author_id=account.author_id
+                    author_id=account.author_id,
+                    is_active=account.is_active
                 )
                 for account in accounts
             ]
@@ -90,16 +89,16 @@ class ScopusAccountsController:
         try:
             account = ScopusAccount(
                 scopus_id=account_create.scopus_id,
-                scopus_user=account_create.scopus_user,
-                author_id=account_create.author_id
+                author_id=account_create.author_id,
+                is_active=account_create.is_active
             )
             
             created_account = await self.scopus_account_service.create_account(account)
             
             account_dto = ScopusAccountDTO(
                 scopus_id=created_account.scopus_id,
-                scopus_user=created_account.scopus_user,
-                author_id=created_account.author_id
+                author_id=created_account.author_id,
+                is_active=created_account.is_active
             )
             
             return ScopusAccountResponseDTO(
@@ -123,16 +122,16 @@ class ScopusAccountsController:
             # Actualizar solo los campos proporcionados
             updated_account = ScopusAccount(
                 scopus_id=existing_account.scopus_id,
-                scopus_user=account_update.scopus_user if account_update.scopus_user is not None else existing_account.scopus_user,
-                author_id=account_update.author_id if account_update.author_id is not None else existing_account.author_id
+                author_id=account_update.author_id if account_update.author_id is not None else existing_account.author_id,
+                is_active=account_update.is_active if account_update.is_active is not None else existing_account.is_active
             )
             
             result_account = await self.scopus_account_service.update_account(updated_account)
             
             account_dto = ScopusAccountDTO(
                 scopus_id=result_account.scopus_id,
-                scopus_user=result_account.scopus_user,
-                author_id=result_account.author_id
+                author_id=result_account.author_id,
+                is_active=result_account.is_active
             )
             
             return ScopusAccountResponseDTO(
@@ -176,8 +175,8 @@ class ScopusAccountsController:
             accounts_dto = [
                 ScopusAccountDTO(
                     scopus_id=account.scopus_id,
-                    scopus_user=account.scopus_user,
-                    author_id=account.author_id
+                    author_id=account.author_id,
+                    is_active=account.is_active
                 )
                 for account in all_accounts
             ]

@@ -26,7 +26,7 @@ const modules = [
     },
     {
         name: 'Departamentos',
-        description: 'Gestión de departamentos institucionales y cargos académicos.',
+        description: 'Gestión de departamentos y cargos de docentes.',
         href: '/departments',
         icon: Building2,
         color: 'text-white',
@@ -36,7 +36,7 @@ const modules = [
     },
     {
         name: 'Publicaciones',
-        description: 'Búsqueda y análisis de publicaciones indexadas en Scopus.',
+        description: 'Búsqueda de publicaciones indexadas en Scopus.',
         href: '/publications',
         icon: FileText,
         color: 'text-white',

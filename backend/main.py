@@ -130,6 +130,17 @@ async def delete_author(
 # ENDPOINTS - DEPARTAMENTOS
 # ===========================
 
+@app.get("/faculties", tags=["Departamentos"])
+async def get_faculties():
+    """Obtiene todas las facultades disponibles."""
+    from src.domain.value_objects.faculty import Faculty
+    return {
+        "success": True,
+        "data": [{"key": f.name, "value": f.value} for f in Faculty if f != Faculty.DESCONOCIDA],
+        "message": "Faculties retrieved successfully"
+    }
+
+
 @app.get("/departments", response_model=DepartmentsResponseDTO, tags=["Departamentos"])
 async def get_all_departments(
         controller: DepartmentsController = Depends(get_departments_controller)

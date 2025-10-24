@@ -11,7 +11,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .base import Base, GenderEnum
+from .base import Base, GenderEnum, FacultyEnum
 from .associations import publication_authors
 
 
@@ -24,8 +24,10 @@ class DepartmentModel(Base):
     __tablename__ = 'departments'
     
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
-    faculty = Column(String(255))
+    dep_id = Column(String(50), unique=True, nullable=False)  # ID del departamento
+    dep_code = Column(String(50), nullable=False)  # Código/sigla del departamento
+    dep_name = Column(String(255), nullable=False)  # Nombre del departamento
+    fac_name = Column(SQLEnum(FacultyEnum), nullable=False)  # Facultad como enum
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     
@@ -41,10 +43,9 @@ class AuthorModel(Base):
     dni = Column(String(20), unique=True)
     first_name = Column(String(255), nullable=False)
     last_name = Column(String(255), nullable=False)
-    full_name = Column(String(500), nullable=False)
-    email = Column(String(255))
     title = Column(String(255))  # Dr., PhD, etc.
-    position = Column(String(255))  # Cargo/puesto
+    birth_date = Column(DateTime)  # Fecha de nacimiento
+    position_id = Column(Integer, ForeignKey('positions.id'))  # Referencia a la tabla positions
     gender = Column(SQLEnum(GenderEnum))
     department_id = Column(Integer, ForeignKey('departments.id'))
     is_active = Column(Boolean, default=True)
@@ -53,9 +54,21 @@ class AuthorModel(Base):
     
     # Relaciones
     department = relationship("DepartmentModel", back_populates="authors")
+    position_rel = relationship("PositionModel", back_populates="authors")  # Relación con Position
     scopus_accounts = relationship("ScopusAccountModel", back_populates="author")
     publications = relationship("PublicationModel", secondary=publication_authors, back_populates="authors")
-    reports = relationship("ReportModel", back_populates="author")
+    
+    # Relaciones con reportes: un autor puede tener reportes propios y reportes generados
+    reports = relationship(
+        "ReportModel", 
+        foreign_keys="ReportModel.author_id",
+        back_populates="author"
+    )
+    generated_reports = relationship(
+        "ReportModel",
+        foreign_keys="ReportModel.generated_by",
+        back_populates="generator"
+    )
 
 
 class ScopusAccountModel(Base):
@@ -64,10 +77,8 @@ class ScopusAccountModel(Base):
     
     id = Column(Integer, primary_key=True)
     author_id = Column(Integer, ForeignKey('authors.id'), nullable=False)
-    scopus_id = Column(String(50), nullable=False)
-    is_primary = Column(Boolean, default=False)
+    scopus_id = Column(String(50), nullable=False, unique=True)
     is_active = Column(Boolean, default=True)
-    last_sync = Column(DateTime)
     created_at = Column(DateTime, default=func.now())
     
     # Relaciones

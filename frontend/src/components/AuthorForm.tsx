@@ -23,14 +23,14 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
   // Los datos se obtienen directamente de los componentes selectores
 
   const [formData, setFormData] = useState({
-    name: author?.name || '',
-    surname: author?.surname || '',
-    dni: author?.dni || '',
-    title: author?.title || '',
-    birth_date: author?.birth_date || '',
-    gender: author?.gender || 'M',
-    position: author?.position || '',
-    department: author?.department || ''
+    name: '',
+    surname: '',
+    dni: '',
+    title: '',
+    birth_date: '',
+    gender: 'M',
+    position: '',
+    department: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -85,25 +85,43 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
 
     if (!formData.name.trim()) {
       newErrors.name = 'El nombre es requerido';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'El nombre debe tener al menos 2 caracteres';
     }
 
     if (!formData.surname.trim()) {
       newErrors.surname = 'El apellido es requerido';
+    } else if (formData.surname.trim().length < 2) {
+      newErrors.surname = 'El apellido debe tener al menos 2 caracteres';
     }
 
     if (!formData.dni.trim()) {
       newErrors.dni = 'El DNI/Cédula es requerido';
+    } else if (formData.dni.trim().length < 5) {
+      newErrors.dni = 'El DNI/Cédula debe tener al menos 5 caracteres';
     }
 
     if (!formData.birth_date) {
       newErrors.birth_date = 'La fecha de nacimiento es requerida';
+    } else {
+      // Validar que la fecha no sea en el futuro
+      const birthDate = new Date(formData.birth_date);
+      const today = new Date();
+      if (birthDate > today) {
+        newErrors.birth_date = 'La fecha de nacimiento no puede ser en el futuro';
+      }
+      // Validar edad mínima (por ejemplo, 18 años)
+      const age = today.getFullYear() - birthDate.getFullYear();
+      if (age < 18 || age > 100) {
+        newErrors.birth_date = 'La edad debe estar entre 18 y 100 años';
+      }
     }
 
-    if (!formData.position) {
+    if (!formData.position.trim()) {
       newErrors.position = 'El cargo es requerido';
     }
 
-    if (!formData.department) {
+    if (!formData.department.trim()) {
       newErrors.department = 'El departamento es requerido';
     }
 

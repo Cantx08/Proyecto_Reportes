@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 class ScopusAccountDTO(BaseModel):
     """DTO para información de una cuenta Scopus."""
     scopus_id: str = Field(..., description="ID de Scopus")
-    scopus_user: str = Field(..., description="Usuario de Scopus")
     author_id: str = Field(..., description="ID del autor asociado")
+    is_active: bool = Field(True, description="Si la cuenta está activa")
 
     class Config:
         from_attributes = True
@@ -15,14 +15,14 @@ class ScopusAccountDTO(BaseModel):
 class ScopusAccountCreateDTO(BaseModel):
     """DTO para crear una nueva cuenta Scopus."""
     scopus_id: str = Field(..., description="ID de Scopus")
-    scopus_user: str = Field("", description="Usuario de Scopus")
     author_id: str = Field(..., description="ID del autor asociado")
+    is_active: bool = Field(True, description="Si la cuenta está activa")
 
 
 class ScopusAccountUpdateDTO(BaseModel):
     """DTO para actualizar una cuenta Scopus."""
-    scopus_user: Optional[str] = Field(None, description="Usuario de Scopus")
     author_id: Optional[str] = Field(None, description="ID del autor asociado")
+    is_active: Optional[bool] = Field(None, description="Si la cuenta está activa")
 
 
 class ScopusAccountsResponseDTO(BaseModel):

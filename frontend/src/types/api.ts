@@ -74,7 +74,7 @@ export interface Author {
 }
 
 export interface AuthorCreateRequest {
-  author_id: string;
+  author_id?: string;  // Opcional, la BD lo genera automáticamente
   name: string;
   surname: string;
   dni: string;
@@ -166,26 +166,28 @@ export interface PositionsResponse {
 
 // Cuenta Scopus
 export interface ScopusAccount {
+  id?: number;
   scopus_id: string;
-  scopus_user: string;
   author_id: string;
+  is_active?: boolean;
 }
 
 export interface ScopusAccountCreateRequest {
   scopus_id: string;
-  scopus_user: string;
   author_id: string;
+  is_active?: boolean;
 }
 
 export interface ScopusAccountUpdateRequest {
-  scopus_user?: string;
   author_id?: string;
+  is_active?: boolean;
 }
 
 export interface ScopusAccountResponse {
+  id?: number;
   scopus_id: string;
-  scopus_user: string;
   author_id: string;
+  is_active?: boolean;
 }
 
 export interface ScopusAccountsResponse {
@@ -198,7 +200,6 @@ export interface ScopusAccountsResponse {
 export interface LinkAuthorScopusRequest {
   author_id: string;
   scopus_id: string;
-  scopus_user?: string;
 }
 
 // Tipos para el estado del componente principal

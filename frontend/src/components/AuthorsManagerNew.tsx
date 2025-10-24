@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuthors } from '@/hooks/useAuthors';
 import { Author } from '@/types/api';
 import AuthorForm from './AuthorForm';
-import { Plus, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
 
 const AuthorsManagerNew: React.FC = () => {
   const { 
@@ -40,20 +40,19 @@ const AuthorsManagerNew: React.FC = () => {
 
   const handleSave = async (authorData: Omit<Author, 'author_id'> | Author) => {
     try {
-      if ('author_id' in authorData) {
+      if ('author_id' in authorData && authorData.author_id) {
+        // Modo edición
         await updateAuthor(authorData.author_id, authorData);
       } else {
-        // Generate a temporary ID for new authors
-        const createData = {
-          ...authorData,
-          author_id: `temp-${Date.now()}`
-        };
+        // Modo creación - NO enviar author_id, la BD lo generará automáticamente
+        const { author_id, ...createData } = authorData as any;
         await createAuthor(createData);
       }
       setShowForm(false);
       setEditingAuthor(null);
     } catch (error) {
       console.error('Error saving author:', error);
+      // El error ya se maneja en el hook, no necesitamos hacer nada más aquí
     }
   };
 
@@ -74,22 +73,27 @@ const AuthorsManagerNew: React.FC = () => {
     <div className="space-y-6">
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="flex">
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error</h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
+          <div className="flex justify-between items-start">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
               </div>
-              <div className="mt-4">
-                <button
-                  type="button"
-                  className="bg-red-50 text-red-800 rounded-md p-2 inline-flex items-center text-sm font-medium hover:bg-red-100"
-                  onClick={clearError}
-                >
-                  Cerrar
-                </button>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
               </div>
             </div>
+            <button
+              type="button"
+              className="ml-auto text-red-400 hover:text-red-600"
+              onClick={clearError}
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
       )}
@@ -101,13 +105,6 @@ const AuthorsManagerNew: React.FC = () => {
             Autores ({authors.length})
           </h2>
         </div>
-        <button
-          onClick={handleCreate}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center space-x-2"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Nuevo Autor</span>
-        </button>
       </div>
 
       {showForm && (
@@ -149,12 +146,13 @@ const AuthorsManagerNew: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <div className="mt-2 text-sm text-gray-600">
+                  <div className="mt-2 text-sm text-gray-600 space-y-1">
+                    <p><strong>DNI:</strong> {author.dni}</p>
                     <p><strong>Género:</strong> {author.gender === 'M' ? 'Masculino' : 'Femenino'}</p>
                     <p><strong>Cargo:</strong> {author.position}</p>
                     <p><strong>Departamento:</strong> {author.department}</p>
                     {author.birth_date && (
-                      <p><strong>Fecha de nacimiento:</strong> {author.birth_date}</p>
+                      <p><strong>Fecha de nacimiento:</strong> {new Date(author.birth_date).toLocaleDateString('es-ES')}</p>
                     )}
                   </div>
                 </div>
@@ -167,13 +165,10 @@ const AuthorsManagerNew: React.FC = () => {
           <div className="text-center py-12">
             <Users className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No hay autores</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Comienza creando un nuevo autor.
-            </p>
             <div className="mt-6">
               <button
                 onClick={handleCreate}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#1f2937] hover:bg-[#1f2937]/80"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Autor

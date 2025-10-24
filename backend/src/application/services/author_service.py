@@ -21,13 +21,12 @@ class AuthorService:
 
     async def create_author(self, author: Author) -> Author:
         """Crea un nuevo autor."""
-        if not author.author_id:
-            raise ValueError("Author ID is required")
-
-        # Verificar que no exista ya
-        existing_author = await self._author_repository.get_by_id(author.author_id)
-        if existing_author:
-            raise ValueError(f"Author with ID {author.author_id} already exists")
+        # El author_id es opcional en la creación, la BD lo generará automáticamente si no se proporciona
+        # Solo verificar si se proporciona un ID y si ya existe
+        if author.author_id and author.author_id.strip():
+            existing_author = await self._author_repository.get_by_id(author.author_id)
+            if existing_author:
+                raise ValueError(f"Author with ID {author.author_id} already exists")
 
         return await self._author_repository.create(author)
 

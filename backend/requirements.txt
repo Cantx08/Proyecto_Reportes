@@ -4,6 +4,7 @@ python-dotenv
 pandas
 pydantic
 pypdf
+psycopg2
 requests
 reportlab
 matplotlib

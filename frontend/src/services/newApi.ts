@@ -40,45 +40,62 @@ const api = axios.create({
 // SERVICIOS PARA AUTORES
 // ===============================
 
+// Tipo de respuesta del backend para autores
+interface BackendAuthorResponse {
+  success: boolean;
+  data: AuthorResponse;
+  message: string;
+}
+
+interface BackendAuthorsResponse {
+  success: boolean;
+  data: AuthorResponse[];
+  message: string;
+  total: number;
+}
+
 export const authorsApi = {
   /**
    * Obtener todos los autores
    */
   async getAll(): Promise<AuthorsResponse> {
-    const response = await api.get<AuthorsResponse>('/authors');
-    return response.data;
+    const response = await api.get<BackendAuthorsResponse>('/authors');
+    // Transformar la respuesta del backend al formato esperado por el frontend
+    return {
+      authors: response.data.data || []
+    };
   },
 
   /**
    * Obtener un autor por ID
    */
   async getById(authorId: string): Promise<AuthorResponse> {
-    const response = await api.get<AuthorResponse>(`/authors/${authorId}`);
-    return response.data;
+    const response = await api.get<BackendAuthorResponse>(`/authors/${authorId}`);
+    return response.data.data;
   },
 
   /**
    * Crear un nuevo autor
    */
   async create(authorData: AuthorCreateRequest): Promise<AuthorResponse> {
-    const response = await api.post<AuthorResponse>('/authors', authorData);
-    return response.data;
+    const response = await api.post<BackendAuthorResponse>('/authors', authorData);
+    return response.data.data;
   },
 
   /**
    * Actualizar un autor existente
    */
   async update(authorId: string, authorData: AuthorUpdateRequest): Promise<AuthorResponse> {
-    const response = await api.put<AuthorResponse>(`/authors/${authorId}`, authorData);
-    return response.data;
+    const response = await api.put<BackendAuthorResponse>(`/authors/${authorId}`, authorData);
+    return response.data.data;
   },
 
   /**
    * Eliminar un autor
    */
   async delete(authorId: string): Promise<{ message: string }> {
-    const response = await api.delete(`/authors/${authorId}`);
-    return response.data;
+    const response = await api.delete<BackendAuthorResponse>(`/authors/${authorId}`);
+    return { message: response.data.message };
   },
 };
 
@@ -86,53 +103,68 @@ export const authorsApi = {
 // SERVICIOS PARA DEPARTAMENTOS NUEVOS
 // ===============================
 
+// Tipo de respuesta del backend para departamentos
+interface BackendDepartmentResponse {
+  success: boolean;
+  data: DepartmentResponse;
+  message: string;
+}
+
+interface BackendDepartmentsResponse {
+  success: boolean;
+  data: DepartmentResponse[];
+  message: string;
+  total: number;
+}
+
 export const newDepartmentsApi = {
   /**
    * Obtener todos los departamentos
    */
   async getAll(): Promise<DepartmentResponse[]> {
-    const response = await api.get<DepartmentResponse[]>('/new-departments');
-    return response.data;
+    const response = await api.get<BackendDepartmentsResponse>('/departments');
+    return response.data.data || [];
   },
 
   /**
    * Obtener un departamento por ID
    */
   async getById(depId: string): Promise<DepartmentResponse> {
-    const response = await api.get<DepartmentResponse>(`/new-departments/${depId}`);
-    return response.data;
+    const response = await api.get<BackendDepartmentResponse>(`/departments/${depId}`);
+    return response.data.data;
   },
 
   /**
    * Obtener departamentos por facultad
    */
   async getByFaculty(facName: string): Promise<DepartmentResponse[]> {
-    const response = await api.get<DepartmentResponse[]>(`/new-departments/faculty/${facName}`);
-    return response.data;
+    const response = await api.get<DepartmentResponse[]>(`/departments/faculty/${facName}`);
+    // Este endpoint puede devolver directamente el array o estructura anidada
+    return Array.isArray(response.data) ? response.data : [];
   },
 
   /**
    * Crear un nuevo departamento
    */
   async create(departmentData: DepartmentCreateRequest): Promise<DepartmentResponse> {
-    const response = await api.post<DepartmentResponse>('/new-departments', departmentData);
-    return response.data;
+    const response = await api.post<BackendDepartmentResponse>('/departments', departmentData);
+    return response.data.data;
   },
 
   /**
    * Actualizar un departamento existente
    */
   async update(depId: string, departmentData: DepartmentUpdateRequest): Promise<DepartmentResponse> {
-    const response = await api.put<DepartmentResponse>(`/new-departments/${depId}`, departmentData);
-    return response.data;
+    const response = await api.put<BackendDepartmentResponse>(`/departments/${depId}`, departmentData);
+    return response.data.data;
   },
 
   /**
    * Eliminar un departamento
    */
   async delete(depId: string): Promise<{ message: string }> {
-    const response = await api.delete(`/new-departments/${depId}`);
-    return response.data;
+    const response = await api.delete<BackendDepartmentResponse>(`/departments/${depId}`);
+    return { message: response.data.message };
   },
 };
 
@@ -140,45 +172,61 @@ export const newDepartmentsApi = {
 // SERVICIOS PARA POSICIONES
 // ===============================
 
+// Tipo de respuesta del backend para posiciones
+interface BackendPositionResponse {
+  success: boolean;
+  data: PositionResponse;
+  message: string;
+}
+
+interface BackendPositionsResponse {
+  success: boolean;
+  data: PositionResponse[];
+  message: string;
+  total: number;
+}
+
 export const positionsApi = {
   /**
    * Obtener todas las posiciones
    */
   async getAll(): Promise<PositionsResponse> {
-    const response = await api.get<PositionsResponse>('/positions');
-    return response.data;
+    const response = await api.get<BackendPositionsResponse>('/positions');
+    return {
+      positions: response.data.data || []
+    };
   },
 
   /**
    * Obtener una posición por ID
    */
   async getById(posId: string): Promise<PositionResponse> {
-    const response = await api.get<PositionResponse>(`/positions/${posId}`);
-    return response.data;
+    const response = await api.get<BackendPositionResponse>(`/positions/${posId}`);
+    return response.data.data;
   },
 
   /**
    * Crear una nueva posición
    */
   async create(positionData: PositionCreateRequest): Promise<PositionResponse> {
-    const response = await api.post<PositionResponse>('/positions', positionData);
-    return response.data;
+    const response = await api.post<BackendPositionResponse>('/positions', positionData);
+    return response.data.data;
   },
 
   /**
    * Actualizar una posición existente
    */
   async update(posId: string, positionData: PositionUpdateRequest): Promise<PositionResponse> {
-    const response = await api.put<PositionResponse>(`/positions/${posId}`, positionData);
-    return response.data;
+    const response = await api.put<BackendPositionResponse>(`/positions/${posId}`, positionData);
+    return response.data.data;
   },
 
   /**
    * Eliminar una posición
    */
   async delete(posId: string): Promise<{ message: string }> {
-    const response = await api.delete(`/positions/${posId}`);
-    return response.data;
+    const response = await api.delete<BackendPositionResponse>(`/positions/${posId}`);
+    return { message: response.data.message };
   },
 };
 

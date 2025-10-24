@@ -20,6 +20,7 @@ Estructura modular:
 from .base import (
     Base,
     GenderEnum,
+    FacultyEnum,
     DocumentTypeEnum,
     SourceTypeEnum,
     ReportTypeEnum,
@@ -46,6 +47,10 @@ from .author import (
     ScopusAccountModel,
     SubjectAreaModel,
     SubjectCategoryModel
+)
+
+from .position import (
+    PositionModel
 )
 
 # ============================================================================
@@ -83,6 +88,7 @@ __all__ = [
     # Base y enums
     "Base",
     "GenderEnum",
+    "FacultyEnum",
     "DocumentTypeEnum",
     "SourceTypeEnum",
     "ReportTypeEnum",
@@ -99,6 +105,7 @@ __all__ = [
     "ScopusAccountModel",
     "SubjectAreaModel",
     "SubjectCategoryModel",
+    "PositionModel",
     
     # Modelos de journals y SJR
     "JournalModel",

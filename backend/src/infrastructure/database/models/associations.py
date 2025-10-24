@@ -34,7 +34,7 @@ publication_subject_areas = Table(
     Column('id', Integer, primary_key=True),
     Column('publication_id', Integer, ForeignKey('publications.id')),
     Column('subject_area_id', Integer, ForeignKey('subject_areas.id')),
-    Column('subject_category_id', Integer, ForeignKey('subject_categories.id')),
+    Column('subject_category_id', Integer, ForeignKey('subject_category.id')),
     Column('created_at', DateTime, default=func.now())
 )
 

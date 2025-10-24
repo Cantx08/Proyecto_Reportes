@@ -9,15 +9,15 @@ if TYPE_CHECKING:
 @dataclass
 class Author:
     """Entidad que representa un autor académico."""
-    author_id: str
     name: str
     surname: str
     dni: str  # Documento Nacional de Identidad
     title: str  # Dr., PhD., Ing., etc.
-    birth_date: Optional[date]
     gender: str  # M, F, u otro valor personalizado
     position: str  # Nombre del cargo que ocupa
     department: str  # Nombre del departamento al que pertenece
+    author_id: Optional[str] = None  # Opcional en creación, generado automáticamente por la BD
+    birth_date: Optional[date] = None
     publications_list: Optional[List["Publication"]] = None
     error: Optional[str] = None
 
@@ -26,9 +26,9 @@ class Author:
         if self.publications_list is None:
             self.publications_list = []
         
-        # Validaciones de campos requeridos
-        if not self.author_id or not self.name or not self.surname or not self.dni:
-            raise ValueError("author_id, name, surname y dni son requeridos")
+        # Validaciones de campos requeridos (author_id es opcional en creación)
+        if not self.name or not self.surname or not self.dni:
+            raise ValueError("name, surname y dni son requeridos")
 
     def get_full_name(self) -> str:
         """Retorna el nombre completo del autor."""

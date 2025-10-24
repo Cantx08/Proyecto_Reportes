@@ -2,43 +2,44 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePositions } from '@/hooks/useNewPositions';
-import { PositionResponse } from '@/types/api';
+import { useNewDepartments } from '@/hooks/useNewDepartments';
+import { DepartmentResponse } from '@/types/api';
 import { ErrorNotification } from '@/components/ErrorNotification';
-import { Plus, Edit, Trash2, Search, Briefcase, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building, Loader2 } from 'lucide-react';
 
-const PositionsManagementPage: React.FC = () => {
+const DepartmentsManagementPage: React.FC = () => {
   const { 
-    positions, 
+    departments, 
     loading, 
     error, 
-    deletePosition, 
-    fetchPositions 
-  } = usePositions();
+    deleteDepartment, 
+    fetchDepartments 
+  } = useNewDepartments();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const filteredPositions = positions.filter((position: PositionResponse) => 
-    position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (position.pos_id && position.pos_id.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredDepartments = departments.filter((department: DepartmentResponse) => 
+    department.dep_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    department.fac_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (department.dep_code && department.dep_code.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleDelete = async (positionId: string) => {
+  const handleDelete = async (departmentId: string) => {
     try {
-      await deletePosition(positionId);
+      await deleteDepartment(departmentId);
       setDeleteConfirm(null);
     } catch (error) {
-      console.error('Error deleting position:', error);
+      console.error('Error deleting department:', error);
     }
   };
 
-  if (loading && positions.length === 0) {
+  if (loading && departments.length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Cargando cargos...</p>
+          <p className="text-gray-600">Cargando departamentos...</p>
         </div>
       </div>
     );
@@ -51,17 +52,17 @@ const PositionsManagementPage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <Briefcase className="h-6 w-6 mr-3 text-blue-600" />
-              Gestión de Cargos
+              <Building className="h-6 w-6 mr-3 text-blue-600" />
+              Gestión de Departamentos
             </h1>
             <p className="text-gray-600 mt-1">
-              Administra los cargos y posiciones de la institución.
+              Administra los departamentos y facultades de la institución.
             </p>
           </div>
           <div className="flex space-x-3">
-            <Link href="/positions/positions-new" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center">
+            <Link href="/departments/departments-new" className="px-4 py-2 bg-[#1f2937] text-white rounded-lg text-sm font-medium hover:bg-[#1f2937]/80 flex items-center">
               <Plus className="h-4 w-4 mr-2" />
-              Nuevo Cargo
+              Nuevo Departamento
             </Link>
           </div>
         </div>
@@ -70,14 +71,14 @@ const PositionsManagementPage: React.FC = () => {
         {error && (
           <ErrorNotification
             error={error}
-            onDismiss={() => fetchPositions()}
+            onDismiss={() => fetchDepartments()}
           />
         )}
 
         {/* Stats Card */}
         <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
-          <div className="text-2xl font-bold text-gray-900">{positions.length}</div>
-          <div className="text-sm text-gray-600">Total Cargos</div>
+          <div className="text-2xl font-bold text-gray-900">{departments.length}</div>
+          <div className="text-sm text-gray-600">Total Departamentos</div>
         </div>
 
         {/* Search Bar */}
@@ -86,7 +87,7 @@ const PositionsManagementPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar por código o nombre de cargo..."
+              placeholder="Buscar por código, departamento o facultad..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -95,16 +96,16 @@ const PositionsManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Positions Table */}
+      {/* Departments Table */}
       <div className="bg-white rounded-lg border border-gray-200">
-        {filteredPositions.length === 0 ? (
+        {filteredDepartments.length === 0 ? (
           <div className="text-center py-12">
-            <Briefcase className="mx-auto h-12 w-12 text-gray-400" />
+            <Building className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No se encontraron cargos
+              No se encontraron departamentos
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza creando un nuevo cargo'}
+              {searchTerm ? 'Intenta con otros términos de búsqueda' : 'Comienza creando un nuevo departamento'}
             </p>
           </div>
         ) : (
@@ -116,7 +117,10 @@ const PositionsManagementPage: React.FC = () => {
                     Código
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nombre del Cargo
+                    Departamento
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Facultad
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
@@ -124,25 +128,30 @@ const PositionsManagementPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPositions.map((position: PositionResponse) => (
-                  <tr key={position.pos_id} className="hover:bg-gray-50">
+                {filteredDepartments.map((department: DepartmentResponse) => (
+                  <tr key={department.dep_id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {position.pos_id}
+                        {department.dep_code || department.dep_id}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {position.pos_name}
+                        {department.dep_name}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {department.fac_name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <Link href={`/positions/${position.pos_id}`} className="text-blue-600 hover:text-blue-900 p-1" title="Editar">
+                        <Link href={`/departments/${department.dep_id}`} className="text-blue-600 hover:text-blue-900 p-1" title="Editar">
                           <Edit className="h-4 w-4" />
                         </Link>
                         <button
-                          onClick={() => setDeleteConfirm(position.pos_id)}
+                          onClick={() => setDeleteConfirm(department.dep_id)}
                           className="text-red-600 hover:text-red-900 p-1"
                           title="Eliminar"
                         >
@@ -166,7 +175,7 @@ const PositionsManagementPage: React.FC = () => {
               Confirmar eliminación
             </h3>
             <p className="text-sm text-gray-500 mb-6">
-              ¿Estás seguro de que deseas eliminar este cargo? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas eliminar este departamento? Esta acción no se puede deshacer.
             </p>
             <div className="flex justify-end space-x-3">
               <button
@@ -189,4 +198,4 @@ const PositionsManagementPage: React.FC = () => {
   );
 };
 
-export default PositionsManagementPage;
+export default DepartmentsManagementPage;

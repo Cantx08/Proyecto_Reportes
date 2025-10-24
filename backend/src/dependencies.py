@@ -23,16 +23,22 @@ from .infrastructure.api.controllers.positions_controller import PositionsContro
 from .infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
 from .infrastructure.api.controllers.departments_controller import DepartmentsController
 
-# Repositorios CSV
+# Repositorios de base de datos
+from .infrastructure.repositories.author_db_repository import AuthorDatabaseRepository
+from .infrastructure.repositories.department_db_repository import DepartmentDatabaseRepository
+from .infrastructure.repositories.position_db_repository import PositionDatabaseRepository
+from .infrastructure.repositories.scopus_account_db_repository import ScopusAccountDBRepository
+
+# Repositorios CSV (para datos que aún no están en BD)
 from .infrastructure.repositories.sjr_file_repository import SJRFileRepository
 from .infrastructure.repositories.subject_areas_file_repository import SubjectAreasFileRepository
-from .infrastructure.repositories.author_file_repository import AuthorFileRepository
-from .infrastructure.repositories.department_file_repository import DepartmentFileRepository
-from .infrastructure.repositories.position_file_repository import PositionFileRepository
 from .infrastructure.repositories.scopus_account_file_repository import ScopusAccountFileRepository
+
+# Clientes y conexiones
 from .infrastructure.external.scopus_api_client import ScopusApiClient
 from .infrastructure.repositories.scopus_publication_repository import ScopusPublicationsRepository
 from .infrastructure.repositories.scopus_subject_areas_repository import ScopusSubjectAreasRepository
+from .infrastructure.database.connection import DatabaseConfig
 
 load_dotenv()
 
@@ -45,9 +51,6 @@ class Settings:
     scopus_api_key: str = os.getenv("SCOPUS_API_KEY", "")
     sjr_csv_path: str = os.getenv("SJR_CSV_PATH", str(BASE_DIR / "data" / "df_sjr_24_04_2025.csv"))
     areas_csv_path: str = os.getenv("AREAS_CSV_PATH", str(BASE_DIR / "data" / "areas_categories.csv"))
-    departments_csv_path: str = os.getenv("DEPARTMENTS_CSV_PATH", str(BASE_DIR / "data" / "deps.csv"))
-    authors_csv_path: str = os.getenv("AUTHORS_CSV_PATH", str(BASE_DIR / "data" / "docentes.csv"))
-    positions_csv_path: str = os.getenv("POSITIONS_CSV_PATH", str(BASE_DIR / "data" / "cargos.csv"))
     scopus_accounts_csv_path: str = os.getenv("SCOPUS_ACCOUNTS_CSV_PATH",
                                               str(BASE_DIR / "data" / "scopus_accounts.csv"))
 
@@ -67,6 +70,13 @@ class DependencyContainer:
 
     def _setup_dependencies(self):
         """Configura todas las dependencias."""
+        # Configuración de base de datos (usa variables de entorno del .env)
+        self._db_config = DatabaseConfig()
+        
+        # No crear tablas aquí para evitar problemas de orden
+        # Las tablas se crearán con un script separado o manualmente
+        # self._db_config.create_tables()
+        
         # Clientes externos
         self._scopus_client = ScopusApiClient(self._settings.scopus_api_key)
 
@@ -76,11 +86,11 @@ class DependencyContainer:
         self._sjr_file_repository = SJRFileRepository(self._settings.sjr_csv_path)
         self._subject_areas_repo = SubjectAreasFileRepository(self._settings.areas_csv_path)
 
-        # Repositorios CSV
-        self._author_repo = AuthorFileRepository(self._settings.authors_csv_path)
-        self._department_repo = DepartmentFileRepository(self._settings.departments_csv_path)
-        self._position_repo = PositionFileRepository(self._settings.positions_csv_path)
-        self._scopus_account_repo = ScopusAccountFileRepository(self._settings.scopus_accounts_csv_path)
+        # Repositorios de base de datos (reemplazan CSV para autores, departamentos y cargos)
+        self._author_repo = AuthorDatabaseRepository(self._db_config)
+        self._department_repo = DepartmentDatabaseRepository(self._db_config)
+        self._position_repo = PositionDatabaseRepository(self._db_config)
+        self._scopus_account_repo = ScopusAccountDBRepository(self._db_config)
 
         # Servicios de aplicación
         self._publication_service = PublicationService(

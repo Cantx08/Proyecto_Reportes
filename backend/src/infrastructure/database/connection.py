@@ -1,6 +1,7 @@
 import os
 from contextlib import contextmanager
 from typing import Generator
+from urllib.parse import quote_plus
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
@@ -33,9 +34,16 @@ class DatabaseConfig:
         db_password = os.getenv("DB_PASSWORD", "P@ssw0rd")
         db_host = os.getenv("DB_HOST", "localhost")
         db_port = os.getenv("DB_PORT", "5432")
-        db_name = os.getenv("DB_NAME", "scopus_author")
+        db_name = os.getenv("DB_NAME", "reportes_publicaciones_epn")
 
-        return f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+        # Si la contraseña ya está escapada (contiene %), no escapar
+        # Si contiene caracteres especiales sin escapar, escapar
+        if '%' in db_password:
+            db_password_escaped = db_password
+        else:
+            db_password_escaped = quote_plus(db_password)
+        
+        return f'postgresql://{db_user}:{db_password_escaped}@{db_host}:{db_port}/{db_name}'
 
     def create_tables(self):
         """Crea todas las tablas en la base de datos."""

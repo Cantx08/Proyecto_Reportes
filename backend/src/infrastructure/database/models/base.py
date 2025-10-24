@@ -18,8 +18,25 @@ Base = declarative_base()
 
 class GenderEnum(enum.Enum):
     """Enumeración para géneros."""
-    MALE = "M"
-    FEMALE = "F"
+    M = "Masculino"
+    F = "Femenino"
+
+
+class FacultyEnum(enum.Enum):
+    """Enumeración para facultades de la EPN."""
+    FIEE = "Facultad de Ingeniería Eléctrica y Electrónica"
+    FC = "Facultad de Ciencias"
+    FCA = "Facultad de Ciencias Administrativas"
+    FIQA = "Facultad de Ingeniería Química y Agroindustria"
+    CS = "Ciencias Sociales"
+    DFB = "Formación Básica"
+    FIGP = "Facultad de Geología y Petróleos"
+    FIS = "Facultad de Ingeniería de Sistemas"
+    FICA = "Facultad de Ingeniería Civil y Ambiental"
+    FIM = "Facultad de Ingeniería Mecánica"
+    ESFOT = "Escuela de Formación de Tecnólogos"
+    IG = "Instituto Geofísico"
+    DESCONOCIDA = "No encontrada"
 
 
 class DocumentTypeEnum(enum.Enum):
