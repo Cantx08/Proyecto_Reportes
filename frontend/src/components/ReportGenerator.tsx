@@ -1,19 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
 import DepartmentSelect from './DepartmentSelectNew';
 import PositionSelect from './PositionSelectNew';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
+import type { AuthorResponse } from '@/types/api';
 
 interface GeneradorReporteProps {
   authorIds: string[];
+  selectedAuthor?: AuthorResponse;
   onError: (error: string) => void;
 }
 
-const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError }) => {
+const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selectedAuthor, onError }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState<Partial<ReportRequest>>({
     docente_nombre: '',
@@ -26,6 +28,20 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
     fecha: '',
     es_borrador: true,
   });
+
+  // Pre-llenar los campos cuando hay un autor seleccionado
+  useEffect(() => {
+    if (selectedAuthor) {
+      const fullName = `${selectedAuthor.title} ${selectedAuthor.name} ${selectedAuthor.surname}`.trim();
+      setFormData(prev => ({
+        ...prev,
+        docente_nombre: fullName,
+        docente_genero: selectedAuthor.gender || 'M',
+        departamento: selectedAuthor.department || '',
+        cargo: selectedAuthor.position || '',
+      }));
+    }
+  }, [selectedAuthor]);
 
   const handleInputChange = (field: keyof ReportRequest, value: string | number | boolean) => {
     setFormData(prev => ({
@@ -84,10 +100,28 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, onError 
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">
-        Generar Reporte de Certificación
-      </h3>
-      
+      {/* Mensaje informativo si los datos fueron pre-llenados */}
+      {selectedAuthor && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                Datos pre-llenados automáticamente
+              </h3>
+              <p className="mt-1 text-sm text-blue-700">
+                Los campos se han completado con la información del autor seleccionado: <strong>{selectedAuthor.title} {selectedAuthor.name} {selectedAuthor.surname}</strong>. 
+                Puedes modificarlos según sea necesario.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -9,7 +9,6 @@ import {
     Users,
     Building2,
     BookOpen,
-    FileEdit,
     ClipboardCheck,
     ChevronsLeft,
     ChevronsRight
@@ -20,7 +19,6 @@ const navigation = [
     {name: 'Autores', href: '/authors', icon: Users},
     {name: 'Departamentos y Cargos', href: '/departments-and-positions', icon: Building2},
     {name: 'Publicaciones', href: '/publications', icon: BookOpen},
-    {name: 'Borradores', href: '/borradores', icon: FileEdit},
     {name: 'Certificados', href: '/reports', icon: ClipboardCheck},
 ];
 

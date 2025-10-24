@@ -24,6 +24,8 @@ import { DocumentosPorAnio } from '@/components/DocumentsByYearChart';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import GeneradorReporte from '@/components/ReportGenerator';
 import { useScopusData } from '@/hooks/useScopusData';
+import { useAuthors } from '@/hooks/useAuthors';
+import type { AuthorResponse } from '@/types/api';
 
 export default function PublicacionesPage() {
   const {
@@ -41,6 +43,8 @@ export default function PublicacionesPage() {
     searchScopusData,
     clearResults,
   } = useScopusData();
+
+  const { authors } = useAuthors();
 
   const [viewMode, setViewMode] = useState<'search' | 'results'>('search');
   const [searchMode, setSearchMode] = useState<'scopus' | 'database'>('scopus');
@@ -85,6 +89,15 @@ export default function PublicacionesPage() {
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('scopus-error', { detail: error }));
     }, 100);
+  };
+
+  // Obtener el primer autor seleccionado de la base de datos para prellenar el formulario
+  const getSelectedAuthor = (): AuthorResponse | undefined => {
+    if (searchMode === 'database' && selectedAuthorIds.length > 0) {
+      const firstSelectedId = selectedAuthorIds[0];
+      return authors.find(author => author.author_id === firstSelectedId);
+    }
+    return undefined;
   };
 
   const stats = {
@@ -400,7 +413,7 @@ export default function PublicacionesPage() {
                   <FileEdit className="h-6 w-6 text-orange-600 mr-3" />
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      Generar Borrador de Reporte
+                      Generar Certificación
                     </h3>
                     <p className="text-sm text-gray-600">
                       Crea un borrador del reporte basado en las publicaciones encontradas
@@ -409,6 +422,7 @@ export default function PublicacionesPage() {
                 </div>
                 <GeneradorReporte 
                   authorIds={[...scopusIds.filter(id => id.trim() !== ''), ...selectedAuthorIds]}
+                  selectedAuthor={getSelectedAuthor()}
                   onError={handleReportError}
                 />
               </div>

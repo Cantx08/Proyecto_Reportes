@@ -12,7 +12,6 @@ const Header: React.FC = () => {
             '/authors': 'Autores',
             '/departments': 'Departamentos y Cargos',
             '/publications': 'Publicaciones',
-            '/borradores': 'Borradores',
             '/reports': 'Certificaciones'
         };
         return routes[pathname] || 'Sistema de Reportes';

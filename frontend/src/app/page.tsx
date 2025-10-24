@@ -6,7 +6,6 @@ import {
     Users,
     Building2,
     FileText,
-    FileEdit,
     ClipboardCheck,
     TrendingUp,
     Calendar,
@@ -28,11 +27,6 @@ const modules = [
         name: 'Publicaciones',
         href: '/publications',
         icon: FileText
-    },
-    {
-        name: 'Borradores',
-        href: '/borradores',
-        icon: FileEdit
     },
     {
         name: 'Certificaciones',
@@ -67,7 +61,7 @@ export default function HomePage() {
             </div>
 
             {/* Main Modules */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {modules.map((module) => (
                     <Link key={module.name} href={module.href}>
                         <div 

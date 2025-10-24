@@ -29,7 +29,7 @@ const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
 
   const firmanteOptions = [
     { value: 1, label: 'Directora de Investigación' },
-    { value: 2, label: 'Vicerrector de Investigación' }
+    { value: 2, label: 'Vicerrectora de Investigación' }
   ];
 
   // Sincronizar el valor del input con el prop cargoValue

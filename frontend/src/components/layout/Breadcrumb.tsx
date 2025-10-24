@@ -24,7 +24,6 @@ const Breadcrumb: React.FC = () => {
       'departments-and-positions': 'Departamentos y Cargos',
       'positions': 'Cargos',
       'publications': 'Publicaciones',
-      'borradores': 'Borradores',
       'reports': 'Certificaciones'
     };
     
