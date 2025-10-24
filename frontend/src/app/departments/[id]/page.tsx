@@ -50,6 +50,10 @@ export default function EditDepartmentPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    if (!formData.dep_code.trim()) {
+      newErrors.dep_code = 'El código del departamento es requerido';
+    }
+
     if (!formData.dep_name.trim()) {
       newErrors.dep_name = 'El nombre del departamento es requerido';
     }
@@ -117,8 +121,8 @@ export default function EditDepartmentPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Cargando departamento...</p>
+          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary-600" />
+          <p className="text-neutral-600">Cargando departamento...</p>
         </div>
       </div>
     );
@@ -126,48 +130,55 @@ export default function EditDepartmentPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
+
+      <div className="mb-6 mt-6">
         <Link 
           href="/departments-and-positions"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center text-sm text-neutral-600 hover:text-primary-600 transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver a Departamentos
+          Volver a Departamentos y Cargos
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-            <Building className="h-6 w-6 mr-3 text-blue-600" />
+      <div className="bg-white rounded-lg border border-neutral-200 shadow-sm">
+        <div className="p-6 border-b border-neutral-200">
+          <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
+            <Building className="h-6 w-6 mr-3 text-primary-600" />
             Editar Departamento
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-neutral-600 mt-1">
             Modifica la información del departamento
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label htmlFor="dep_code" className="block text-sm font-medium text-gray-700 mb-1">
-              Código del Departamento
+            <label htmlFor="dep_code" className="block text-sm font-medium text-neutral-700 mb-1">
+              Código del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
               id="dep_code"
               name="dep_code"
               value={formData.dep_code}
-              disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-gray-100"
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
+                errors.dep_code ? 'border-error-500' : 'border-neutral-300'
+              }`}
+              placeholder="Ejemplo: DCCO, DFIS, DICA"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              El código del departamento no se puede modificar
+            {errors.dep_code && (
+              <p className="mt-1 text-sm text-error-600">{errors.dep_code}</p>
+            )}
+            <p className="mt-1 text-sm text-neutral-500">
+              Código único del departamento (siglas)
             </p>
           </div>
 
           <div>
-            <label htmlFor="dep_name" className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre del Departamento <span className="text-red-500">*</span>
+            <label htmlFor="dep_name" className="block text-sm font-medium text-neutral-700 mb-1">
+              Nombre del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
@@ -175,19 +186,19 @@ export default function EditDepartmentPage() {
               name="dep_name"
               value={formData.dep_name}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.dep_name ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
+                errors.dep_name ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ejemplo: Departamento de Ciencias de la Computación"
             />
             {errors.dep_name && (
-              <p className="mt-1 text-sm text-red-600">{errors.dep_name}</p>
+              <p className="mt-1 text-sm text-error-600">{errors.dep_name}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="fac_name" className="block text-sm font-medium text-gray-700 mb-1">
-              Facultad <span className="text-red-500">*</span>
+            <label htmlFor="fac_name" className="block text-sm font-medium text-neutral-700 mb-1">
+              Facultad <span className="text-error-500">*</span>
             </label>
             <FacultySelect
               value={formData.fac_name}
@@ -197,14 +208,14 @@ export default function EditDepartmentPage() {
             />
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <Link href="/departments-and-positions" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-200">
+            <Link href="/departments-and-positions" className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors">
               Cancelar
             </Link>
             <button
               type="submit"
               disabled={updating}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#1f2937] rounded-lg hover:bg-[#1f2937]/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
             >
               {updating ? (
                 <>

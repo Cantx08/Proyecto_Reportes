@@ -20,7 +20,9 @@ const Breadcrumb: React.FC = () => {
     
     const routeNames: { [key: string]: string } = {
       'authors': 'Autores',
+      'departments': 'Departamentos',
       'departments-and-positions': 'Departamentos y Cargos',
+      'positions': 'Cargos',
       'publications': 'Publicaciones',
       'borradores': 'Borradores',
       'reports': 'Certificaciones'

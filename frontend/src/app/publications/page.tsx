@@ -198,62 +198,6 @@ export default function PublicacionesPage() {
               </div>
             )}
           </div>
-
-          {/* Quick Access */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Acceso Rápido</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="text-left p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                <Eye className="h-6 w-6 mb-2" style={{ color: '#042a53' }} />
-                <h4 className="font-medium text-gray-900">Búsquedas Recientes</h4>
-                <p className="text-sm text-gray-600">Ver análisis anteriores</p>
-              </button>
-              <button className="text-left p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                <Download className="h-6 w-6 text-green-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Importar Lista</h4>
-                <p className="text-sm text-gray-600">Cargar IDs desde archivo</p>
-              </button>
-              <button className="text-left p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
-                <Filter className="h-6 w-6 text-purple-600 mb-2" />
-                <h4 className="font-medium text-gray-900">Filtros Avanzados</h4>
-                <p className="text-sm text-gray-600">Configurar búsqueda específica</p>
-              </button>
-            </div>
-          </div>
-
-          {/* Guidelines */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Guía de Uso</h3>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-semibold text-blue-600">
-                  1
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-medium text-gray-900">Ingresar IDs de Scopus</h4>
-                  <p className="text-sm text-gray-600">Añade uno o más IDs de autores para análisis. Ejemplo: 12345678900</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-semibold text-blue-600">
-                  2
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-medium text-gray-900">Ejecutar Búsqueda</h4>
-                  <p className="text-sm text-gray-600">Presiona 'Buscar Publicaciones' para obtener datos de Scopus</p>
-                </div>
-              </div>
-              <div className="flex items-start">
-                <div className="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-semibold text-blue-600">
-                  3
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-medium text-gray-900">Analizar Resultados</h4>
-                  <p className="text-sm text-gray-600">Revisa publicaciones, áreas temáticas y estadísticas por año</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       ) : (
         <div className="space-y-6">

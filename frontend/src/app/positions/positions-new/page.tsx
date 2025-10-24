@@ -18,16 +18,11 @@ const NewPositionPage: React.FC = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState<{
-    pos_id?: string;
     pos_name?: string;
   }>({});
 
   const validateForm = (): boolean => {
     const errors: typeof validationErrors = {};
-
-    if (!formData.pos_id.trim()) {
-      errors.pos_id = 'El código del cargo es requerido';
-    }
 
     if (!formData.pos_name.trim()) {
       errors.pos_name = 'El nombre del cargo es requerido';
@@ -44,8 +39,17 @@ const NewPositionPage: React.FC = () => {
       return;
     }
 
+    // Generar pos_id automáticamente a partir del nombre
+    const generatedPosId = formData.pos_name
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
+      .replace(/[^\w_]/g, ''); // Solo letras, números y guión bajo
+
     const result = await createPosition({
-      pos_id: formData.pos_id.trim(),
+      pos_id: generatedPosId,
       pos_name: formData.pos_name.trim(),
     });
 
@@ -57,24 +61,25 @@ const NewPositionPage: React.FC = () => {
   const handleChange = (field: keyof PositionCreateRequest, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Limpiar error de validación del campo cuando el usuario empieza a escribir
-    if (validationErrors[field]) {
-      setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+    if (field === 'pos_name' && validationErrors.pos_name) {
+      setValidationErrors({});
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto">
+
       {/* Header */}
-      <div className="mb-8">
-        <Link href="/departments-and-positions" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
+      <div className="mb-8 mt-6">
+        <Link href="/departments-and-positions" className="inline-flex items-center text-sm text-neutral-600 hover:text-primary-600 mb-4 transition-colors">
           <ArrowLeft className="h-4 w-4 mr-1" />
-          Volver a Gestión de Cargos
+          Volver a Departamentos y Cargos
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-          <Briefcase className="h-6 w-6 mr-3 text-blue-600" />
+        <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
+          <Briefcase className="h-6 w-6 mr-3 text-primary-600" />
           Nuevo Cargo
         </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-neutral-600 mt-1">
           Crea un nuevo cargo en el sistema
         </p>
       </div>
@@ -88,60 +93,40 @@ const NewPositionPage: React.FC = () => {
       )}
 
       {/* Form */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-neutral-200 shadow-sm p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Código del Cargo */}
-          <div>
-            <label htmlFor="pos_id" className="block text-sm font-medium text-gray-700 mb-2">
-              Código del Cargo <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="pos_id"
-              value={formData.pos_id}
-              onChange={(e) => handleChange('pos_id', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                validationErrors.pos_id ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Ej: PROF_PRINCIPAL"
-            />
-            {validationErrors.pos_id && (
-              <p className="mt-1 text-sm text-red-600">{validationErrors.pos_id}</p>
-            )}
-            <p className="mt-1 text-sm text-gray-500">
-              Este código se usará como identificador único del cargo
-            </p>
-          </div>
-
           {/* Nombre del Cargo */}
           <div>
-            <label htmlFor="pos_name" className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre del Cargo <span className="text-red-500">*</span>
+            <label htmlFor="pos_name" className="block text-sm font-medium text-neutral-700 mb-2">
+              Nombre del Cargo <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
               id="pos_name"
               value={formData.pos_name}
               onChange={(e) => handleChange('pos_name', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                validationErrors.pos_name ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
+                validationErrors.pos_name ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ej: Profesor Principal"
             />
             {validationErrors.pos_name && (
-              <p className="mt-1 text-sm text-red-600">{validationErrors.pos_name}</p>
+              <p className="mt-1 text-sm text-error-600">{validationErrors.pos_name}</p>
             )}
+            <p className="mt-1 text-sm text-neutral-500">
+              El código se generará automáticamente a partir del nombre
+            </p>
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <Link href="/departments-and-positions" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-neutral-200">
+            <Link href="/departments-and-positions" className="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors">
               Cancelar
             </Link>
             <button
               type="submit"
               disabled={creating}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
             >
               {creating ? (
                 <>

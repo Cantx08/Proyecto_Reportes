@@ -6,7 +6,7 @@ import { useNewDepartments } from '@/hooks/useNewDepartments';
 import { usePositions } from '@/hooks/useNewPositions';
 import { DepartmentResponse, PositionResponse } from '@/types/api';
 import { ErrorNotification } from '@/components/ErrorNotification';
-import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Faculty {
   key: string;
@@ -41,6 +41,10 @@ const DepartmentsManagementPage: React.FC = () => {
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   useEffect(() => {
     // Cargar facultades
     const loadFaculties = async () => {
@@ -62,7 +66,13 @@ const DepartmentsManagementPage: React.FC = () => {
     setSearchTerm('');
     setDeleteConfirm(null);
     setSelectedFaculty('all');
+    setCurrentPage(1); // Reset to first page when changing view
   }, [viewMode]);
+
+  // Reset page when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedFaculty]);
 
   const filteredDepartments = departments.filter((department: DepartmentResponse) => {
     const matchesSearch = 
@@ -78,6 +88,27 @@ const DepartmentsManagementPage: React.FC = () => {
     position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (position.pos_id && position.pos_id.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  // Check if filters are active
+  const hasActiveFilters = searchTerm !== '' || selectedFaculty !== 'all';
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedFaculty('all');
+    setCurrentPage(1);
+  };
+
+  // Pagination logic
+  const currentData = viewMode === 'departments' ? filteredDepartments : filteredPositions;
+  const totalPages = Math.ceil(currentData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedData = currentData.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   const handleDeleteDepartment = async (departmentId: string) => {
     try {
@@ -116,7 +147,7 @@ const DepartmentsManagementPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="mb-8 mt-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
@@ -193,7 +224,7 @@ const DepartmentsManagementPage: React.FC = () => {
 
         {/* Search Bar and Filter */}
         <div className="bg-white rounded-lg border border-neutral-200 shadow-sm p-4 mb-6">
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-3">
             {/* Search Bar */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
@@ -210,7 +241,7 @@ const DepartmentsManagementPage: React.FC = () => {
             
             {/* Faculty Filter - Only for departments */}
             {viewMode === 'departments' && (
-              <div className="flex items-center space-x-2 min-w-[300px]">
+              <div className="flex items-center space-x-2 md:min-w-[300px]">
                 <Filter className="h-5 w-5 text-neutral-400" />
                 <select
                   value={selectedFaculty}
@@ -226,24 +257,82 @@ const DepartmentsManagementPage: React.FC = () => {
                 </select>
               </div>
             )}
+
+            {/* Clear Filters Button - Only show when filters are active */}
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg text-sm font-medium flex items-center transition-colors whitespace-nowrap"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Limpiar filtros
+              </button>
+            )}
           </div>
+
+          {/* Active Filters Badge */}
+          {hasActiveFilters && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {searchTerm && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 border border-primary-200">
+                  Búsqueda: "{searchTerm}"
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="ml-2 hover:text-primary-900"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {viewMode === 'departments' && selectedFaculty !== 'all' && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary-100 text-secondary-700 border border-secondary-200">
+                  Facultad: {selectedFaculty}
+                  <button
+                    onClick={() => setSelectedFaculty('all')}
+                    className="ml-2 hover:text-secondary-900"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Stats Card */}
-        <div className="px-4 mb-6">
+        {/* Stats Card with Result Count */}
+        <div className="px-4 mb-6 flex items-center justify-between flex-wrap gap-3">
           <div className="inline-flex items-center px-4 py-2 bg-info-50 border border-info-200 rounded-lg">
             <div className="text-sm font-medium text-info-700">
               {viewMode === 'departments' ? (
                 <>
-                  {filteredDepartments.length} { }
-                  {selectedFaculty === 'all' ? 'departamentos encontrados' : 'departamento/s encontrado/s'}
+                  Mostrando {startIndex + 1}-{Math.min(endIndex, filteredDepartments.length)} de {filteredDepartments.length} departamento/s
+                  {hasActiveFilters && ' (filtrados)'}
                 </>
               ) : (
                 <>
-                  {filteredPositions.length} cargo/s encontrado/s
+                  Mostrando {startIndex + 1}-{Math.min(endIndex, filteredPositions.length)} de {filteredPositions.length} cargo/s
+                  {hasActiveFilters && ' (filtrados)'}
                 </>
               )}
             </div>
+          </div>
+
+          {/* Items per page selector */}
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-neutral-600">Por página:</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="px-3 py-1.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={25}>25</option>
+            </select>
           </div>
         </div>
       </div>
@@ -251,17 +340,76 @@ const DepartmentsManagementPage: React.FC = () => {
       {/* Content - Departments or Positions Table */}
       {viewMode === 'departments' ? (
         <DepartmentsTable 
-          filteredDepartments={filteredDepartments}
+          filteredDepartments={paginatedData as DepartmentResponse[]}
           searchTerm={searchTerm}
           selectedFaculty={selectedFaculty}
           setDeleteConfirm={setDeleteConfirm}
         />
       ) : (
         <PositionsTable 
-          filteredPositions={filteredPositions}
+          filteredPositions={paginatedData as PositionResponse[]}
           searchTerm={searchTerm}
           setDeleteConfirm={setDeleteConfirm}
         />
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between bg-white rounded-lg border border-neutral-200 shadow-sm px-6 py-4">
+          <div className="text-sm text-neutral-600">
+            Página {currentPage} de {totalPages}
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-neutral-300 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Página anterior"
+            >
+              <ChevronLeft className="h-5 w-5 text-neutral-600" />
+            </button>
+
+            {/* Page numbers */}
+            <div className="flex space-x-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={i}
+                    onClick={() => goToPage(pageNum)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === pageNum
+                        ? 'bg-primary-600 text-white'
+                        : 'text-neutral-600 hover:bg-neutral-100'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-neutral-300 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Página siguiente"
+            >
+              <ChevronRight className="h-5 w-5 text-neutral-600" />
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Delete Confirmation Modal */}
