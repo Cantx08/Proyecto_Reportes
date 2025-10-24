@@ -16,9 +16,9 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-    {name: 'Home', href: '/', icon: Home},
+    {name: 'Inicio', href: '/', icon: Home},
     {name: 'Autores', href: '/authors', icon: Users},
-    {name: 'Departamentos', href: '/departments', icon: Building2},
+    {name: 'Departamentos y Cargos', href: '/departments-management', icon: Building2},
     {name: 'Publicaciones', href: '/publications', icon: BookOpen},
     {name: 'Borradores', href: '/borradores', icon: FileEdit},
     {name: 'Certificados', href: '/reports', icon: ClipboardCheck},
@@ -29,11 +29,11 @@ const Sidebar: React.FC = () => {
     const {isCollapsed, toggleSidebar} = useSidebar();
 
     return (
-        <div className={`flex h-full flex-col transition-all duration-300 ${
+        <div className={`flex h-full flex-col bg-primary-500 transition-all duration-300 ${
             isCollapsed ? 'w-16' : 'w-64'
-        }`} style={{backgroundColor: '#042a53'}}>
+        }`}>
             {/* Logo del Departamento */}
-            <div className={`relative flex h-16 items-center border-b border-white/20 bg-white ${
+            <div className={`relative flex h-16 items-center border-b border-primary-400/30 bg-white ${
                 isCollapsed ? 'px-2 justify-center' : 'px-6 justify-between'
             }`}>
                 <div className="flex items-center space-x-3">
@@ -46,8 +46,8 @@ const Sidebar: React.FC = () => {
                     </div>
                     {!isCollapsed && (
                         <div>
-                            <h1 className="text-xl font-bold text-center text-[#042a53]">VIIV</h1>
-                            <p className="text-xs text-center text-[#042a53]/80">Dirección de Investigación</p>
+                            <h1 className="text-xl font-bold text-center text-primary-500">VIIV</h1>
+                            <p className="text-xs text-center text-primary-400">Dirección de Investigación</p>
                         </div>
                     )}
                 </div>
@@ -57,10 +57,9 @@ const Sidebar: React.FC = () => {
                     onClick={toggleSidebar}
                     className={`p-1 rounded transition-colors z-20 ${
                         isCollapsed
-                            ? 'absolute -right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200 shadow-lg'
-                            : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                            ? 'absolute -right-3 top-1/2 transform -translate-y-1/2 bg-primary-500 text-white hover:bg-primary-600 shadow-lg'
+                            : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100'
                     }`}
-                    style={isCollapsed ? {backgroundColor: '#042a53'} : {}}
                 >
                     {isCollapsed ? (
                         <ChevronsRight className="h-4 w-4"/>
@@ -79,20 +78,20 @@ const Sidebar: React.FC = () => {
                             <li key={item.name}>
                                 <Link
                                     href={item.href}
-                                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors group relative ${
+                                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group relative ${
                                         isActive
-                                            ? 'bg-white/20 text-white border-r-2 border-white'
-                                            : 'text-white/80 hover:bg-white/10 hover:text-white'
+                                            ? 'bg-primary-600 text-white shadow-md'
+                                            : 'text-primary-100 hover:bg-primary-600/80 hover:text-white'
                                     } ${isCollapsed ? 'justify-center' : ''}`}
                                     title={isCollapsed ? item.name : undefined}
                                 >
-                                    <item.icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-white/80'} ${
+                                    <item.icon className={`h-5 w-5 ${
                                         !isCollapsed ? 'mr-3' : ''
                                     }`}/>
                                     {!isCollapsed && item.name}
                                     {isCollapsed && (
                                         <span
-                                            className="absolute left-16 bg-gray-900 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                                            className="absolute left-16 bg-neutral-900 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
                       {item.name}
                     </span>
                                     )}
@@ -104,7 +103,7 @@ const Sidebar: React.FC = () => {
             </nav>
 
             {/* Footer */}
-            <div className={`p-4 border-t border-white/20 ${isCollapsed ? 'px-2' : ''}`}>
+            <div className={`p-4 border-t border-primary-400/30 ${isCollapsed ? 'px-2' : ''}`}>
                 <div className={`flex items-center px-3 py-2 ${
                     isCollapsed ? 'justify-center' : 'space-x-3'
                 }`}>
@@ -116,7 +115,7 @@ const Sidebar: React.FC = () => {
                     {!isCollapsed && (
                         <div>
                             <p className="text-sm font-medium text-white">Certificaciones EPN</p>
-                            <p className="text-xs text-white/60">v1.0.0</p>
+                            <p className="text-xs text-primary-200">v1.0.0</p>
                         </div>
                     )}
                 </div>

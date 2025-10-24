@@ -35,7 +35,7 @@ export default function RootLayout({
         </head>
         <body className={inter.className}>
         <SidebarProvider>
-            <div className="flex h-screen bg-gray-50">
+            <div className="flex h-screen bg-neutral-50">
                 {/* Sidebar */}
                 <Sidebar/>
 
@@ -45,7 +45,7 @@ export default function RootLayout({
                     <Header/>
 
                     {/* Page Content */}
-                    <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-4">
+                    <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-4 bg-neutral-50">
                         <Breadcrumb/>
                         {children}
                     </main>

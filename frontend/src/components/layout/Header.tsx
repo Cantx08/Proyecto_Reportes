@@ -8,7 +8,7 @@ const Header: React.FC = () => {
 
     const getPageTitle = () => {
         const routes: { [key: string]: string } = {
-            '/': 'Home',
+            '/': 'Inicio',
             '/authors': 'Autores',
             '/departments': 'Departamentos y Cargos',
             '/publications': 'Publicaciones',
@@ -19,7 +19,7 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="px-6 py-4 border-b border-gray-200" style={{backgroundColor: '#042a53'}}>
+        <header className="px-6 py-4 bg-primary-500 border-b border-primary-600 shadow-sm">
             <div className="flex items-center justify-between">
                 {/* Page Title */}
                 <div>
