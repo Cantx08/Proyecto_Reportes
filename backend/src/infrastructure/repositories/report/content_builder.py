@@ -35,29 +35,29 @@ class ReportLabContentBuilder(IContentBuilder):
         
         return header
 
-    def generate_summary(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections) -> List[Any]:
+    #def generate_summary(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections) -> List[Any]:
         """Construye la sección de resumen."""
-        summary_section = []
+    #    summary_section = []
         
         # Subtítulo "RESUMEN"
-        subtitle_style = self._style_manager.fetch_style('SubTitle')
-        summary_section.append(Paragraph("<b>RESUMEN</b>", subtitle_style))
+    #    subtitle_style = self._style_manager.fetch_style('SubTitle')
+    #    summary_section.append(Paragraph("<b>RESUMEN</b>", subtitle_style))
         
         # Texto del resumen
-        gender_text = "del profesor" if author.gender.value == "M" else "de la profesora"
-        total_publications = publications.get_total_publications()
-        publication_text = "las publicaciones" if total_publications > 1 else "la publicación"
+    #    gender_text = "del profesor" if author.gender.value == "M" else "de la profesora"
+    #    total_publications = publications.get_total_publications()
+    #    publication_text = "las publicaciones" if total_publications > 1 else "la publicación"
         
-        if config.memorandum:
-            summary = f"El presente informe se realiza en base a la solicitud del memorando {config.memorandum}, con la finalidad de certificar {publication_text} {gender_text} {author.name}."
-        else:
-            summary = f"El presente informe se realiza con la finalidad de certificar {publication_text} {gender_text} {author.name}."
+    #    if config.memorandum:
+    #        summary = f"El presente informe se realiza en base a la solicitud del memorando {config.memorandum}, con la finalidad de certificar {publication_text} {gender_text} {author.name}."
+    #    else:
+    #        summary = f"El presente informe se realiza con la finalidad de certificar {publication_text} {gender_text} {author.name}."
         
-        justified_style = self._style_manager.fetch_style('Justified')
-        summary_section.append(Paragraph(summary, justified_style))
-        summary_section.append(Spacer(1, 15))
+    #    justified_style = self._style_manager.fetch_style('Justified')
+    #    summary_section.append(Paragraph(summary, justified_style))
+    #    summary_section.append(Spacer(1, 15))
         
-        return summary_section
+    #    return summary_section
     
     def generate_technical_report(self, author: AuthorInfo, publications: PublicationCollections, statistics: PublicationsStatistics) -> List[Any]:
         """Construye la sección de informe técnico."""
@@ -65,7 +65,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         # Subtítulo "INFORME TÉCNICO"
         subtitle_style = self._style_manager.fetch_style('SubTitle')
-        technical_report.append(Paragraph("<b>INFORME TÉCNICO</b>", subtitle_style))
+        technical_report.append(Paragraph("<b>RESUMEN</b>", subtitle_style))
         
         # Introducción
         technical_report.extend(self._generate_report_introduction(publications))
@@ -90,7 +90,7 @@ class ReportLabContentBuilder(IContentBuilder):
 
     def _generate_report_introduction(self, publications: PublicationCollections) -> List[Any]:
         """Construye la introducción del informe técnico."""
-        text = "El presente informe se realiza en base a la información recopilada por la Dirección de Investigación"
+        text = "La presente certificación se realiza en base a la información recopilada por la Dirección de Investigación"
 
         if publications.scopus:
             text += ", de la base de datos científicos Scopus"

@@ -151,6 +151,55 @@ export const scopusApi = {
       }
       throw new Error('Error al generar el reporte.');
     }
+  },
+
+  /**
+   * Procesar borrador PDF existente y convertirlo en certificado final
+   */
+  async procesarBorrador(
+    file: File,
+    metadata?: {
+      memorando?: string;
+      firmante?: number;
+      firmante_nombre?: string;
+      fecha?: string;
+    }
+  ): Promise<Blob> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Añadir metadatos opcionales si existen
+      if (metadata) {
+        if (metadata.memorando) formData.append('memorando', metadata.memorando);
+        if (metadata.firmante) formData.append('firmante', metadata.firmante.toString());
+        if (metadata.firmante_nombre) formData.append('firmante_nombre', metadata.firmante_nombre);
+        if (metadata.fecha) formData.append('fecha', metadata.fecha);
+      }
+
+      const response = await api.post('/reports/process-draft', formData, {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error al procesar borrador:', error);
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('El procesamiento del borrador está tomando más tiempo del esperado.');
+        }
+        if (error.response?.status === 400) {
+          throw new Error('El archivo no es un PDF válido o excede el tamaño máximo (10MB).');
+        }
+        if (error.response?.status === 500) {
+          throw new Error('Error interno del servidor al procesar el borrador.');
+        }
+      }
+      throw new Error('Error al procesar el borrador PDF.');
+    }
   }
 };
 

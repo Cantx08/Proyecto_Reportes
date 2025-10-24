@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Query, Depends
+from fastapi import FastAPI, Query, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from typing import List
+from typing import List, Optional
 from src.dependencies import container
 from src.application.dto import (
     ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO,
@@ -19,6 +19,7 @@ from src.infrastructure.api.controllers.departments_controller import Department
 from src.infrastructure.api.controllers.authors_controller import AuthorsController
 from src.infrastructure.api.controllers.positions_controller import PositionsController
 from src.infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
+from src.infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
@@ -69,6 +70,11 @@ def get_positions_controller() -> PositionsController:
 def get_scopus_accounts_controller() -> ScopusAccountsController:
     """Dependencia para obtener el controlador de cuentas Scopus."""
     return container.scopus_accounts_controller
+
+
+def get_draft_processor_controller() -> DraftProcessorController:
+    """Dependencia para obtener el controlador de procesamiento de borradores."""
+    return container.draft_processor_controller
 
 
 @app.get("/health")
@@ -393,3 +399,41 @@ async def generar_informe(
     - Firmas oficiales
     """
     return await controller.generate_report(request)
+
+
+@app.post("/reports/process-draft", response_class=Response, tags=["Reportes"])
+async def procesar_borrador(
+        file: UploadFile = File(..., description="Archivo PDF borrador a procesar"),
+        memorando: Optional[str] = Form(None, description="Número de memorando"),
+        firmante: Optional[int] = Form(None, description="Tipo de firmante (1=Directora, 2=Vicerrector)"),
+        firmante_nombre: Optional[str] = Form(None, description="Nombre del firmante"),
+        fecha: Optional[str] = Form(None, description="Fecha del certificado"),
+        controller: DraftProcessorController = Depends(get_draft_processor_controller)
+):
+    """
+    Procesa un borrador PDF existente y lo convierte en certificado final.
+    
+    Este endpoint toma un PDF borrador (sin plantilla institucional) y le aplica
+    la plantilla oficial de la EPN (form.pdf) con encabezados, logos y formato oficial.
+    
+    Args:
+        file: Archivo PDF borrador (máximo 10MB)
+        memorando: Número de memorando (opcional, para extensión futura)
+        firmante: Tipo de firmante (opcional, para extensión futura)
+        firmante_nombre: Nombre del firmante (opcional, para extensión futura)
+        fecha: Fecha del certificado (opcional, para extensión futura)
+    
+    Returns:
+        Response: PDF final con plantilla institucional aplicada
+        
+    Raises:
+        HTTPException 400: Si el archivo no es un PDF válido o excede el tamaño máximo
+        HTTPException 500: Si hay un error al procesar el PDF
+    """
+    return await controller.process_draft(
+        file=file,
+        memorando=memorando,
+        firmante=firmante,
+        firmante_nombre=firmante_nombre,
+        fecha=fecha
+    )

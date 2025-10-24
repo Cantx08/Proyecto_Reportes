@@ -5,44 +5,73 @@ import {
   ClipboardCheck, 
   Download,
   Upload,
-  FileText
+  FileText,
+  AlertCircle
 } from 'lucide-react';
+import { scopusApi } from '@/services/scopusApi';
 
 export default function InformesPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
+    setError(null);
+
+    if (file) {
+      // Validar tipo
+      if (file.type !== 'application/pdf') {
+        setError('Por favor seleccione un archivo PDF válido');
+        return;
+      }
+
+      // Validar tamaño (10MB)
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        setError('El archivo excede el tamaño máximo permitido (10MB)');
+        return;
+      }
+
       setUploadedFile(file);
-    } else {
-      alert('Por favor seleccione un archivo PDF válido');
     }
   };
 
   const handleProcessReport = async () => {
     if (!uploadedFile) {
-      alert('Por favor seleccione un archivo PDF');
+      setError('Por favor seleccione un archivo PDF');
       return;
     }
 
     setIsProcessing(true);
+    setError(null);
     
     try {
-      // Aquí se integraría con el backend para procesar el PDF
-      // Simulación de procesamiento
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Llamar al backend para procesar el borrador
+      const pdfBlob = await scopusApi.procesarBorrador(uploadedFile);
       
-      // Simular descarga del archivo procesado
-      alert('Certificado generado exitosamente');
+      // Crear URL del blob para descarga
+      const url = window.URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'certificado_final.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
       
       // Reset form
       setUploadedFile(null);
       
+      // Mostrar mensaje de éxito
+      alert('Certificado generado y descargado exitosamente');
+      
     } catch (error) {
       console.error('Error processing report:', error);
-      alert('Error al procesar el certificado. Por favor intente nuevamente.');
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Error desconocido al procesar el certificado';
+      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -50,6 +79,7 @@ export default function InformesPage() {
 
   const handleCancel = () => {
     setUploadedFile(null);
+    setError(null);
   };
 
   return (
@@ -63,7 +93,7 @@ export default function InformesPage() {
               Generación de Certificaciones
             </h1>
             <p className="text-gray-600 mt-1">
-              Carga el archivo PDF para generar el certificado oficial
+              Carga aquí el borrador para generar la certificación
             </p>
           </div>
         </div>
@@ -72,6 +102,17 @@ export default function InformesPage() {
       {/* Content */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
+              <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-red-800">Error</p>
+                <p className="text-sm text-red-600 mt-1">{error}</p>
+              </div>
+            </div>
+          )}
+
           {/* File Upload */}
           <div>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
@@ -86,6 +127,7 @@ export default function InformesPage() {
                     accept=".pdf"
                     onChange={handleFileUpload}
                     className="hidden"
+                    disabled={isProcessing}
                   />
                 </label>
                 <span className="text-gray-600"> o arrastra y suelta aquí</span>
@@ -128,7 +170,7 @@ export default function InformesPage() {
               ) : (
                 <>
                   <Download className="h-4 w-4 mr-2" />
-                  Descargar PDF
+                  Generar Certificado
                 </>
               )}
             </button>

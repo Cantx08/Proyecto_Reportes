@@ -13,6 +13,7 @@ from .application.services.author_service import AuthorService
 from .application.services.position_service import PositionService
 from .application.services.scopus_account_service import ScopusAccountService
 from .application.services.department_service import DepartmentService
+from .application.services.draft_processor_service import DraftProcessorService
 
 # Controladores
 from .infrastructure.api.controllers.reports_controller import ReportsController
@@ -22,6 +23,7 @@ from .infrastructure.api.controllers.authors_controller import AuthorsController
 from .infrastructure.api.controllers.positions_controller import PositionsController
 from .infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
 from .infrastructure.api.controllers.departments_controller import DepartmentsController
+from .infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
 
 # Repositorios de base de datos
 from .infrastructure.repositories.author_db_repository import AuthorDatabaseRepository
@@ -39,6 +41,7 @@ from .infrastructure.external.scopus_api_client import ScopusApiClient
 from .infrastructure.repositories.scopus_publication_repository import ScopusPublicationsRepository
 from .infrastructure.repositories.scopus_subject_areas_repository import ScopusSubjectAreasRepository
 from .infrastructure.database.connection import DatabaseConfig
+from .infrastructure.repositories.report.template_overlay_service import TemplateOverlayService
 
 load_dotenv()
 
@@ -108,6 +111,10 @@ class DependencyContainer:
         self._position_service = PositionService(self._position_repo)
         self._scopus_account_service = ScopusAccountService(self._scopus_account_repo)
 
+        # Servicio de procesamiento de borradores
+        self._template_overlay_service = TemplateOverlayService()
+        self._draft_processor_service = DraftProcessorService(self._template_overlay_service)
+
         # Controladores legacy
         self._publication_controller = PublicationsController(self._publication_service)
         self._subject_area_controller = SubjectAreasController(self._subject_area_service)
@@ -119,6 +126,7 @@ class DependencyContainer:
         self._departments_controller = DepartmentsController(self._department_service)
         self._positions_controller = PositionsController(self._position_service)
         self._scopus_accounts_controller = ScopusAccountsController(self._scopus_account_service)
+        self._draft_processor_controller = DraftProcessorController(self._draft_processor_service)
 
     # Controladores legacy
     @property
@@ -155,6 +163,11 @@ class DependencyContainer:
     def scopus_accounts_controller(self) -> ScopusAccountsController:
         """Obtiene el controlador de cuentas Scopus."""
         return self._scopus_accounts_controller
+
+    @property
+    def draft_processor_controller(self) -> DraftProcessorController:
+        """Obtiene el controlador de procesamiento de borradores."""
+        return self._draft_processor_controller
 
 
 # Instancia global del contenedor
