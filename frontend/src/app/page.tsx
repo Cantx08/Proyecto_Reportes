@@ -21,7 +21,7 @@ const modules = [
     },
     {
         name: 'Departamentos y Cargos',
-        href: '/departments-management',
+        href: '/departments-and-positions',
         icon: Building2
     },
     {

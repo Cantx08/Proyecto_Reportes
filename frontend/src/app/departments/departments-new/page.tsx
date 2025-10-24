@@ -84,7 +84,7 @@ export default function NewDepartmentPage() {
       const result = await createDepartment(createData);
       
       if (result) {
-        router.push('/departments-management');
+        router.push('/departments-and-positions');
       }
     } catch (error) {
       console.error('Error creating department:', error);
@@ -95,7 +95,7 @@ export default function NewDepartmentPage() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <Link 
-          href="/departments-management"
+          href="/departments-and-positions"
           className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -171,7 +171,7 @@ export default function NewDepartmentPage() {
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <Link href="/departments-management" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+            <Link href="/departments-and-positions" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancelar
             </Link>
             <button

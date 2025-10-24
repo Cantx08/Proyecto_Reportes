@@ -67,7 +67,7 @@ const EditPositionPage: React.FC = () => {
     });
 
     if (result) {
-      router.push('/positions-management');
+      router.push('/departments-and-positions');
     }
   };
 
@@ -95,7 +95,7 @@ const EditPositionPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-800">No se pudo cargar el cargo</p>
-          <Link href="/positions-management" className="text-red-600 hover:text-red-800 text-sm mt-2 inline-block">
+          <Link href="/departments-and-positions" className="text-red-600 hover:text-red-800 text-sm mt-2 inline-block">
             Volver a Gestión de Cargos
           </Link>
         </div>
@@ -107,7 +107,7 @@ const EditPositionPage: React.FC = () => {
     <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <Link href="/positions-management" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
+        <Link href="/departments-and-positions" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Volver a Gestión de Cargos
         </Link>
@@ -170,7 +170,7 @@ const EditPositionPage: React.FC = () => {
 
           {/* Buttons */}
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <Link href="/positions-management" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+            <Link href="/departments-and-positions" className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
               Cancelar
             </Link>
             <button
