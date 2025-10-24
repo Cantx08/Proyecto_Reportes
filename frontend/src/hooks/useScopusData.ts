@@ -66,17 +66,24 @@ export const useScopusData = () => {
   }, []);
 
   // Buscar datos de Scopus
-  const searchScopusData = useCallback(async () => {
+  const searchScopusData = useCallback(async (mixedIds?: string[]) => {
+    // Si se pasan IDs mixtos, usarlos. Si no, usar los del estado
+    const idsToSearch = mixedIds || state.scopusIds;
+    
     // Validar IDs antes de enviar
-    const validIds = state.scopusIds.filter(id => {
-      const validation = validateScopusId(id);
-      return validation.isValid;
+    const validIds = idsToSearch.filter(id => {
+      // Si es un ID de 11 dígitos, es un Scopus ID
+      if (/^\d{11}$/.test(id.trim())) {
+        return true;
+      }
+      // Si no es vacío, asumir que es un Author ID de la base de datos
+      return id.trim() !== '';
     });
 
     if (validIds.length === 0) {
       setState(prev => ({
         ...prev,
-        error: 'Debe ingresar al menos un ID válido de Scopus.'
+        error: 'Debe ingresar al menos un ID válido de Scopus o seleccionar un autor.'
       }));
       return;
     }
@@ -120,7 +127,7 @@ export const useScopusData = () => {
         loadingProgress: null
       }));
     }
-  }, [state.scopusIds, validateScopusId]);
+  }, [state.scopusIds]);
 
   // Limpiar resultados
   const clearResults = useCallback(() => {

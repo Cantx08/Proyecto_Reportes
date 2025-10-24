@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Union
 from ....application.dto import AuthorDTO, DocumentsByYearResponseDTO, PublicationDTO, PublicationsResponseDTO
 from ....application.services.publication_service import PublicationService
 from ....domain.entities.author import Author
+from ....domain.entities.author_publications import AuthorPublications
 
 
 class PublicationsController:
@@ -31,7 +32,7 @@ class PublicationsController:
         )
 
     @staticmethod
-    def _map_author_to_dto(author: Author) -> AuthorDTO:
+    def _map_author_to_dto(author: Union[Author, AuthorPublications]) -> AuthorDTO:
         """Convierte una entidad Autor a DTO."""
         publications_dto = []
 
@@ -48,8 +49,28 @@ class PublicationsController:
                 )
                 publications_dto.append(pub_dto)
 
+        # Si es un AuthorPublications (solo publicaciones de Scopus)
+        if isinstance(author, AuthorPublications):
+            return AuthorDTO(
+                author_id=author.author_id,
+                name="",  # No disponible desde Scopus
+                surname="",  # No disponible desde Scopus
+                dni="",  # No disponible desde Scopus
+                publications_list=publications_dto,
+                error=author.error
+            )
+        
+        # Si es un Author completo
         return AuthorDTO(
-            author_id=author.author_id,
+            author_id=author.author_id or "",
+            name=author.name,
+            surname=author.surname,
+            dni=author.dni,
+            title=author.title,
+            birth_date=author.birth_date,
+            gender=author.gender,
+            position=author.position,
+            department=author.department,
             publications_list=publications_dto,
             error=author.error
         )

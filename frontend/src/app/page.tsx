@@ -45,7 +45,7 @@ export default function HomePage() {
     return (
         <div className="max-w-7xl mx-auto">
             {/* Home Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 mb-8">
+            <div className="bg-white p-8 mb-8">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-primary-500 text-4xl font-bold mb-2">

@@ -132,6 +132,9 @@ class ReportLabContentBuilder(IContentBuilder):
         # Lista de publicaciones
         scopus_section.extend(self._publication_formatter.format_publication_list(publications.scopus, "Scopus"))
         
+        filiation_note = f"Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional."
+        scopus_section.append(Paragraph(filiation_note, justified_style))
+
         # Gráfico solo para Scopus si hay datos suficientes
         if len(publications.scopus) > 1 and statistics.has_sufficient_data_for_graph():
             scopus_section.extend(self._draw_chart(statistics, author.name))

@@ -95,11 +95,13 @@ class DependencyContainer:
         # Servicios de aplicación
         self._publication_service = PublicationService(
             self._scopus_publications_repository,
-            self._sjr_file_repository
+            self._sjr_file_repository,
+            self._scopus_account_repo
         )
         self._subject_area_service = SubjectAreaService(
             self._scopus_subject_areas_repository,  # Para obtener datos de Scopus
-            self._subject_areas_repo  # Para mapear usando CSV
+            self._subject_areas_repo,  # Para mapear usando CSV
+            self._scopus_account_repo  # Para resolver Author IDs a Scopus IDs
         )
         self._author_service = AuthorService(self._author_repo)
         self._department_service = DepartmentService(self._department_repo)

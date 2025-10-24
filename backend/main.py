@@ -327,34 +327,51 @@ async def get_all_scopus_ids(
 
 @app.get("/scopus/publications", response_model=PublicationsResponseDTO, tags=["Publicaciones"])
 async def get_publications(
-        ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
+        ids: List[str] = Query(..., description="Lista de IDs de Scopus o IDs de autor de la base de datos"),
         controller: PublicationsController = Depends(get_publications_controller)
 ):
     """
-    Obtiene publicaciones de uno o varios ID de autor Scopus.
-    Agrupa todas las publicaciones bajo un solo autor.
+    Obtiene publicaciones de uno o varios autores.
+    
+    Puedes usar:
+    - IDs de Scopus (numéricos de 11 dígitos, ej: 57832340700)
+    - IDs de autor de la base de datos (cualquier formato, ej: A001)
+    
+    El sistema automáticamente resolverá los IDs de autor a sus Scopus IDs asociados.
     """
     return await controller.get_publications(ids)
 
 
 @app.get("/scopus/docs_by_year", response_model=DocumentsByYearResponseDTO, tags=["Publicaciones"])
 async def get_documents_by_year(
-        ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
+        ids: List[str] = Query(..., description="Lista de IDs de Scopus o IDs de autor de la base de datos"),
         controller: PublicationsController = Depends(get_publications_controller)
 ):
     """
-    Obtiene el número de publicaciones por año realizadas por un autor que tiene uno o varios ID.
+    Obtiene el número de publicaciones por año de uno o varios autores.
+    
+    Puedes usar:
+    - IDs de Scopus (numéricos de 11 dígitos, ej: 57832340700)
+    - IDs de autor de la base de datos (cualquier formato, ej: A001)
+    
+    El sistema automáticamente resolverá los IDs de autor a sus Scopus IDs asociados.
     """
     return await controller.get_documents_by_year(ids)
 
 
 @app.get("/scopus/subject_areas", response_model=SubjectAreaResponseDTO, tags=["Publicaciones"])
 async def get_subject_areas(
-        ids: List[str] = Query(..., description="Lista de IDs de autor de Scopus"),
+        ids: List[str] = Query(..., description="Lista de IDs de Scopus o IDs de autor de la base de datos"),
         controller: SubjectAreasController = Depends(get_subject_areas_controller)
 ):
     """
-    Obtiene las áreas temáticas generales de las publicaciones del autor.
+    Obtiene las áreas temáticas generales de las publicaciones de uno o varios autores.
+    
+    Puedes usar:
+    - IDs de Scopus (numéricos de 11 dígitos, ej: 57832340700)
+    - IDs de autor de la base de datos (cualquier formato, ej: A001)
+    
+    El sistema automáticamente resolverá los IDs de autor a sus Scopus IDs asociados.
     Mapea las subáreas específicas de Scopus a las áreas temáticas generales definidas.
     """
     return await controller.fetch_subject_areas(ids)

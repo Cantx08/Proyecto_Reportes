@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .author import Author
+    from .author_publications import AuthorPublications
 
 
 @dataclass
@@ -27,7 +28,7 @@ class Publication:
 @dataclass
 class PublicationsCollection:
     """Colección de publicaciones con métodos de análisis."""
-    authors: List["Author"]
+    authors: List[Union["Author", "AuthorPublications"]]
 
     def get_all_publications(self) -> List[Publication]:
         """Obtiene todas las publicaciones de todos los autores."""

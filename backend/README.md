@@ -43,10 +43,31 @@ Este sistema permite consultar y analizar publicaciones académicas de la base d
 ### Funcionalidades Principales
 
 - **Consulta de Publicaciones**: Obtiene publicaciones completas de uno o múltiples autores
+- **🆕 IDs Flexibles**: Busca usando Scopus IDs o Author IDs de la base de datos
 - **Análisis Temporal**: Estadísticas de publicaciones por año con rangos completos
 - **Categorización Temática**: Extracción de subject areas de publicaciones
 - **Enriquecimiento de Datos**: Integración con datos SJR para categorías de revistas
 - **Manejo de Múltiples IDs**: Soporte para autores con múltiples identificadores Scopus
+
+### 🆕 Nueva Funcionalidad: IDs Flexibles
+
+Los endpoints de publicaciones ahora aceptan **dos tipos de IDs**:
+
+1. **Scopus IDs** (11 dígitos): `57832340700`
+2. **Author IDs** (base de datos): `A001`, `AUTH-123`, etc.
+
+El sistema automáticamente:
+- ✅ Detecta el tipo de ID
+- ✅ Resuelve Author IDs a Scopus IDs
+- ✅ Consulta publicaciones de todos los IDs
+- ✅ Genera estadísticas y gráficos
+
+**Ejemplo de uso mixto**:
+```bash
+GET /scopus/publications?ids=57832340700&ids=A001&ids=A002
+```
+
+📖 **Documentación completa**: Ver [`PUBLICATIONS_API.md`](./PUBLICATIONS_API.md)
 
 ### Arquitectura y Calidad
 
