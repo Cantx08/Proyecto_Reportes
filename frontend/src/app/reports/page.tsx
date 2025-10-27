@@ -48,7 +48,7 @@ export default function CertificationPage() {
     
     try {
       // Llamar al backend para procesar el borrador
-      const pdfBlob = await scopusApi.proccessDraft(uploadedFile);
+      const pdfBlob = await scopusApi.procesarBorrador(uploadedFile);
       
       // Crear URL del blob para descarga
       const url = window.URL.createObjectURL(pdfBlob);

@@ -35,11 +35,11 @@ class IContentBuilder(ABC):
         """Construye el encabezado del documento."""
         pass
 
-    #@abstractmethod
-    #def generate_summary(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections) -> \
-    #List[Any]:
+    @abstractmethod
+    def generate_summary(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections) -> \
+    List[Any]:
         """Construye la sección de resumen."""
-    #    pass
+        pass
 
     @abstractmethod
     def generate_technical_report(self, author: AuthorInfo, publications: PublicationCollections,

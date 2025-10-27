@@ -10,12 +10,12 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
     def __init__(self, style_manager: IStyleManager):
         self._style_manager = style_manager
     
-    def format_publication_list(self, publications: List[Publication], tipo: str) -> List[Any]:
+    def format_publication_list(self, publications: List[Publication], publication_type: str) -> List[Any]:
         """Formatea una lista de publicaciones."""
         elements = []
         
         for i, pub in enumerate(publications, 1):
-            pub_text = self._generate_publications_list(pub, i, tipo)
+            pub_text = self._generate_publications_list(pub, i, publication_type)
             
             publication_style = self._style_manager.fetch_style('Publication')
             elements.append(Paragraph(pub_text, publication_style))
@@ -25,6 +25,10 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
     
     def _generate_publications_list(self, pub: Publication, num: int, db_name: str) -> str:
         """Construye el texto formateado de una publicación."""
+        # Verificar si alguna categoría contiene Q1
+        has_q1 = self._contains_q1_category(pub.categories)
+        
+        # Construir texto base de la publicación
         pub_text = f"{num}. ({pub.year}) \"{pub.title}\". {pub.source}."
         
         # Agregar información de categorías e indexación
@@ -44,6 +48,10 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         if pub.affiliation and "escuela politécnica nacional" not in pub.affiliation.lower():
             pub_text += " <u>(Sin Filiación)</u>"
         
+        # Si tiene al menos una categoría Q1, aplicar negritas a toda la publicación
+        if has_q1:
+            pub_text = f"<b>{pub_text}</b>"
+        
         return pub_text
     
     @staticmethod
@@ -58,6 +66,50 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
                 return "".join(categories)
         else:
             return str(categories)
+    
+    @staticmethod
+    def _contains_q1_category(categories: Any) -> bool:
+        """
+        Verifica si alguna de las categorías de la publicación contiene Q1.
+        
+        Args:
+            categories: Categorías de la publicación (puede ser string, lista, etc.)
+            
+        Returns:
+            bool: True si al menos una categoría tiene Q1, False en caso contrario
+        """
+        if not categories:
+            return False
+        
+        # Convertir a string para facilitar la búsqueda
+        categories_str = ""
+        if isinstance(categories, str):
+            categories_str = categories
+        elif isinstance(categories, list):
+            categories_str = "; ".join(str(cat) for cat in categories)
+        else:
+            categories_str = str(categories)
+        
+        # Buscar Q1 en el texto (con variaciones comunes)
+        categories_upper = categories_str.upper()
+        
+        # Patrones de búsqueda para Q1
+        q1_patterns = [
+            "(Q1)",      # Formato estándar: Category (Q1)
+            " Q1 ",      # Q1 con espacios
+            " Q1;",      # Q1 seguido de punto y coma
+            " Q1,",      # Q1 seguido de coma
+        ]
+        
+        for pattern in q1_patterns:
+            if pattern in categories_upper:
+                return True
+        
+        # También verificar si empieza o termina con Q1
+        if categories_upper.startswith("Q1") or categories_upper.endswith("Q1"):
+            return True
+        
+        return False
     
     def get_document_type(self, publications: List[Publication]) -> str:
         """Obtiene la distribución de tipos de documentos."""

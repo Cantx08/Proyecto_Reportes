@@ -84,7 +84,7 @@ class ReportLabReportGenerator(IReportGenerator):
         story.extend(self._content_builder.generate_header(author, config))
         
         # Sección Resumen
-        #story.extend(self._content_builder.generate_summary(author, config, publications))
+        story.extend(self._content_builder.generate_summary(author, config, publications))
         
         # Sección Informe Técnico
         story.extend(self._content_builder.generate_technical_report(author, publications, statistics))

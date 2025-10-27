@@ -9,15 +9,15 @@ import type {
 
 export interface ReportRequest {
   author_ids: string[];
-  author_name: string;
-  author_gender: string; // Cambiado de 'M' | 'F' a string para permitir texto libre
-  department: string;
-  position: string;
-  memorandum?: string;
-  signatory?: number | string; // Cambiado para permitir texto libre
-  authority_name?: string; // Nuevo campo para nombre de firmante personalizado
-  cert_date?: string;
-  is_draft?: boolean; // Nuevo campo para indicar si es borrador o certificado final
+  docente_nombre: string;
+  docente_genero: string; // Cambiado de 'M' | 'F' a string para permitir texto libre
+  departamento: string;
+  cargo: string;
+  memorando?: string;
+  firmante?: number | string; // Cambiado para permitir texto libre
+  firmante_nombre?: string; // Nuevo campo para nombre de firmante personalizado
+  fecha?: string;
+  es_borrador?: boolean; // Nuevo campo para indicar si es borrador o certificado final
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -156,7 +156,7 @@ export const scopusApi = {
   /**
    * Procesar borrador PDF existente y convertirlo en certificado final
    */
-  async proccessDraft(
+  async procesarBorrador(
     file: File,
     metadata?: {
       memorando?: string;

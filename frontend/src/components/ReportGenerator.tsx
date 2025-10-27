@@ -18,15 +18,15 @@ interface ReportGeneratorProps {
 const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAuthor, onError }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState<Partial<ReportRequest>>({
-    author_name: '',
-    author_gender: 'M',
-    department: '',
-    position: '',
-    memorandum: '',
-    signatory: 1,
-    authority_name: '',
-    cert_date: '',
-    is_draft: true,
+    docente_nombre: '',
+    docente_genero: 'M',
+    departamento: '',
+    cargo: '',
+    memorando: '',
+    firmante: 1,
+    firmante_nombre: '',
+    fecha: '',
+    es_borrador: true,
   });
 
   // Pre-llenar los campos cuando hay un autor seleccionado
@@ -35,10 +35,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
       const fullName = `${selectedAuthor.title} ${selectedAuthor.name} ${selectedAuthor.surname}`.trim();
       setFormData(prev => ({
         ...prev,
-        author_name: fullName,
-        author_gender: selectedAuthor.gender || 'M',
-        department: selectedAuthor.department || '',
-        position: selectedAuthor.position || '',
+        docente_nombre: fullName,
+        docente_genero: selectedAuthor.gender || 'M',
+        departamento: selectedAuthor.department || '',
+        cargo: selectedAuthor.position || '',
       }));
     }
   }, [selectedAuthor]);
@@ -52,7 +52,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
 
   const handleGenerateReport = async () => {
     // Validar campos requeridos
-    if (!formData.author_name || !formData.department || !formData.position) {
+    if (!formData.docente_nombre || !formData.departamento || !formData.cargo) {
       onError('Por favor complete todos los campos requeridos');
       return;
     }
@@ -67,15 +67,15 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
     try {
       const reportRequest: ReportRequest = {
         author_ids: authorIds,
-        author_name: formData.author_name!,
-        author_gender: formData.author_gender!,
-        department: formData.department!,
-        position: formData.position!,
-        memorandum: formData.memorandum || undefined,
-        signatory: formData.signatory || 1,
-        authority_name: formData.authority_name || undefined,
-        cert_date: formData.cert_date ? formatDateToSpanish(formData.cert_date) : undefined,
-        is_draft: formData.is_draft ?? true,
+        docente_nombre: formData.docente_nombre!,
+        docente_genero: formData.docente_genero!,
+        departamento: formData.departamento!,
+        cargo: formData.cargo!,
+        memorando: formData.memorando || undefined,
+        firmante: formData.firmante || 1,
+        firmante_nombre: formData.firmante_nombre || undefined,
+        fecha: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
+        es_borrador: formData.es_borrador ?? true,
       };
 
       const blob = await scopusApi.generateCertification(reportRequest);
@@ -84,8 +84,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      const tipoDoc = formData.is_draft ? 'borrador' : 'certificado_final';
-      link.download = `${tipoDoc}_${formData.author_name.replace(/\s+/g, '_')}.pdf`;
+      const tipoDoc = formData.es_borrador ? 'borrador' : 'certificado_final';
+      link.download = `${tipoDoc}_${formData.docente_nombre.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -111,7 +111,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-info-800">
-                Datos pre-llenados automáticamente
+                Datos autocompletados
               </h3>
               <p className="mt-1 text-sm text-info-700">
                 Los campos se han completado con la información del autor seleccionado: <strong>{selectedAuthor.title} {selectedAuthor.name} {selectedAuthor.surname}</strong>. 
@@ -131,8 +131,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             type="text"
             className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             placeholder="PhD. Juan Pérez"
-            value={formData.author_name}
-            onChange={(e) => handleInputChange('author_name', e.target.value)}
+            value={formData.docente_nombre}
+            onChange={(e) => handleInputChange('docente_nombre', e.target.value)}
           />
         </div>
 
@@ -141,8 +141,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             Género
           </label>
           <GenderSelect
-            value={formData.author_gender || ''}
-            onChange={(value) => handleInputChange('author_gender', value)}
+            value={formData.docente_genero || ''}
+            onChange={(value) => handleInputChange('docente_genero', value)}
             placeholder="Escriba o seleccione un género"
           />
         </div>
@@ -152,8 +152,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             Departamento *
           </label>
           <DepartmentSelect
-            value={formData.department || ''}
-            onChange={(value) => handleInputChange('department', value)}
+            value={formData.departamento || ''}
+            onChange={(value) => handleInputChange('departamento', value)}
             placeholder="Seleccione un departamento"
           />
         </div>
@@ -163,8 +163,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             Cargo *
           </label>
           <PositionSelect
-            value={formData.position || ''}
-            onChange={(value) => handleInputChange('position', value)}
+            value={formData.cargo || ''}
+            onChange={(value) => handleInputChange('cargo', value)}
             placeholder="Seleccione un cargo"
           />
         </div>
@@ -177,8 +177,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             type="text"
             className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             placeholder="EPN-DOCDCTA-2025-0055-M"
-            value={formData.memorandum}
-            onChange={(e) => handleInputChange('memorandum', e.target.value)}
+            value={formData.memorando}
+            onChange={(e) => handleInputChange('memorando', e.target.value)}
           />
         </div>
 
@@ -187,10 +187,10 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             Firmante
           </label>
           <FirmanteSelect
-            positionValue={formData.signatory || 1}
-            nameValue={formData.authority_name || ''}
-            onPositionChange={(value) => handleInputChange('signatory', value)}
-            onNameChange={(value) => handleInputChange('authority_name', value)}
+            positionValue={formData.firmante || 1}
+            nameValue={formData.firmante_nombre || ''}
+            onPositionChange={(value) => handleInputChange('firmante', value)}
+            onNameChange={(value) => handleInputChange('firmante_nombre', value)}
             placeholder="Escriba o seleccione un firmante"
           />
         </div>
@@ -202,13 +202,13 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
           <input
             type="date"
             className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-            value={formData.cert_date}
-            onChange={(e) => handleInputChange('cert_date', e.target.value)}
+            value={formData.fecha}
+            onChange={(e) => handleInputChange('fecha', e.target.value)}
           />
-          {formData.cert_date && (
+          {formData.fecha && (
             <p className="mt-2 text-sm text-neutral-600">
               <span className="font-medium">Fecha de reporte:</span>{' '}
-              <span className="text-primary-600 font-medium">{formatDateToSpanish(formData.cert_date)}</span>
+              <span className="text-primary-600 font-medium">{formatDateToSpanish(formData.fecha)}</span>
             </p>
           )}
         </div>
@@ -222,29 +222,29 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
               Tipo de Documento
             </h4>
             <p className="text-sm text-neutral-600">
-              {formData.is_draft
-                ? 'Borrador' 
+              {formData.es_borrador
+                ? 'Borrador'
                 : 'Certificado final'}
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <span className={`text-sm font-medium ${formData.is_draft ? 'text-primary-600' : 'text-neutral-500'}`}>
+            <span className={`text-sm font-medium ${formData.es_borrador ? 'text-primary-600' : 'text-neutral-500'}`}>
               Borrador
             </span>
             <button
               type="button"
-              onClick={() => handleInputChange('is_draft', !formData.is_draft)}
+              onClick={() => handleInputChange('es_borrador', !formData.es_borrador)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                formData.is_draft ? 'bg-neutral-300' : 'bg-primary-600'
+                formData.es_borrador ? 'bg-neutral-300' : 'bg-primary-600'
               }`}
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  formData.is_draft ? 'translate-x-1' : 'translate-x-6'
+                  formData.es_borrador ? 'translate-x-1' : 'translate-x-6'
                 }`}
               />
             </button>
-            <span className={`text-sm font-medium ${!formData.is_draft ? 'text-primary-600' : 'text-neutral-500'}`}>
+            <span className={`text-sm font-medium ${!formData.es_borrador ? 'text-primary-600' : 'text-neutral-500'}`}>
               Final
             </span>
           </div>
@@ -257,13 +257,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
           disabled={isGenerating}
           className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
         >
-          {isGenerating ? 'Generando...' : `📄 Generar ${formData.is_draft ? 'Borrador' : 'Certificado Final'}`}
+          {isGenerating ? 'Generando...' : `📄 Generar ${formData.es_borrador ? 'Borrador' : 'Certificado Final'}`}
         </button>
-      </div>
-
-      <div className="mt-4 text-sm text-neutral-600">
-        <p><strong>IDs de Autor:</strong> {authorIds.join(', ')}</p>
-        <p className="mt-1">* Campos requeridos</p>
       </div>
     </div>
   );
