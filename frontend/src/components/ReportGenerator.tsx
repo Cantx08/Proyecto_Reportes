@@ -99,21 +99,21 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
+    <div className="bg-white p-6 rounded-lg shadow-lg border border-neutral-200">
       {/* Mensaje informativo si los datos fueron pre-llenados */}
       {selectedAuthor && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-6 p-4 bg-info-50 border border-info-200 rounded-lg">
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-5 w-5 text-info-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
+              <h3 className="text-sm font-medium text-info-800">
                 Datos pre-llenados automáticamente
               </h3>
-              <p className="mt-1 text-sm text-blue-700">
+              <p className="mt-1 text-sm text-info-700">
                 Los campos se han completado con la información del autor seleccionado: <strong>{selectedAuthor.title} {selectedAuthor.name} {selectedAuthor.surname}</strong>. 
                 Puedes modificarlos según sea necesario.
               </p>
@@ -124,12 +124,12 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Nombre del Docente *
           </label>
           <input
             type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             placeholder="PhD. Juan Pérez"
             value={formData.docente_nombre}
             onChange={(e) => handleInputChange('docente_nombre', e.target.value)}
@@ -137,7 +137,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Género
           </label>
           <GenderSelect
@@ -148,7 +148,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Departamento *
           </label>
           <DepartmentSelect
@@ -159,7 +159,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Cargo *
           </label>
           <PositionSelect
@@ -170,12 +170,12 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Memorando (Opcional)
           </label>
           <input
             type="text"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             placeholder="EPN-DOCDCTA-2025-0055-M"
             value={formData.memorando}
             onChange={(e) => handleInputChange('memorando', e.target.value)}
@@ -183,7 +183,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Firmante
           </label>
           <FirmanteSelect
@@ -196,46 +196,46 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
             Fecha (Opcional)
           </label>
           <input
             type="date"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             value={formData.fecha}
             onChange={(e) => handleInputChange('fecha', e.target.value)}
           />
           {formData.fecha && (
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-neutral-600">
               <span className="font-medium">Fecha de reporte:</span>{' '}
-              <span className="text-blue-600">{formatDateToSpanish(formData.fecha)}</span>
+              <span className="text-primary-600 font-medium">{formatDateToSpanish(formData.fecha)}</span>
             </p>
           )}
         </div>
       </div>
 
       {/* Toggle para borrador vs certificado final */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+      <div className="mb-6 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-lg font-medium text-gray-800 mb-1">
+            <h4 className="text-lg font-medium text-neutral-800 mb-1">
               Tipo de Documento
             </h4>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-neutral-600">
               {formData.es_borrador 
                 ? 'Borrador' 
                 : 'Certificado final'}
             </p>
           </div>
           <div className="flex items-center space-x-3">
-            <span className={`text-sm font-medium ${formData.es_borrador ? 'text-blue-600' : 'text-gray-500'}`}>
+            <span className={`text-sm font-medium ${formData.es_borrador ? 'text-primary-600' : 'text-neutral-500'}`}>
               Borrador
             </span>
             <button
               type="button"
               onClick={() => handleInputChange('es_borrador', !formData.es_borrador)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                formData.es_borrador ? 'bg-gray-300' : 'bg-blue-600'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
+                formData.es_borrador ? 'bg-neutral-300' : 'bg-primary-600'
               }`}
             >
               <span
@@ -244,7 +244,7 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
                 }`}
               />
             </button>
-            <span className={`text-sm font-medium ${!formData.es_borrador ? 'text-blue-600' : 'text-gray-500'}`}>
+            <span className={`text-sm font-medium ${!formData.es_borrador ? 'text-primary-600' : 'text-neutral-500'}`}>
               Final
             </span>
           </div>
@@ -255,13 +255,13 @@ const GeneradorReporte: React.FC<GeneradorReporteProps> = ({ authorIds, selected
         <button
           onClick={handleGenerateReport}
           disabled={isGenerating}
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-8 rounded-md transition-colors duration-200"
+          className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
         >
           {isGenerating ? 'Generando...' : `📄 Generar ${formData.es_borrador ? 'Borrador' : 'Certificado Final'}`}
         </button>
       </div>
 
-      <div className="mt-4 text-sm text-gray-600">
+      <div className="mt-4 text-sm text-neutral-600">
         <p><strong>IDs de Autor:</strong> {authorIds.join(', ')}</p>
         <p className="mt-1">* Campos requeridos</p>
       </div>

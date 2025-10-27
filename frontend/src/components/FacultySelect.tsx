@@ -48,7 +48,7 @@ export const FacultySelect: React.FC<FacultySelectProps> = ({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-2">
-        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+        <Loader2 className="h-5 w-5 animate-spin text-neutral-400" />
       </div>
     );
   }
@@ -59,9 +59,9 @@ export const FacultySelect: React.FC<FacultySelectProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-          error ? 'border-red-500' : 'border-gray-300'
-        } ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+        className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
+          error ? 'border-error-500' : 'border-neutral-300'
+        } ${disabled ? 'bg-neutral-100 cursor-not-allowed' : ''}`}
         required={required}
       >
         <option value="">Selecciona una facultad...</option>
@@ -72,7 +72,7 @@ export const FacultySelect: React.FC<FacultySelectProps> = ({
         ))}
       </select>
       {error && (
-        <p className="mt-1 text-sm text-red-600">{error}</p>
+        <p className="mt-1 text-sm text-error-600">{error}</p>
       )}
     </div>
   );

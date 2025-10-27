@@ -113,11 +113,11 @@ export default function PublicacionesPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <FileText className="h-6 w-6 mr-3" style={{ color: '#042a53' }} />
+            <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
+              <FileText className="h-6 w-6 mr-3 text-primary-500" />
               Gestión de Publicaciones
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-neutral-600 mt-1">
               Búsqueda, análisis y visualización de publicaciones académicas
             </p>
           </div>
@@ -126,10 +126,9 @@ export default function PublicacionesPage() {
               onClick={() => setViewMode('search')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 viewMode === 'search' 
-                  ? 'text-white' 
-                  : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-primary-500 text-white hover:bg-primary-600' 
+                  : 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50'
               }`}
-              style={viewMode === 'search' ? { backgroundColor: '#1f2937' } : {}}
             >
               <Search className="h-4 w-4 mr-2 inline" />
               Búsqueda
@@ -139,12 +138,11 @@ export default function PublicacionesPage() {
               disabled={publicaciones.length === 0}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 viewMode === 'results' 
-                  ? 'text-white' 
+                  ? 'bg-primary-500 text-white hover:bg-primary-600' 
                   : publicaciones.length > 0 
-                    ? 'border border-gray-300 text-gray-700 hover:bg-gray-50' 
-                    : 'border border-gray-200 text-gray-400 cursor-not-allowed'
+                    ? 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50' 
+                    : 'border border-neutral-200 text-neutral-400 cursor-not-allowed'
               }`}
-              style={viewMode === 'results' ? { backgroundColor: '#1f2937' } : {}}
             >
               <BarChart3 className="h-4 w-4 mr-2 inline" />
               Análisis
@@ -155,39 +153,39 @@ export default function PublicacionesPage() {
         {/* Stats Cards */}
         {stats.totalPublicaciones > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex items-center">
-                <FileText className="h-8 w-8" style={{ color: '#042a53' }} />
+                <FileText className="h-8 w-8 text-primary-500" />
                 <div className="ml-3">
-                  <div className="text-2xl font-bold text-gray-900">{stats.totalPublicaciones}</div>
-                  <div className="text-sm text-gray-600">Publicaciones</div>
+                  <div className="text-2xl font-bold text-neutral-900">{stats.totalPublicaciones}</div>
+                  <div className="text-sm text-neutral-600">Publicaciones</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex items-center">
-                <Target className="h-8 w-8 text-green-600" />
+                <Target className="h-8 w-8 text-success-600" />
                 <div className="ml-3">
-                  <div className="text-2xl font-bold text-gray-900">{stats.totalAreas}</div>
-                  <div className="text-sm text-gray-600">Áreas Temáticas</div>
+                  <div className="text-2xl font-bold text-neutral-900">{stats.totalAreas}</div>
+                  <div className="text-sm text-neutral-600">Áreas Temáticas</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-purple-600" />
+                <Calendar className="h-8 w-8 text-info-600" />
                 <div className="ml-3">
-                  <div className="text-2xl font-bold text-gray-900">{stats.totalAnios}</div>
-                  <div className="text-sm text-gray-600">Años Analizados</div>
+                  <div className="text-2xl font-bold text-neutral-900">{stats.totalAnios}</div>
+                  <div className="text-sm text-neutral-600">Años Analizados</div>
                 </div>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 text-orange-600" />
+                <TrendingUp className="h-8 w-8 text-warning-600" />
                 <div className="ml-3">
-                  <div className="text-2xl font-bold text-gray-900">{stats.autoresAnalizados}</div>
-                  <div className="text-sm text-gray-600">Autores Analizados</div>
+                  <div className="text-2xl font-bold text-neutral-900">{stats.autoresAnalizados}</div>
+                  <div className="text-sm text-neutral-600">Autores Analizados</div>
                 </div>
               </div>
             </div>
@@ -199,8 +197,8 @@ export default function PublicacionesPage() {
       {viewMode === 'search' ? (
         <div className="space-y-8">
           {/* Search Mode Selector */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <div className="bg-white rounded-lg border border-neutral-200 p-6">
+            <h3 className="text-sm font-medium text-neutral-700 mb-3">
               Modo de Búsqueda
             </h3>
             <div className="flex flex-wrap gap-3">
@@ -208,8 +206,8 @@ export default function PublicacionesPage() {
                 onClick={() => setSearchMode('scopus')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
                   searchMode === 'scopus'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-primary-500 text-white hover:bg-primary-600'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                 }`}
               >
                 <Microscope className="h-4 w-4 mr-2" />
@@ -219,8 +217,8 @@ export default function PublicacionesPage() {
                 onClick={() => setSearchMode('database')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center ${
                   searchMode === 'database'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-primary-500 text-white hover:bg-primary-600'
+                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                 }`}
               >
                 <Users className="h-4 w-4 mr-2" />
@@ -230,12 +228,12 @@ export default function PublicacionesPage() {
           </div>
 
           {/* Search Section */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg border border-neutral-200 p-6">
             <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-2">
                 Búsqueda de Publicaciones
               </h2>
-              <p className="text-gray-600">
+              <p className="text-neutral-600">
                 {searchMode === 'scopus' && 'Buscar publicaciones por Scopus IDs.'}
                 {searchMode === 'database' && 'Buscar publicaciones por autor.'}
               </p>
@@ -271,27 +269,27 @@ export default function PublicacionesPage() {
 
             {/* Selection Summary */}
             {(scopusIds.filter(id => id.trim()).length > 0 || selectedAuthorIds.length > 0) && (
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="font-medium text-gray-900 mb-3 flex items-center">
+              <div className="mt-6 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                <h3 className="font-medium text-neutral-900 mb-3 flex items-center">
                   <Filter className="h-4 w-4 mr-2" />
                   Selección Actual
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Scopus IDs</p>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-sm text-neutral-600">Scopus IDs</p>
+                    <p className="text-2xl font-bold text-primary-500">
                       {scopusIds.filter(id => id.trim()).length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Autores de BD</p>
+                    <p className="text-sm text-neutral-600">Autores de BD</p>
                     <p className="text-2xl font-bold text-green-600">
                       {selectedAuthorIds.length}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Total</p>
-                    <p className="text-2xl font-bold text-gray-900">
+                    <p className="text-sm text-neutral-600">Total</p>
+                    <p className="text-2xl font-bold text-neutral-900">
                       {scopusIds.filter(id => id.trim()).length + selectedAuthorIds.length}
                     </p>
                   </div>
@@ -300,7 +298,7 @@ export default function PublicacionesPage() {
                 {/* Selected IDs Display */}
                 {selectedAuthorIds.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-xs font-medium text-gray-700 mb-2">Autores seleccionados:</p>
+                    <p className="text-xs font-medium text-neutral-700 mb-2">Autores seleccionados:</p>
                     <div className="flex flex-wrap gap-2">
                       {selectedAuthorIds.map(id => (
                         <span
@@ -327,7 +325,7 @@ export default function PublicacionesPage() {
             <button
               onClick={handleSearch}
               disabled={isLoading || (scopusIds.filter(id => id.trim()).length === 0 && selectedAuthorIds.length === 0)}
-              className="w-full mt-6 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm font-medium"
+              className="w-full mt-6 py-3 px-4 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm font-medium"
             >
               {isLoading ? (
                 <>
@@ -347,11 +345,11 @@ export default function PublicacionesPage() {
               <div className="mt-8 text-center py-8">
                 <div className="inline-flex items-center flex-col">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                  <span className="text-lg text-gray-600 mb-2">
+                  <span className="text-lg text-neutral-600 mb-2">
                     Procesando datos de Scopus...
                   </span>
                   {loadingProgress && (
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-neutral-500">
                       {loadingProgress}
                     </span>
                   )}
@@ -363,14 +361,14 @@ export default function PublicacionesPage() {
       ) : (
         <div className="space-y-6">
           {/* Quick Search Bar in Results Mode */}
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
+          <div className="bg-white p-4 rounded-lg border border-neutral-200">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-sm font-medium text-neutral-700">
                 Realizar nueva búsqueda
               </h3>
               <button
                 onClick={() => setViewMode('search')}
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                className="text-sm text-primary-500 hover:text-primary-600 flex items-center"
               >
                 <Search className="h-4 w-4 mr-1" />
                 Búsqueda avanzada
@@ -379,7 +377,7 @@ export default function PublicacionesPage() {
             <button
               onClick={handleSearch}
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 transition-colors text-sm font-medium"
+              className="w-full py-2 px-4 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:bg-neutral-300 transition-colors text-sm font-medium"
             >
               {isLoading ? 'Buscando...' : 'Actualizar Resultados'}
             </button>
@@ -412,12 +410,9 @@ export default function PublicacionesPage() {
                 <div className="flex items-center mb-4">
                   <FileEdit className="h-6 w-6 text-orange-600 mr-3" />
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Generar Certificación
+                    <h3 className="text-lg font-semibold text-neutral-900">
+                      Generar Borrador
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      Crea un borrador del reporte basado en las publicaciones encontradas
-                    </p>
                   </div>
                 </div>
                 <GeneradorReporte 
@@ -431,17 +426,17 @@ export default function PublicacionesPage() {
 
           {/* Empty State */}
           {publicaciones.length === 0 && !isLoading && (
-            <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-              <FileText className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
+            <div className="text-center py-12 bg-white rounded-lg border border-neutral-200">
+              <FileText className="mx-auto h-12 w-12 text-neutral-400" />
+              <h3 className="mt-2 text-sm font-medium text-neutral-900">
                 No se encontraron publicaciones
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-neutral-500">
                 Ingresa IDs de Scopus o selecciona autores para comenzar el análisis
               </p>
               <button
                 onClick={() => setViewMode('search')}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                className="mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 text-sm"
               >
                 Volver a la búsqueda
               </button>

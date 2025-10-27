@@ -88,11 +88,11 @@ export default function InformesPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-              <ClipboardCheck className="h-6 w-6 mr-3 text-[#042a53]" />
+            <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
+              <ClipboardCheck className="h-6 w-6 mr-3 text-primary-500" />
               Generación de Certificaciones
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-neutral-600 mt-1">
               Carga aquí el borrador para generar la certificación
             </p>
           </div>
@@ -100,7 +100,7 @@ export default function InformesPage() {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-neutral-200 p-6">
         <div className="space-y-6">
           {/* Error Message */}
           {error && (
@@ -115,11 +115,11 @@ export default function InformesPage() {
 
           {/* File Upload */}
           <div>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-              <Upload className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center hover:border-neutral-400 transition-colors">
+              <Upload className="mx-auto h-16 w-16 text-neutral-400 mb-4" />
               <div className="mb-2">
                 <label className="cursor-pointer">
-                  <span className="text-[#042a53] hover:text-[#1e7bb8] font-medium text-lg">
+                  <span className="text-primary-500 hover:text-primary-400 font-medium text-lg">
                     Haz clic para subir un archivo
                   </span>
                   <input
@@ -130,9 +130,9 @@ export default function InformesPage() {
                     disabled={isProcessing}
                   />
                 </label>
-                <span className="text-gray-600"> o arrastra y suelta aquí</span>
+                <span className="text-neutral-600"> o arrastra y suelta aquí</span>
               </div>
-              <p className="text-sm text-gray-500">Solo archivos PDF hasta 10MB</p>
+              <p className="text-sm text-neutral-500">Solo archivos PDF hasta 10MB</p>
               
               {uploadedFile && (
                 <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
@@ -149,18 +149,18 @@ export default function InformesPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-neutral-200">
             <button
               onClick={handleCancel}
               disabled={isProcessing}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancelar
             </button>
             <button
               onClick={handleProcessReport}
               disabled={isProcessing || !uploadedFile}
-              className="px-6 py-2 bg-[#5a8db3] text-white rounded-lg text-sm font-medium hover:bg-[#4a7d9f] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-6 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {isProcessing ? (
                 <>

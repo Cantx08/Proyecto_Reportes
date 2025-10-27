@@ -21,11 +21,11 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
 }) => {
   if (publicaciones.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
+        <h3 className="text-lg font-semibold text-neutral-800 mb-4">
           Publicaciones
         </h3>
-        <p className="text-gray-500 text-center py-8">
+        <p className="text-neutral-500 text-center py-8">
           No hay publicaciones para mostrar
         </p>
       </div>
@@ -33,8 +33,8 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
+      <h3 className="text-lg font-semibold text-neutral-800 mb-4">
         Publicaciones ({publicaciones.length})
       </h3>
       
@@ -42,13 +42,13 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
         {publicaciones.map((pub, index) => (
           <div
             key={index}
-            className="border border-gray-200 rounded-md p-4 hover:shadow-sm transition-shadow"
+            className="border border-neutral-200 rounded-md p-4 hover:shadow-sm hover:border-primary-300 transition-all"
           >
-            <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+            <h4 className="font-semibold text-neutral-900 mb-2 line-clamp-2">
               {pub.title}
             </h4>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-neutral-600">
               <div>
                 <span className="font-medium">Año:</span> {pub.year}
               </div>
@@ -64,7 +64,7 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
               {pub.categories && (
                 <div className="md:col-span-2">
                   <span className="font-medium">Categorías:</span>{' '}
-                  <span style={{ color: '#2c5f7f' }}>{pub.categories}</span>
+                  <span className="text-primary-600 font-medium">{pub.categories}</span>
                 </div>
               )}
               {pub.doi && (
@@ -74,8 +74,7 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
                     href={`https://doi.org/${pub.doi}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline"
-                    style={{ color: '#2c5f7f' }}
+                    className="text-primary-600 hover:text-primary-700 hover:underline transition-colors"
                   >
                     {pub.doi}
                   </a>

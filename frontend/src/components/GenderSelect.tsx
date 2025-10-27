@@ -76,8 +76,8 @@ const GenderSelect: React.FC<GenderSelectProps> = ({
     }
   };
 
-  const baseClassName = "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
-  const errorClassName = error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "";
+  const baseClassName = "w-full p-3 border rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors";
+  const errorClassName = error ? "border-error-500 focus:ring-error-500 focus:border-error-500" : "border-neutral-300";
 
   // Mostrar etiqueta completa si es una opción predefinida
   const displayValue = (() => {
