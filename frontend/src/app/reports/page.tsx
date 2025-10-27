@@ -14,22 +14,83 @@ export default function CertificationPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const validateFile = (file: File): string | null => {
+    // Validar tipo
+    if (file.type !== 'application/pdf') {
+      return 'Por favor seleccione un archivo PDF válido';
+    }
+
+    // Validar tamaño (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return 'El archivo excede el tamaño máximo permitido (10MB)';
+    }
+
+    return null;
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     setError(null);
 
     if (file) {
-      // Validar tipo
-      if (file.type !== 'application/pdf') {
-        setError('Por favor seleccione un archivo PDF válido');
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
         return;
       }
 
-      // Validar tamaño (10MB)
-      const maxSize = 10 * 1024 * 1024;
-      if (file.size > maxSize) {
-        setError('El archivo excede el tamaño máximo permitido (10MB)');
+      setUploadedFile(file);
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Solo desactivar isDragging si realmente salimos del contenedor principal
+    // e.currentTarget es el div con los event handlers
+    // e.relatedTarget es el elemento al que nos movemos
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    // Verificar si el cursor está fuera de los límites del contenedor
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Mantener el estado de dragging activo
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setError(null);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const validationError = validateFile(file);
+      
+      if (validationError) {
+        setError(validationError);
         return;
       }
 
@@ -113,13 +174,25 @@ export default function CertificationPage() {
             </div>
           )}
 
-          {/* File Upload */}
+          {/* File Upload with Drag & Drop */}
           <div>
-            <div className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center hover:border-neutral-400 transition-colors">
-              <Upload className="mx-auto h-16 w-16 text-neutral-400 mb-4" />
+            <div 
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
+                isDragging 
+                  ? 'border-primary-500 bg-primary-50' 
+                  : 'border-neutral-300 hover:border-neutral-400'
+              }`}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <Upload className={`mx-auto h-16 w-16 mb-4 transition-colors ${
+                isDragging ? 'text-primary-500' : 'text-neutral-400'
+              }`} />
               <div className="mb-2">
                 <label className="cursor-pointer">
-                  <span className="text-primary-500 hover:text-primary-400 font-medium text-lg">
+                  <span className="text-primary-500 hover:text-primary-600 font-medium text-lg">
                     Haz clic para subir un archivo
                   </span>
                   <input
@@ -143,6 +216,13 @@ export default function CertificationPage() {
                   <p className="text-sm text-green-600 mt-2">
                     Tamaño: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
+                  <button
+                    onClick={handleCancel}
+                    className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
+                    disabled={isProcessing}
+                  >
+                    Eliminar archivo
+                  </button>
                 </div>
               )}
             </div>
