@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useNewDepartments } from '@/hooks/useNewDepartments';
+import { useDepartments } from '@/hooks/useDepartments';
 import { DepartmentCreateRequest } from '@/types/api';
 import { FacultySelect } from '@/components/FacultySelect';
 import { Building, ArrowLeft, Save } from 'lucide-react';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 export default function NewDepartmentPage() {
   const router = useRouter();
-  const { createDepartment, creating } = useNewDepartments();
+  const { createDepartment, creating } = useDepartments();
 
   const [formData, setFormData] = useState({
     dep_code: '',

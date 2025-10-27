@@ -6,7 +6,7 @@ import { Author } from '@/types/api';
 import AuthorForm from './AuthorForm';
 import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
 
-const AuthorsManagerNew: React.FC = () => {
+const AuthorsManager: React.FC = () => {
   const { 
     authors, 
     loading, 
@@ -181,4 +181,4 @@ const AuthorsManagerNew: React.FC = () => {
   );
 };
 
-export default AuthorsManagerNew;
+export default AuthorsManager;

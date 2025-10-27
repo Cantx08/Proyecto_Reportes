@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Author, Department, Position } from '@/types/api';
-import DepartmentSelectNew from './DepartmentSelectNew';
-import PositionSelectNew from './PositionSelectNew';
+import DepartmentSelectNew from './DepartmentSelect';
+import PositionSelectNew from './PositionSelect';
 import type { DepartmentResponse, PositionResponse } from '@/types/api';
 import { Save, X } from 'lucide-react';
 

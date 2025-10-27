@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-interface Publicacion {
+interface Publication {
   title: string;           // Cambio: titulo -> title
   year: string;           // Cambio: anio -> year
   source: string;         // Cambio: fuente -> source
@@ -12,14 +12,14 @@ interface Publicacion {
   categories: string;     // Cambio: categorias -> categories
 }
 
-interface PublicacionesListProps {
-  publicaciones: Publicacion[];
+interface PublicationsListProps {
+  publications: Publication[];
 }
 
-export const PublicacionesList: React.FC<PublicacionesListProps> = ({
-  publicaciones
+export const PublicationsList: React.FC<PublicationsListProps> = ({
+  publications
 }) => {
-  if (publicaciones.length === 0) {
+  if (publications.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
         <h3 className="text-lg font-semibold text-neutral-800 mb-4">
@@ -35,11 +35,11 @@ export const PublicacionesList: React.FC<PublicacionesListProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
       <h3 className="text-lg font-semibold text-neutral-800 mb-4">
-        Publicaciones ({publicaciones.length})
+        Publicaciones ({publications.length})
       </h3>
       
       <div className="space-y-4 max-h-96 overflow-y-auto">
-        {publicaciones.map((pub, index) => (
+        {publications.map((pub, index) => (
           <div
             key={index}
             className="border border-neutral-200 rounded-md p-4 hover:shadow-sm hover:border-primary-300 transition-all"

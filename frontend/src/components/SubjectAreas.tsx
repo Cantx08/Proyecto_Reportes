@@ -2,11 +2,11 @@
 
 import React from 'react';
 
-interface AreasTematicasProps {
+interface SubjectAreasProps {
   areas: string[];
 }
 
-export const AreasTematicas: React.FC<AreasTematicasProps> = ({ areas }) => {
+export const SubjectAreas: React.FC<SubjectAreasProps> = ({ areas }) => {
   if (areas.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">

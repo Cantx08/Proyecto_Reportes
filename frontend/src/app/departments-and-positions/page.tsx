@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useNewDepartments } from '@/hooks/useNewDepartments';
-import { usePositions } from '@/hooks/useNewPositions';
+import { useDepartments } from '@/hooks/useDepartments';
+import { usePositions } from '@/hooks/usePositions';
 import { DepartmentResponse, PositionResponse } from '@/types/api';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -15,7 +15,7 @@ interface Faculty {
 
 type ViewMode = 'departments' | 'positions';
 
-const DepartmentsManagementPage: React.FC = () => {
+const DepartmentsAndPositionsPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('departments');
   
   // Departments hooks
@@ -25,7 +25,7 @@ const DepartmentsManagementPage: React.FC = () => {
     error: errorDepartments, 
     deleteDepartment, 
     fetchDepartments 
-  } = useNewDepartments();
+  } = useDepartments();
 
   // Positions hooks
   const { 
@@ -607,4 +607,4 @@ const PositionsTable: React.FC<{
   );
 };
 
-export default DepartmentsManagementPage;
+export default DepartmentsAndPositionsPage;

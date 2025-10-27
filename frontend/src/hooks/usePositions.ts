@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { positionsApi, apiUtils } from '@/services/newApi';
+import { positionsApi, apiUtils } from '@/services/servicesApi';
 import type { 
   PositionResponse, 
   PositionsResponse,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { authorsApi, apiUtils } from '@/services/newApi';
+import { authorsApi, apiUtils } from '@/services/servicesApi';
 import type { 
   Author, 
   AuthorResponse, 

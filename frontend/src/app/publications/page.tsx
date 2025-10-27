@@ -18,23 +18,23 @@ import {
 } from 'lucide-react';
 import { ScopusIdInput } from '@/components/ScopusIdInput';
 import { AuthorSelector } from '@/components/AuthorSelector';
-import { PublicacionesList } from '@/components/PublicationsList';
-import { AreasTematicas } from '@/components/SubjectAreas';
-import { DocumentosPorAnio } from '@/components/DocumentsByYearChart';
+import { PublicationsList } from '@/components/PublicationsList';
+import { SubjectAreas } from '@/components/SubjectAreas';
+import { DocumentsByYear } from '@/components/DocumentsByYearChart';
 import { ErrorNotification } from '@/components/ErrorNotification';
-import GeneradorReporte from '@/components/ReportGenerator';
+import ReportGenerator from '@/components/ReportGenerator';
 import { useScopusData } from '@/hooks/useScopusData';
 import { useAuthors } from '@/hooks/useAuthors';
 import type { AuthorResponse } from '@/types/api';
 
-export default function PublicacionesPage() {
+export default function PublicationsPage() {
   const {
     scopusIds,
     isLoading,
     loadingProgress,
-    publicaciones,
-    areasTematicas,
-    documentosPorAnio,
+    publications,
+    subjectAreas,
+    documentsByYear,
     error,
     validateScopusId,
     addScopusId,
@@ -52,12 +52,12 @@ export default function PublicacionesPage() {
 
   // Auto-cambiar a vista de resultados cuando hay datos
   useEffect(() => {
-    if (publicaciones.length > 0 || areasTematicas.length > 0) {
+    if (publications.length > 0 || subjectAreas.length > 0) {
       setViewMode('results');
     } else {
       setViewMode('search');
     }
-  }, [publicaciones, areasTematicas]);
+  }, [publications, subjectAreas]);
 
   const handleAuthorSelect = (authorId: string) => {
     setSelectedAuthorIds(prev =>
@@ -101,9 +101,9 @@ export default function PublicacionesPage() {
   };
 
   const stats = {
-    totalPublicaciones: publicaciones.length,
-    totalAreas: areasTematicas.length,
-    totalAnios: Object.keys(documentosPorAnio).length,
+    totalPublicaciones: publications.length,
+    totalAreas: subjectAreas.length,
+    totalAnios: Object.keys(documentsByYear).length,
     autoresAnalizados: scopusIds.filter(id => id.trim() !== '').length + selectedAuthorIds.length
   };
 
@@ -135,11 +135,11 @@ export default function PublicacionesPage() {
             </button>
             <button 
               onClick={() => setViewMode('results')}
-              disabled={publicaciones.length === 0}
+              disabled={publications.length === 0}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 viewMode === 'results' 
                   ? 'bg-primary-500 text-white hover:bg-primary-600' 
-                  : publicaciones.length > 0 
+                  : publications.length > 0 
                     ? 'border border-neutral-300 text-neutral-700 hover:bg-neutral-50' 
                     : 'border border-neutral-200 text-neutral-400 cursor-not-allowed'
               }`}
@@ -387,26 +387,26 @@ export default function PublicacionesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Publicaciones - Ocupa 2 columnas */}
             <div className="lg:col-span-2">
-              <PublicacionesList publicaciones={publicaciones} />
+              <PublicationsList publications={publications} />
             </div>
 
             {/* Sidebar - Áreas Temáticas */}
             <div className="space-y-6">
-              <AreasTematicas areas={areasTematicas} />
+              <SubjectAreas areas={subjectAreas} />
             </div>
           </div>
 
           {/* Gráfico de Documentos por Año - Ancho completo */}
-          {Object.keys(documentosPorAnio).length > 0 && (
+          {Object.keys(documentsByYear).length > 0 && (
             <div className="w-full">
-              <DocumentosPorAnio documentosPorAnio={documentosPorAnio} />
+              <DocumentsByYear documentsByYear={documentsByYear} />
             </div>
           )}
 
           {/* Generador de Borrador - Solo cuando hay resultados */}
-          {(scopusIds.filter(id => id.trim() !== '').length > 0 || selectedAuthorIds.length > 0) && publicaciones.length > 0 && (
+          {(scopusIds.filter(id => id.trim() !== '').length > 0 || selectedAuthorIds.length > 0) && publications.length > 0 && (
             <div className="w-full">
-              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg p-6 border border-orange-200">
+              <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center mb-4">
                   <FileEdit className="h-6 w-6 text-orange-600 mr-3" />
                   <div>
@@ -415,7 +415,7 @@ export default function PublicacionesPage() {
                     </h3>
                   </div>
                 </div>
-                <GeneradorReporte 
+                <ReportGenerator
                   authorIds={[...scopusIds.filter(id => id.trim() !== ''), ...selectedAuthorIds]}
                   selectedAuthor={getSelectedAuthor()}
                   onError={handleReportError}
@@ -425,7 +425,7 @@ export default function PublicacionesPage() {
           )}
 
           {/* Empty State */}
-          {publicaciones.length === 0 && !isLoading && (
+          {publications.length === 0 && !isLoading && (
             <div className="text-center py-12 bg-white rounded-lg border border-neutral-200">
               <FileText className="mx-auto h-12 w-12 text-neutral-400" />
               <h3 className="mt-2 text-sm font-medium text-neutral-900">

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
-import { usePositions } from '@/hooks/useNewPositions';
+import { usePositions } from '@/hooks/usePositions';
 import { PositionUpdateRequest, PositionResponse } from '@/types/api';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import Breadcrumb from '@/components/layout/Breadcrumb';

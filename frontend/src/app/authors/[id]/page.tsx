@@ -3,19 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuthors } from '@/hooks/useAuthors';
-import { useNewDepartments } from '@/hooks/useNewDepartments';
-import { usePositions } from '@/hooks/useNewPositions';
+import { useDepartments } from '@/hooks/useDepartments';
+import { usePositions } from '@/hooks/usePositions';
 import { ArrowLeft, Save, Loader2, User } from 'lucide-react';
 import Link from 'next/link';
 import ScopusAccountsManager from '@/components/ScopusAccountsManager';
 
-export default function EditarAutorPage() {
+export default function EditAuthorPage() {
   const router = useRouter();
   const params = useParams();
   const authorId = params?.id as string;
 
   const { getAuthor, updateAuthor, updating, error } = useAuthors();
-  const { departments, loading: loadingDepartments } = useNewDepartments();
+  const { departments, loading: loadingDepartments } = useDepartments();
   const { positions, loading: loadingPositions } = usePositions();
 
   const [loading, setLoading] = useState(true);

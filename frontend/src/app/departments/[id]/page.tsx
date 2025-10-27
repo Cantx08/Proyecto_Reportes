@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useNewDepartments } from '@/hooks/useNewDepartments';
+import { useDepartments } from '@/hooks/useDepartments';
 import { DepartmentUpdateRequest } from '@/types/api';
 import { FacultySelect } from '@/components/FacultySelect';
 import { Building, ArrowLeft, Save, Loader2 } from 'lucide-react';
@@ -13,7 +13,7 @@ export default function EditDepartmentPage() {
   const params = useParams();
   const depId = params.id as string;
   
-  const { getDepartment, updateDepartment, updating } = useNewDepartments();
+  const { getDepartment, updateDepartment, updating } = useDepartments();
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { usePositions } from '@/hooks/useNewPositions';
+import { usePositions } from '@/hooks/usePositions';
 import type { PositionResponse } from '@/types/api';
 
 interface PositionSelectProps {

@@ -27,7 +27,7 @@ interface Department {
   fac_name: string;
 }
 
-export default function AutoresPage() {
+export default function AuthorsPage() {
   const { authors, loading, error, fetchAuthors, deleteAuthor } = useAuthors();
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);

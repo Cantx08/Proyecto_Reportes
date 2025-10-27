@@ -100,7 +100,7 @@ export const authorsApi = {
 };
 
 // ===============================
-// SERVICIOS PARA DEPARTAMENTOS NUEVOS
+// SERVICIOS PARA DEPARTAMENTOS
 // ===============================
 
 // Tipo de respuesta del backend para departamentos

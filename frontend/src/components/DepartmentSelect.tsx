@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useNewDepartments as useDepartments } from '@/hooks/useNewDepartments';
+import { useDepartments as useDepartments } from '@/hooks/useDepartments';
 import type { DepartmentResponse } from '@/types/api';
 
 interface DepartmentSelectProps {

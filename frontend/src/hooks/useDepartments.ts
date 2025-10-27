@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { newDepartmentsApi, apiUtils } from '@/services/newApi';
+import { newDepartmentsApi, apiUtils } from '@/services/servicesApi';
 import type { 
   DepartmentResponse, 
   DepartmentCreateRequest, 
   DepartmentUpdateRequest 
 } from '@/types/api';
 
-export interface UseNewDepartmentsState {
+export interface UseDepartmentsState {
   departments: DepartmentResponse[];
   loading: boolean;
   error: string | null;
@@ -15,7 +15,7 @@ export interface UseNewDepartmentsState {
   deleting: boolean;
 }
 
-export interface UseNewDepartmentsActions {
+export interface UseDepartmentsActions {
   fetchDepartments: () => Promise<void>;
   getDepartment: (depId: string) => Promise<DepartmentResponse | null>;
   getDepartmentsByFaculty: (facName: string) => Promise<DepartmentResponse[]>;
@@ -25,8 +25,8 @@ export interface UseNewDepartmentsActions {
   clearError: () => void;
 }
 
-export function useNewDepartments(): UseNewDepartmentsState & UseNewDepartmentsActions {
-  const [state, setState] = useState<UseNewDepartmentsState>({
+export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
+  const [state, setState] = useState<UseDepartmentsState>({
     departments: [],
     loading: false,
     error: null,

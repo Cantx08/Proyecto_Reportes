@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Loader2, XCircle } from 'lucide-react';
-import { scopusAccountsApi } from '@/services/newApi';
+import { scopusAccountsApi } from '@/services/servicesApi';
 import type { ScopusAccountResponse } from '@/types/api';
 
 interface ScopusAccountData {

@@ -25,12 +25,12 @@ ChartJS.register(
   Legend
 );
 
-interface DocumentosPorAnioProps {
-  documentosPorAnio: Record<string, number>;
+interface DocumentsByYearProps {
+  documentsByYear: Record<string, number>;
 }
 
-export const DocumentosPorAnio: React.FC<DocumentosPorAnioProps> = ({
-  documentosPorAnio
+export const DocumentsByYear: React.FC<DocumentsByYearProps> = ({
+  documentsByYear
 }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<any>(null);
@@ -51,8 +51,8 @@ export const DocumentosPorAnio: React.FC<DocumentosPorAnioProps> = ({
     if (!ctx) return;
 
     // Preparar datos
-    const years = Object.keys(documentosPorAnio).sort();
-    const counts = years.map(year => documentosPorAnio[year]);
+    const years = Object.keys(documentsByYear).sort();
+    const counts = years.map(year => documentsByYear[year]);
     
     // Calcular el máximo dinámico para el eje Y y el stepSize
     const maxPublications = Math.max(...counts);
@@ -174,9 +174,9 @@ export const DocumentosPorAnio: React.FC<DocumentosPorAnioProps> = ({
         chartInstance.current = null;
       }
     };
-  }, [documentosPorAnio]);
+  }, [documentsByYear]);
 
-  if (Object.keys(documentosPorAnio).length === 0) {
+  if (Object.keys(documentsByYear).length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">

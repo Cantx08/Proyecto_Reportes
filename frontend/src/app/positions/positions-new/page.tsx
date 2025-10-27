@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usePositions } from '@/hooks/useNewPositions';
+import { usePositions } from '@/hooks/usePositions';
 import { PositionCreateRequest } from '@/types/api';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import { Briefcase, Save, ArrowLeft } from 'lucide-react';

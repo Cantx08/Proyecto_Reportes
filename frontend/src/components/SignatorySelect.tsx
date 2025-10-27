@@ -2,21 +2,21 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 
-interface FirmanteSelectProps {
-  cargoValue: number | string;
-  nombreValue: string;
-  onCargoChange: (value: number | string) => void;
-  onNombreChange: (value: string) => void;
+interface SignatorySelectProps {
+  positionValue: number | string;
+  nameValue: string;
+  onPositionChange: (value: number | string) => void;
+  onNameChange: (value: string) => void;
   error?: string;
   className?: string;
   placeholder?: string;
 }
 
-const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
-  cargoValue,
-  nombreValue,
-  onCargoChange,
-  onNombreChange,
+const FirmanteSelect: React.FC<SignatorySelectProps> = ({
+  positionValue,
+  nameValue,
+  onPositionChange,
+  onNameChange,
   error,
   className = '',
   placeholder = 'Escriba o seleccione un firmante'
@@ -32,15 +32,15 @@ const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
     { value: 2, label: 'Vicerrectora de Investigación' }
   ];
 
-  // Sincronizar el valor del input con el prop cargoValue
+  // Sincronizar el valor del input con el prop positionValue
   useEffect(() => {
-    if (typeof cargoValue === 'number') {
-      const option = firmanteOptions.find(opt => opt.value === cargoValue);
+    if (typeof positionValue === 'number') {
+      const option = firmanteOptions.find(opt => opt.value === positionValue);
       setInputValue(option ? option.label : '');
     } else {
-      setInputValue(String(cargoValue));
+      setInputValue(String(positionValue));
     }
-  }, [cargoValue]);
+  }, [positionValue]);
 
   // Filtrar opciones basado en el texto ingresado
   useEffect(() => {
@@ -70,7 +70,7 @@ const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
     setInputValue(newValue);
-    onCargoChange(newValue);
+    onPositionChange(newValue);
     setIsOpen(true);
   };
 
@@ -80,9 +80,9 @@ const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
 
   const handleSelectOption = (option: {value: number, label: string}) => {
     setInputValue(option.label);
-    onCargoChange(option.value); // Enviamos el número para opciones predefinidas
+    onPositionChange(option.value); // Enviamos el número para opciones predefinidas
     // Limpiar el nombre cuando se selecciona una opción predefinida
-    onNombreChange('');
+    onNameChange('');
     setIsOpen(false);
     inputRef.current?.blur();
   };
@@ -95,12 +95,12 @@ const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
   };
 
   const handleNombreChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onNombreChange(event.target.value);
+    onNameChange(event.target.value);
   };
 
   // Determinar si necesitamos mostrar el campo de nombre
-  const showNombreField = typeof cargoValue === 'string' && cargoValue.trim() !== '';
-  const isCustomFirmante = !firmanteOptions.some(opt => opt.value === cargoValue);
+  const showNombreField = typeof positionValue === 'string' && positionValue.trim() !== '';
+  const isCustomFirmante = !firmanteOptions.some(opt => opt.value === positionValue);
 
   const baseClassName = "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
   const errorClassName = error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "";
@@ -157,7 +157,7 @@ const FirmanteSelect: React.FC<FirmanteSelectProps> = ({
           </label>
           <input
             type="text"
-            value={nombreValue}
+            value={nameValue}
             onChange={handleNombreChange}
             className={`${baseClassName} ${className}`}
             placeholder="Ej: Dr. Juan Pérez Rodríguez"

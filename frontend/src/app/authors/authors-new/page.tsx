@@ -3,16 +3,16 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthors } from '@/hooks/useAuthors';
-import { useNewDepartments } from '@/hooks/useNewDepartments';
-import { usePositions } from '@/hooks/useNewPositions';
+import { useDepartments } from '@/hooks/useDepartments';
+import { usePositions } from '@/hooks/usePositions';
 import { ArrowLeft, Save, Loader2, UserPlus, User, AlertCircle, GraduationCap, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import ScopusAccountsManager from '@/components/ScopusAccountsManager';
 
-export default function NuevoAutorPage() {
+export default function NewAuthorPage() {
   const router = useRouter();
   const { createAuthor, creating, error } = useAuthors();
-  const { departments, loading: loadingDepartments } = useNewDepartments();
+  const { departments, loading: loadingDepartments } = useDepartments();
   const { positions, loading: loadingPositions } = usePositions();
 
   const [formData, setFormData] = useState({

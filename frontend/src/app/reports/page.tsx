@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { scopusApi } from '@/services/scopusApi';
 
-export default function InformesPage() {
+export default function CertificationPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +48,7 @@ export default function InformesPage() {
     
     try {
       // Llamar al backend para procesar el borrador
-      const pdfBlob = await scopusApi.procesarBorrador(uploadedFile);
+      const pdfBlob = await scopusApi.proccessDraft(uploadedFile);
       
       // Crear URL del blob para descarga
       const url = window.URL.createObjectURL(pdfBlob);

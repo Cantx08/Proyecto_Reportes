@@ -1,23 +1,23 @@
 import axios from 'axios';
 import type { 
-  PublicacionesResponse, 
-  DocumentosPorAnioResponse, 
-  AreasTematicasResponse,
+  PublicationsResponse,
+  DocumentsByYearResponse,
+  SubjectAreasResponse,
   DepartmentsResponse,
 
 } from '@/types/api';
 
 export interface ReportRequest {
   author_ids: string[];
-  docente_nombre: string;
-  docente_genero: string; // Cambiado de 'M' | 'F' a string para permitir texto libre
-  departamento: string;
-  cargo: string;
-  memorando?: string;
-  firmante?: number | string; // Cambiado para permitir texto libre
-  firmante_nombre?: string; // Nuevo campo para nombre de firmante personalizado
-  fecha?: string;
-  es_borrador?: boolean; // Nuevo campo para indicar si es borrador o certificado final
+  author_name: string;
+  author_gender: string; // Cambiado de 'M' | 'F' a string para permitir texto libre
+  department: string;
+  position: string;
+  memorandum?: string;
+  signatory?: number | string; // Cambiado para permitir texto libre
+  authority_name?: string; // Nuevo campo para nombre de firmante personalizado
+  cert_date?: string;
+  is_draft?: boolean; // Nuevo campo para indicar si es borrador o certificado final
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -34,12 +34,12 @@ export const scopusApi = {
   /**
    * Obtener publicaciones por IDs de Scopus
    */
-  async getPublicaciones(authorIds: string[]): Promise<PublicacionesResponse> {
+  async getPublications(authorIds: string[]): Promise<PublicationsResponse> {
     try {
       const params = new URLSearchParams();
       authorIds.forEach(id => params.append('ids', id));
       
-      const response = await api.get<PublicacionesResponse>(`/scopus/publications?${params.toString()}`);
+      const response = await api.get<PublicationsResponse>(`/scopus/publications?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener publicaciones:', error);
@@ -58,12 +58,12 @@ export const scopusApi = {
   /**
    * Obtener documentos por año
    */
-  async getDocumentosPorAnio(authorIds: string[]): Promise<DocumentosPorAnioResponse> {
+  async getDocumentsByYear(authorIds: string[]): Promise<DocumentsByYearResponse> {
     try {
       const params = new URLSearchParams();
       authorIds.forEach(id => params.append('ids', id));
       
-      const response = await api.get<DocumentosPorAnioResponse>(`/scopus/docs_by_year?${params.toString()}`);
+      const response = await api.get<DocumentsByYearResponse>(`/scopus/docs_by_year?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener documentos por año:', error);
@@ -82,12 +82,12 @@ export const scopusApi = {
   /**
    * Obtener áreas temáticas
    */
-  async getAreasTematicas(authorIds: string[]): Promise<AreasTematicasResponse> {
+  async getSubjectAreas(authorIds: string[]): Promise<SubjectAreasResponse> {
     try {
       const params = new URLSearchParams();
       authorIds.forEach(id => params.append('ids', id));
       
-      const response = await api.get<AreasTematicasResponse>(`/scopus/subject_areas?${params.toString()}`);
+      const response = await api.get<SubjectAreasResponse>(`/scopus/subject_areas?${params.toString()}`);
       return response.data;
     } catch (error) {
       console.error('Error al obtener áreas temáticas:', error);
@@ -126,7 +126,7 @@ export const scopusApi = {
   /**
    * Generar reporte de certificación
    */
-  async generarReporte(reportData: ReportRequest): Promise<Blob> {
+  async generateCertification(reportData: ReportRequest): Promise<Blob> {
     try {
       const response = await api.post('/reports/inform', reportData, {
         responseType: 'blob',
@@ -156,7 +156,7 @@ export const scopusApi = {
   /**
    * Procesar borrador PDF existente y convertirlo en certificado final
    */
-  async procesarBorrador(
+  async proccessDraft(
     file: File,
     metadata?: {
       memorando?: string;

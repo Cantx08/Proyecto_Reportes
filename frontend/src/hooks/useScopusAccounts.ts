@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { scopusAccountsApi, apiUtils } from '@/services/newApi';
+import { scopusAccountsApi, apiUtils } from '@/services/servicesApi';
 import type { 
   ScopusAccountResponse, 
   ScopusAccountsResponse,

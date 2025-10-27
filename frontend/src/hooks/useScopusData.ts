@@ -6,9 +6,9 @@ const initialState: AppState = {
   scopusIds: [''],
   isLoading: false,
   loadingProgress: null,
-  publicaciones: [],
-  areasTematicas: [],
-  documentosPorAnio: {},
+  publications: [],
+  subjectAreas: [],
+  documentsByYear: {},
   error: null,
 };
 
@@ -95,15 +95,15 @@ export const useScopusData = () => {
       console.log('Iniciando consulta con', validIds.length, 'IDs...');
       
       setState(prev => ({ ...prev, loadingProgress: 'Obteniendo publicaciones...' }));
-      const publicacionesResult = await scopusApi.getPublicaciones(validIds);
+      const publicacionesResult = await scopusApi.getPublications(validIds);
       console.log('Publicaciones obtenidas:', publicacionesResult.publications.length);
       
       setState(prev => ({ ...prev, loadingProgress: 'Procesando documentos por año...' }));
-      const documentosResult = await scopusApi.getDocumentosPorAnio(validIds);
+      const documentosResult = await scopusApi.getDocumentsByYear(validIds);
       console.log('Documentos por año procesados');
       
       setState(prev => ({ ...prev, loadingProgress: 'Procesando áreas temáticas...' }));
-      const areasResult = await scopusApi.getAreasTematicas(validIds);
+      const areasResult = await scopusApi.getSubjectAreas(validIds);
       console.log('Áreas temáticas procesadas');
 
       // Combinar todas las publicaciones
@@ -112,9 +112,9 @@ export const useScopusData = () => {
 
       setState(prev => ({
         ...prev,
-        publicaciones: todasPublicaciones,
-        areasTematicas: areasResult.subject_areas,
-        documentosPorAnio: documentosResult.documents_by_year,
+        publications: todasPublicaciones,
+        subjectAreas: areasResult.subject_areas,
+        documentsByYear: documentosResult.documents_by_year,
         isLoading: false,
         loadingProgress: null
       }));
