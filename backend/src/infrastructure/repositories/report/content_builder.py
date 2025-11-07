@@ -23,7 +23,7 @@ class ReportLabContentBuilder(IContentBuilder):
         header = []
         
         # Título principal con fecha
-        title = f"Certificación de Publicaciones<br/><font size=10>{config.report_date}</font>"
+        title = f"Certificación de Publicaciones<font size=10>{config.report_date}</font>"
         title_style = self._style_manager.fetch_style('MainTitle')
         header.append(Paragraph(title, title_style))
         

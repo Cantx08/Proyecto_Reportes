@@ -29,7 +29,7 @@ class ReportLabStyleManager(IStyleManager):
     def _stylize_title(self) -> None:
         """Crea el estilo para el título principal."""
         self._styles.add(ParagraphStyle(name='MainTitle', parent=self._styles['Title'], fontSize=20, spaceAfter=30,
-                                        alignment=TA_CENTER, textColor=colors.black, fontName='Helvetica-Bold'))
+                                        alignment=TA_LEFT, textColor=colors.black, fontName='Helvetica-Bold'))
     
     def _stylize_subtitle(self) -> None:
         """Crea el estilo para subtítulos."""
