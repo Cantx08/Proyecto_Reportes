@@ -34,7 +34,7 @@ class ReportLabStyleManager(IStyleManager):
     def _stylize_subtitle(self) -> None:
         """Crea el estilo para subtítulos."""
         self._styles.add(ParagraphStyle(name='SubTitle', parent=self._styles['Heading2'], fontSize=12,
-                                        spaceAfter=10, spaceBefore=20, fontName='Helvetica-Bold'))
+                                        spaceAfter=10, spaceBefore=10, fontName='Helvetica-Bold'))
     
     def _stylize_justified_text(self) -> None:
         """Crea el estilo para texto justificado."""
@@ -58,5 +58,5 @@ class ReportLabStyleManager(IStyleManager):
     
     def _stylize_author_table(self) -> None:
         """Crea el estilo para la tabla de elaboración."""
-        self._styles.add(ParagraphStyle(name='AuthorTable', parent=self._styles['Normal'], fontSize=9,
+        self._styles.add(ParagraphStyle(name='AuthorTable', parent=self._styles['Normal'], fontSize=8,
                                         alignment=TA_LEFT, fontName='Times-Roman', textColor=colors.black))

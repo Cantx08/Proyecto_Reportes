@@ -32,12 +32,36 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         pub_text = f"{num}. ({pub.year}) \"{pub.title}\". {pub.source}."
         
         # Agregar información de categorías e indexación
+        format_type = "SCOPUS" if db_name == "Scopus" else db_name
+
+        # Normalizar y determinar si la publicación es de tipo conferencia
+        source_type_raw = (pub.document_type or "").strip()
+        source_type_lower = source_type_raw.lower()
+        is_conference = any(k in source_type_lower for k in (
+            'conference', 'proceedings', 'conference paper', 'congreso', 'conferencia'
+        ))
+
+        # Considerar 'No indexada' como ausencia de categorías
+        has_valid_categories = False
         if pub.categories:
+            # si categories es string y contiene 'no indexada', lo tratamos como sin categorías
+            if isinstance(pub.categories, str) and 'no indexada' in pub.categories.lower():
+                has_valid_categories = False
+            else:
+                # lista o string válidos
+                # si formato resultante no es vacío, consideramos que hay categorías
+                formatted = self._format_categories(pub.categories)
+                has_valid_categories = bool(formatted and formatted.strip())
+        else:
+            has_valid_categories = False
+
+        if is_conference and not has_valid_categories:
+            # Para conferencias sin categorías, usar una frase específica
+            pub_text += f" <b>Conferencia Indexada en {format_type}</b>."
+        elif has_valid_categories:
             journal_categories = self._format_categories(pub.categories)
-            format_type = "SCOPUS" if db_name == "Scopus" else db_name
             pub_text += f" <b>Indexada en {format_type} - {journal_categories}</b>."
         else:
-            format_type = "SCOPUS" if db_name == "Scopus" else db_name
             pub_text += f" <b>Indexada en {format_type}</b>."
         
         # Agregar DOI si existe
@@ -120,10 +144,11 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         
         distributions = []
         for source_type, count in count_types.items():
+            singular, plural = self._translate_doc_type(source_type)
             if count > 1:
-                distributions.append(f"{count} {source_type}s")
+                distributions.append(f"{count} {plural}")
             else:
-                distributions.append(f"{count} {source_type}")
+                distributions.append(f"{count} {singular}")
         
         if len(distributions) > 1:
             return " y ".join([", ".join(distributions[:-1]), distributions[-1]])
@@ -131,3 +156,39 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
             return distributions[0]
         else:
             return "Sin especificar"
+
+    @staticmethod
+    def _translate_doc_type(source_type: str) -> tuple:
+        """Traduce tipos de documento comunes al español y devuelve (singular, plural).
+
+        Si no se reconoce, aplica una heurística simple.
+        """
+        if not source_type:
+            return ("Artículo", "Artículos")
+
+        key = source_type.strip().lower()
+
+        translations = {
+            'article': ("Artículo", "Artículos"),
+            'artículo': ("Artículo", "Artículos"),
+            'conference paper': ("Artículo de Conferencia", "Artículos de Conferencia"),
+            'conference': ("Artículo de Conferencia", "Artículos de Conferencia"),
+            'proceedings': ("Artículo de Conferencia", "Artículos de Conferencia"),
+            'book chapter': ("Capítulo de Libro", "Capítulos de Libro"),
+            'chapter': ("Capítulo de Libro", "Capítulos de Libro"),
+            'book': ("Libro", "Libros"),
+        }
+
+        if key in translations:
+            return translations[key]
+
+        # Si la cadena ya está en español y termina en 's', asumimos plural/singular
+        if key.endswith('s'):
+            singular = source_type.rstrip('s').capitalize()
+            plural = source_type.capitalize()
+            return (singular, plural)
+
+        # Heurística por defecto: añadir 's' para plural (no perfecto, pero suficiente)
+        singular = source_type.capitalize()
+        plural = singular + 's'
+        return (singular, plural)

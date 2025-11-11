@@ -83,12 +83,16 @@ class ReportsController:
             categories_lower = (pub.categories or "").lower()
             
             if source_name == "scopus":
-                # Publicaciones indexadas en Scopus - criterio más amplio
-                if (any(keyword in source_lower for keyword in 
-                       ["elsevier", "springer", "ieee", "nature", "science", "journal", "review"]) or
-                    any(keyword in categories_lower for keyword in 
-                       ["scopus", "q1", "q2", "q3", "q4"]) or
-                    pub.doi):  # La mayoría de publicaciones Scopus tienen DOI
+                # TODAS las publicaciones se consideran Scopus por defecto,
+                # a menos que sean explícitamente de otro tipo (libros, WOS, regionales)
+                is_book = ("book" in document_type_lower or 
+                          "chapter" in document_type_lower or 
+                          "libro" in source_lower)
+                is_wos = ("web of science" in source_lower or "wos" in source_lower)
+                is_regional = any(kw in source_lower for kw in ["scielo", "redalyc", "latindex"])
+                
+                # Si no es ninguno de los tipos especiales, es Scopus
+                if not (is_book or is_wos or is_regional):
                     filtered.append(pub)
             
             elif source_name == "wos":
@@ -105,13 +109,12 @@ class ReportsController:
                     filtered.append(pub)
             
             elif source_name == "memoria":
-                # Memorias de eventos/conferencias - solo las que NO son Scopus
-                if (("proceeding" in source_lower or
-                     "symposium" in source_lower or
-                     "workshop" in source_lower) and
-                    not any(keyword in categories_lower for keyword in 
-                           ["scopus", "q1", "q2", "q3", "q4"]) and
-                    not pub.doi):
+                # Memorias de eventos/conferencias que NO están en Scopus
+                # IMPORTANTE: Actualmente todas las publicaciones vienen de Scopus API.
+                # Las memorias se agregarán manualmente en el futuro, por lo tanto
+                # este filtro NO debe capturar ninguna publicación por ahora.
+                # Solo capturará memorias si tienen un marcador manual explícito.
+                if "memoria_manual" in categories_lower:  # Marcador para futuro
                     filtered.append(pub)
             
             elif source_name == "libro":
@@ -121,4 +124,7 @@ class ReportsController:
                     "libro" in source_lower or
                     "capítulo" in source_lower):
                     filtered.append(pub)
+        
+        # Ordenar por año descendente (más reciente primero)
+        filtered.sort(key=lambda p: p.year if p.year else 0, reverse=True)
         return filtered

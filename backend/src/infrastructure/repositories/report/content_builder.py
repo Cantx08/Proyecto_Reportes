@@ -14,23 +14,40 @@ class ReportLabContentBuilder(IContentBuilder):
     """Constructor de contenido usando ReportLab."""
     
     def __init__(self, style_manager: IStyleManager, chart_generator: IChartGenerator, publication_formatter: IPublicationFormatter):
-                self._style_manager = style_manager
-                self._chart_generator = chart_generator
-                self._publication_formatter = publication_formatter
+        self._style_manager = style_manager
+        self._chart_generator = chart_generator
+        self._publication_formatter = publication_formatter
     
     def generate_header(self, author: AuthorInfo, config: ReportConfiguration) -> List[Any]:
         """Construye el encabezado del documento."""
         header = []
         
-        # Título principal con fecha
-        title = f"Certificación de Publicaciones<font size=10>{config.report_date}</font>"
+        # Título principal con fecha en la misma línea: texto a la izquierda y
+        # fecha a la derecha. Usamos una tabla de 2 columnas para posicionarlos.
         title_style = self._style_manager.fetch_style('MainTitle')
-        header.append(Paragraph(title, title_style))
+        left = Paragraph("Certificación de Publicaciones", title_style)
+        # fecha en tamaño más pequeño pero en la misma línea, alineada a la derecha
+        date_para = Paragraph(f"<font size=10>{config.report_date}</font>", title_style)
+
+        # ColWidths elegidos para aproximar el ancho de página (ajustable si se desea).
+        title_table = Table([[left, date_para]], colWidths=[13*cm, 6*cm], hAlign='LEFT')
+        title_table.setStyle(TableStyle([
+            # Alinear al fondo de las celdas (mismo ras horizontal / baseline)
+            ('VALIGN', (0, 0), (-1, -1), 'BOTTOM'),
+            ('ALIGN', (0, 0), (0, 0), 'LEFT'),
+            ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+            ('TOPPADDING', (0, 0), (-1, -1), 0),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
+        ]))
+        header.append(title_table)
+        header.append(Spacer(1, 20))
         
         # Información del docente
-        author_info = f"<b>{author.name}</b><br/>{author.department}<br/>Escuela Politécnica Nacional"
+        author_info = f"<b>{author.name}</b><br/><br/>{author.department}<br/><br/>Escuela Politécnica Nacional"
         normal_style = self._style_manager.fetch_style('Normal')
-        header.append(Paragraph(author_info, normal_style))
+        header.append(Paragraph(f"<font size=12>{author_info}</font>", normal_style))
         header.append(Spacer(1, 20))
         
         return header
@@ -132,8 +149,9 @@ class ReportLabContentBuilder(IContentBuilder):
         # Lista de publicaciones
         scopus_section.extend(self._publication_formatter.format_publication_list(publications.scopus, "Scopus"))
         
-        filiation_note = f"Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional."
+        filiation_note = "Sin Filiación: Publicación sin filiación de la Escuela Politécnica Nacional."
         scopus_section.append(Paragraph(filiation_note, justified_style))
+        scopus_section.append(Spacer(1, 15))
 
         # Gráfico solo para Scopus si hay datos suficientes
         if len(publications.scopus) > 1 and statistics.has_sufficient_data_for_graph():
@@ -337,7 +355,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         # Crear un espaciador que empuje las firmas hacia el final de la página
         # Esto empujará las firmas hacia la parte inferior de la página
-        elements.append(Spacer(1, 60))  # Espaciado que empuja hacia abajo
+        elements.append(Spacer(1, 80))  # Espaciado que empuja hacia abajo
         
         # Crear los elementos de firma como un grupo que se mantiene junto
         signature_elements = []
@@ -369,14 +387,18 @@ class ReportLabContentBuilder(IContentBuilder):
         table_details = [
             [Paragraph("Elaborado por:", table_style), Paragraph(AUTHOR_REPORT, table_style)]
         ]
-        author_table = Table(table_details, colWidths=[3*cm, 3*cm])
+
+        author_table = Table(table_details, colWidths=[2*cm, 2*cm], hAlign='LEFT')
         author_table.setStyle(TableStyle([
             ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('LEFTPADDING', (0, 0), (-1, -1), 2),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+            # Reducir paddings para acercar las líneas al contenido
+            ('LEFTPADDING', (0, 0), (-1, -1), 1),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0.5),
+            ('TOPPADDING', (0, 0), (-1, -1), 0.5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 0.5),
         ]))
         
         signature_elements.append(author_table)
