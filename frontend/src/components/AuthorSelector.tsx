@@ -68,10 +68,10 @@ export const AuthorSelector: React.FC<AuthorSelectorProps> = ({
       {/* Authors List */}
       {!loading && !error && (
         <>
-          {/* Selected Count */}
+          {/* Selected Author Info */}
           {selectedAuthors.length > 0 && (
             <div className="text-sm text-gray-600">
-              {selectedAuthors.length} autor{selectedAuthors.length !== 1 ? 'es' : ''} seleccionado{selectedAuthors.length !== 1 ? 's' : ''}
+              Lista de autores
             </div>
           )}
 

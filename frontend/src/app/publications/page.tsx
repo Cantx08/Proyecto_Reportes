@@ -5,16 +5,10 @@ import {
   FileText, 
   Search, 
   Filter,
-  Download,
-  Eye,
-  Calendar,
   BarChart3,
-  TrendingUp,
   FileEdit,
-  Plus,
   Users,
-  Microscope,
-  Target
+  Microscope
 } from 'lucide-react';
 import { ScopusIdInput } from '@/components/ScopusIdInput';
 import { AuthorSelector } from '@/components/AuthorSelector';
@@ -60,11 +54,8 @@ export default function PublicationsPage() {
   }, [publications, subjectAreas]);
 
   const handleAuthorSelect = (authorId: string) => {
-    setSelectedAuthorIds(prev =>
-      prev.includes(authorId)
-        ? prev.filter(id => id !== authorId)
-        : [...prev, authorId]
-    );
+    // Solo permite seleccionar un autor a la vez (certificaciones individuales)
+    setSelectedAuthorIds([authorId]);
   };
 
   const handleSearch = async () => {
@@ -100,13 +91,6 @@ export default function PublicationsPage() {
     return undefined;
   };
 
-  const stats = {
-    totalPublicaciones: publications.length,
-    totalAreas: subjectAreas.length,
-    totalAnios: Object.keys(documentsByYear).length,
-    autoresAnalizados: scopusIds.filter(id => id.trim() !== '').length + selectedAuthorIds.length
-  };
-
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
@@ -118,7 +102,7 @@ export default function PublicationsPage() {
               Gestión de Publicaciones
             </h1>
             <p className="text-neutral-600 mt-1">
-              Búsqueda, análisis y visualización de publicaciones académicas
+              Búsqueda y visualización de publicaciones indexadas en Scopus
             </p>
           </div>
           <div className="flex space-x-3">
@@ -149,48 +133,6 @@ export default function PublicationsPage() {
             </button>
           </div>
         </div>
-
-        {/* Stats Cards */}
-        {stats.totalPublicaciones > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white p-4 rounded-lg border border-neutral-200">
-              <div className="flex items-center">
-                <FileText className="h-8 w-8 text-primary-500" />
-                <div className="ml-3">
-                  <div className="text-2xl font-bold text-neutral-900">{stats.totalPublicaciones}</div>
-                  <div className="text-sm text-neutral-600">Publicaciones</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-neutral-200">
-              <div className="flex items-center">
-                <Target className="h-8 w-8 text-success-600" />
-                <div className="ml-3">
-                  <div className="text-2xl font-bold text-neutral-900">{stats.totalAreas}</div>
-                  <div className="text-sm text-neutral-600">Áreas Temáticas</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-neutral-200">
-              <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-info-600" />
-                <div className="ml-3">
-                  <div className="text-2xl font-bold text-neutral-900">{stats.totalAnios}</div>
-                  <div className="text-sm text-neutral-600">Años Analizados</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-lg border border-neutral-200">
-              <div className="flex items-center">
-                <TrendingUp className="h-8 w-8 text-warning-600" />
-                <div className="ml-3">
-                  <div className="text-2xl font-bold text-neutral-900">{stats.autoresAnalizados}</div>
-                  <div className="text-sm text-neutral-600">Autores Analizados</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Content based on view mode */}
@@ -199,7 +141,7 @@ export default function PublicationsPage() {
           {/* Search Mode Selector */}
           <div className="bg-white rounded-lg border border-neutral-200 p-6">
             <h3 className="text-sm font-medium text-neutral-700 mb-3">
-              Modo de Búsqueda
+              Buscar por:
             </h3>
             <div className="flex flex-wrap gap-3">
               <button
@@ -211,7 +153,7 @@ export default function PublicationsPage() {
                 }`}
               >
                 <Microscope className="h-4 w-4 mr-2" />
-                Por Scopus IDs
+                Scopus IDs
               </button>
               <button
                 onClick={() => setSearchMode('database')}
@@ -222,7 +164,7 @@ export default function PublicationsPage() {
                 }`}
               >
                 <Users className="h-4 w-4 mr-2" />
-                Por Autor
+                Autor
               </button>
             </div>
           </div>
@@ -267,8 +209,8 @@ export default function PublicationsPage() {
               )}
             </div>
 
-            {/* Selection Summary */}
-            {(scopusIds.filter(id => id.trim()).length > 0 || selectedAuthorIds.length > 0) && (
+            {/* Selection Summary - Solo mostrar para Scopus IDs */}
+            {searchMode === 'scopus' && scopusIds.filter(id => id.trim()).length > 0 && (
               <div className="mt-6 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                 <h3 className="font-medium text-neutral-900 mb-3 flex items-center">
                   <Filter className="h-4 w-4 mr-2" />
@@ -281,43 +223,7 @@ export default function PublicationsPage() {
                       {scopusIds.filter(id => id.trim()).length}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm text-neutral-600">Autores de BD</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {selectedAuthorIds.length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral-600">Total</p>
-                    <p className="text-2xl font-bold text-neutral-900">
-                      {scopusIds.filter(id => id.trim()).length + selectedAuthorIds.length}
-                    </p>
-                  </div>
                 </div>
-
-                {/* Selected IDs Display */}
-                {selectedAuthorIds.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs font-medium text-neutral-700 mb-2">Autores seleccionados:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedAuthorIds.map(id => (
-                        <span
-                          key={id}
-                          className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 border border-green-200"
-                        >
-                          <Users className="h-3 w-3 mr-1" />
-                          {id}
-                          <button
-                            onClick={() => handleAuthorSelect(id)}
-                            className="ml-2 hover:text-green-900"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 

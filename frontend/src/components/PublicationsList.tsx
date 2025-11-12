@@ -19,6 +19,13 @@ interface PublicationsListProps {
 export const PublicationsList: React.FC<PublicationsListProps> = ({
   publications
 }) => {
+  // Ordenar publicaciones por año descendente (más reciente primero)
+  const sortedPublications = [...publications].sort((a, b) => {
+    const yearA = parseInt(a.year) || 0;
+    const yearB = parseInt(b.year) || 0;
+    return yearB - yearA;
+  });
+
   if (publications.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
@@ -35,11 +42,11 @@ export const PublicationsList: React.FC<PublicationsListProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
       <h3 className="text-lg font-semibold text-neutral-800 mb-4">
-        Publicaciones ({publications.length})
+        {publications.length} publicaciones obtenidas
       </h3>
       
       <div className="space-y-4 max-h-96 overflow-y-auto">
-        {publications.map((pub, index) => (
+        {sortedPublications.map((pub, index) => (
           <div
             key={index}
             className="border border-neutral-200 rounded-md p-4 hover:shadow-sm hover:border-primary-300 transition-all"

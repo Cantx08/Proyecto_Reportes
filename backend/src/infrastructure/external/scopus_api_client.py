@@ -16,11 +16,15 @@ class ScopusApiClient:
     def get_publications_by_author(self, author_id: str) -> Dict[str, Any]:
         """Busca publicaciones de un autor en Scopus."""
         url = f"{self._base_url}/content/search/scopus"
+        start = 0
+        count = 200
         params = {
-            "query": f"AU-ID({author_id})"
+            "query": f"AU-ID({author_id})",
+            "start": start,
+            "count": count
         }
 
-        response = requests.get(url, headers=self._headers, params=params)
+        response = requests.get(url, headers=self._headers, params=params, timeout=180)
         response.raise_for_status()
         return response.json()
 
@@ -28,6 +32,6 @@ class ScopusApiClient:
         """Obtiene detalles completos de una publicación."""
         url = f"{self._base_url}/content/abstract/scopus_id/{scopus_id}"
 
-        response = requests.get(url, headers=self._headers)
+        response = requests.get(url, headers=self._headers, timeout=180)
         response.raise_for_status()
         return response.json()

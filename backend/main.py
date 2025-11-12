@@ -405,7 +405,7 @@ async def generar_informe(
 async def procesar_borrador(
         file: UploadFile = File(..., description="Archivo PDF borrador a procesar"),
         memorando: Optional[str] = Form(None, description="Número de memorando"),
-        firmante: Optional[int] = Form(None, description="Tipo de firmante (1=Directora, 2=Vicerrector)"),
+        firmante: Optional[int] = Form(None, description="Tipo de firmante (1=Directora, 2=Vicerrectora)"),
         firmante_nombre: Optional[str] = Form(None, description="Nombre del firmante"),
         fecha: Optional[str] = Form(None, description="Fecha del certificado"),
         controller: DraftProcessorController = Depends(get_draft_processor_controller)

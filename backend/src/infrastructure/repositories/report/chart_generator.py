@@ -31,9 +31,9 @@ class MatplotlibChartGenerator(IChartGenerator):
         plt.plot(years, counts, marker='o', linewidth=2, markersize=6, color='#009ece')
         
         # Configurar etiquetas y título
-        plt.xlabel('Año', fontsize=10, ha='center', color='#333366')
-        plt.ylabel('Documentos', fontsize=10, ha='center', color='#333366')
-        plt.title('Documentos por año', fontsize=12, pad=15, color='#333366', loc='center')
+        plt.xlabel('Year', fontsize=10, ha='center', color='#2e2e2e')
+        plt.ylabel('Documents', fontsize=10, ha='center', color='#2e2e2e')
+        plt.title('Documents by year', fontsize=13, pad=15, color='#2e2e2e', loc='left')
         
         # Configurar grid - solo líneas horizontales
         plt.grid(axis='y', alpha=0.3, color='#cccccc')
@@ -50,9 +50,42 @@ class MatplotlibChartGenerator(IChartGenerator):
         plt.xlim(min(years) - 0.5, max(years) + 0.5)
         plt.ylim(0, max(counts) + 1)
         
-        # Configurar ticks
-        plt.xticks(years, color='#333366')
-        plt.yticks(range(0, max(counts) + 2), color='#333366')
+        # Configurar ticks dinámicamente según la cantidad de datos
+        # X-axis (años): determinar el paso según el rango de años
+        year_range = max(years) - min(years) + 1
+        if year_range <= 15:
+            # Pocas publicaciones: mostrar todos los años
+            x_step = 1
+        elif year_range <= 30:
+            # Rango medio: mostrar cada 2 años
+            x_step = 2
+        elif year_range <= 45:
+            # Rango grande: mostrar cada 3 años
+            x_step = 3
+        else:
+            # Rango muy grande: mostrar cada 5 años
+            x_step = 5
+        
+        x_ticks = list(range(min(years), max(years) + 1, x_step))
+        plt.xticks(x_ticks, color='#2e2e2e')
+        
+        # Y-axis (número de publicaciones): determinar el paso según el máximo
+        max_count = max(counts) if counts else 1
+        if max_count <= 5:
+            # Pocas publicaciones: mostrar de 1 en 1
+            y_step = 1
+        elif max_count <= 10:
+            # Cantidad media: mostrar de 2 en 2
+            y_step = 2
+        elif max_count <= 20:
+            # Cantidad considerable: mostrar de 5 en 5
+            y_step = 3
+        else:
+            # Muchas publicaciones: mostrar de 10 en 10
+            y_step = 5
+        
+        y_ticks = list(range(0, max_count + y_step + 1, y_step))
+        plt.yticks(y_ticks, color='#2e2e2e')
         
         # Guardar como imagen
         img_buffer = io.BytesIO()
