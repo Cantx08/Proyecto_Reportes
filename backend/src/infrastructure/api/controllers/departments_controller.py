@@ -23,10 +23,9 @@ class DepartmentsController:
         """Crea un nuevo departamento."""
         try:
             department = Department(
-                dep_id=department_data.dep_id,
                 dep_code=department_data.dep_code,
                 dep_name=department_data.dep_name,
-                faculty=department_data.fac_name
+                fac_name=department_data.fac_name
             )
 
             created_department = await self.department_service.create_department(department)
@@ -99,10 +98,10 @@ class DepartmentsController:
 
             # Actualizar solo los campos proporcionados
             updated_department = Department(
-                dep_id=dep_id,
+                dep_id=int(dep_id),
                 dep_code=department_data.dep_code or existing_department.dep_code,
                 dep_name=department_data.dep_name or existing_department.dep_name,
-                faculty=department_data.fac_name or existing_department.faculty
+                fac_name=department_data.fac_name or existing_department.fac_name
             )
 
             result = await self.department_service.update_department(updated_department)

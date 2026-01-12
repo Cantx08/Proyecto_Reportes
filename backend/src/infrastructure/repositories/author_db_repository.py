@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from ...domain.entities.author import Author
 from ...domain.repositories.author_repository import AuthorRepository
 from ..database.models.author import AuthorModel
+from ..database.models.base import FacultyEnum
 from ..database.connection import DatabaseConfig
 
 
@@ -97,10 +98,9 @@ class AuthorDatabaseRepository(AuthorRepository):
                     if not dept:
                         # Si no existe, crear uno nuevo con valores por defecto
                         dept = DepartmentModel(
-                            dep_id=f"DEP-{author.department[:3].upper()}",
                             dep_code=author.department[:3].upper(),
                             dep_name=author.department,
-                            fac_name="Facultad por Definir"
+                            fac_name=FacultyEnum.DESCONOCIDA
                         )
                         session.add(dept)
                         session.flush()
@@ -158,10 +158,9 @@ class AuthorDatabaseRepository(AuthorRepository):
                     if not dept:
                         # Si no existe, crear uno nuevo con valores por defecto
                         dept = DepartmentModel(
-                            dep_id=f"DEP-{author.department[:3].upper()}",
                             dep_code=author.department[:3].upper(),
                             dep_name=author.department,
-                            fac_name="Facultad por Definir"
+                            fac_name=FacultyEnum.DESCONOCIDA
                         )
                         session.add(dept)
                         session.flush()

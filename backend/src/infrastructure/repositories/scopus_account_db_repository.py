@@ -13,10 +13,6 @@ class ScopusAccountDBRepository(ScopusAccountRepository):
     def __init__(self, db_config: DatabaseConfig):
         self.db_config = db_config
     
-    def _get_session(self) -> Session:
-        """Obtiene una nueva sesión de base de datos."""
-        return self.db_config.SessionLocal()
-    
     def _to_entity(self, model: ScopusAccountModel) -> ScopusAccount:
         """Convierte un modelo de base de datos a entidad de dominio."""
         return ScopusAccount(
@@ -38,45 +34,32 @@ class ScopusAccountDBRepository(ScopusAccountRepository):
     
     async def get_by_scopus_id(self, scopus_id: str) -> Optional[ScopusAccount]:
         """Obtiene una cuenta Scopus por su ID de Scopus."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             model = session.query(ScopusAccountModel).filter(
                 ScopusAccountModel.scopus_id == scopus_id
             ).first()
-            
             return self._to_entity(model) if model else None
-        finally:
-            session.close()
     
     async def get_by_author_id(self, author_id: str) -> List[ScopusAccount]:
         """Obtiene todas las cuentas Scopus de un autor."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             models = session.query(ScopusAccountModel).filter(
                 ScopusAccountModel.author_id == int(author_id)
             ).order_by(ScopusAccountModel.created_at).all()
-            
             return [self._to_entity(model) for model in models]
-        finally:
-            session.close()
     
     async def get_all(self) -> List[ScopusAccount]:
         """Obtiene todas las cuentas Scopus."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             models = session.query(ScopusAccountModel).order_by(
                 ScopusAccountModel.author_id, 
                 ScopusAccountModel.created_at
             ).all()
-            
             return [self._to_entity(model) for model in models]
-        finally:
-            session.close()
     
     async def create(self, scopus_account: ScopusAccount) -> ScopusAccount:
         """Crea una nueva cuenta Scopus."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             # Verificar si ya existe
             existing = session.query(ScopusAccountModel).filter(
                 ScopusAccountModel.scopus_id == scopus_account.scopus_id
@@ -87,20 +70,14 @@ class ScopusAccountDBRepository(ScopusAccountRepository):
             
             model = self._to_model(scopus_account)
             session.add(model)
-            session.commit()
+            session.flush()
             session.refresh(model)
             
             return self._to_entity(model)
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
     
     async def update(self, scopus_account: ScopusAccount) -> ScopusAccount:
         """Actualiza una cuenta Scopus existente."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             model = session.query(ScopusAccountModel).filter(
                 ScopusAccountModel.scopus_id == scopus_account.scopus_id
             ).first()
@@ -109,44 +86,23 @@ class ScopusAccountDBRepository(ScopusAccountRepository):
                 raise ValueError(f"Scopus account with ID {scopus_account.scopus_id} not found")
             
             model = self._to_model(scopus_account, model)
-            session.commit()
+            session.flush()
             session.refresh(model)
             
             return self._to_entity(model)
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
     
     async def delete(self, scopus_id: str) -> bool:
         """Elimina una cuenta Scopus por su ID de Scopus."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             result = session.query(ScopusAccountModel).filter(
                 ScopusAccountModel.scopus_id == scopus_id
             ).delete()
-            session.commit()
-            
             return result > 0
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
     
     async def delete_by_author_id(self, author_id: str) -> bool:
         """Elimina todas las cuentas Scopus de un autor."""
-        session = self._get_session()
-        try:
+        with self.db_config.get_session() as session:
             result = session.query(ScopusAccountModel).filter(
                 ScopusAccountModel.author_id == int(author_id)
             ).delete()
-            session.commit()
-            
             return result > 0
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()

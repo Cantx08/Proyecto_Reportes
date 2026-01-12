@@ -1,15 +1,10 @@
 """
 Configuración de dependencias e inyección de dependencias.
 """
-from fastapi import Depends
-from sqlalchemy.orm import Session
-from typing import Generator
 import os
 from functools import lru_cache
 from pathlib import Path
 from dotenv import load_dotenv
-
-
 
 # Servicios de aplicación
 from src.application.services.subject_area_service import SubjectAreaService
@@ -36,12 +31,11 @@ from src.infrastructure.repositories.db_department_repository import DBDepartmen
 from src.infrastructure.repositories.position_db_repository import PositionDatabaseRepository
 from src.infrastructure.repositories.scopus_account_db_repository import ScopusAccountDBRepository
 
-# Repositorios CSV (para datos que aún no están en BD)
+# Repositorios de archivos (para datos externos como SJR y mapeo de áreas)
 from src.infrastructure.repositories.sjr_file_repository import SJRFileRepository
 from src.infrastructure.repositories.subject_areas_file_repository import SubjectAreasFileRepository
-from src.infrastructure.repositories.scopus_account_file_repository import ScopusAccountFileRepository
 
-# Clientes y conexiones
+# Clientes externos y conexiones
 from src.infrastructure.external.scopus_api_client import ScopusApiClient
 from src.infrastructure.repositories.scopus_publication_repository import ScopusPublicationsRepository
 from src.infrastructure.repositories.scopus_subject_areas_repository import ScopusSubjectAreasRepository

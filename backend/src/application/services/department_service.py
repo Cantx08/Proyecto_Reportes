@@ -27,16 +27,8 @@ class DepartmentService:
     
     async def create_department(self, department: Department) -> Department:
         """Crea un nuevo departamento."""
-        if not department.dep_id:
-            raise ValueError("Department ID is required")
-        
-        # Verificar que no exista ya
-        existing_dept = await self._department_repository.get_by_id(department.dep_id)
-        if existing_dept:
-            raise ValueError(f"Department with ID {department.dep_id} already exists")
-        
         # Verificar que no exista el código
-        existing_code = await self._department_repository.get_by_name(department.dep_code)
+        existing_code = await self._department_repository.get_by_code(department.dep_code)
         if existing_code:
             raise ValueError(f"Department with code {department.dep_code} already exists")
         

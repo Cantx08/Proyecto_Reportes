@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class DepartmentDTO(BaseModel):
     """DTO para información de un departamento."""
-    dep_id: str = Field(..., description="ID único del departamento")
+    dep_id: Optional[int] = Field(None, description="ID único del departamento")
     dep_code: str = Field(..., description="Código/sigla del departamento")
     dep_name: str = Field(..., description="Nombre completo del departamento")
     fac_name: str = Field(..., description="Nombre de la facultad")
@@ -15,7 +15,6 @@ class DepartmentDTO(BaseModel):
 
 class DepartmentCreateDTO(BaseModel):
     """DTO para crear un nuevo departamento."""
-    dep_id: str = Field(..., description="ID único del departamento")
     dep_code: str = Field(..., description="Código/sigla del departamento")
     dep_name: str = Field(..., description="Nombre completo del departamento")
     fac_name: str = Field(..., description="Nombre de la facultad")
@@ -43,7 +42,7 @@ class DepartmentsResponseDTO(BaseModel):
                 dep_id=dept.dep_id,
                 dep_code=dept.dep_code,
                 dep_name=dept.dep_name,
-                fac_name=dept.fac_name
+                fac_name=dept.fac_name.name if hasattr(dept.fac_name, 'name') else str(dept.fac_name)
             ) for dept in departments
         ]
         return cls(
@@ -69,7 +68,7 @@ class DepartmentResponseDTO(BaseModel):
                 dep_id=department.dep_id,
                 dep_code=department.dep_code,
                 dep_name=department.dep_name,
-                fac_name=department.fac_name
+                fac_name=department.fac_name.name if hasattr(department.fac_name, 'name') else str(department.fac_name)
             ),
             message="Departamento obtenido exitosamente"
         )

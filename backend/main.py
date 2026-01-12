@@ -139,7 +139,7 @@ async def delete_author(
 @app.get("/faculties", tags=["Departamentos"])
 async def get_faculties():
     """Obtiene todas las facultades disponibles."""
-    from backend.src.domain.enums.faculty import Faculty
+    from src.domain.enums.faculty import Faculty
     return {
         "success": True,
         "data": [{"key": f.name, "value": f.value} for f in Faculty if f != Faculty.DESCONOCIDA],
