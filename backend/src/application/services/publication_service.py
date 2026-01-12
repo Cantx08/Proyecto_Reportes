@@ -56,7 +56,7 @@ class PublicationService:
         Args:
             mixed_ids: Lista que puede contener Scopus IDs o Author IDs de la base de datos
         """
-        # Resolver todos los IDs a Scopus IDs
+        # Resolver todos los IDs a Scopus IDs (solo cuentas activas)
         scopus_ids = await self._resolve_scopus_ids(mixed_ids)
         
         authors = []
@@ -65,17 +65,21 @@ class PublicationService:
             try:
                 publication_list = await self._publications_repository.get_publications_by_author(scopus_id)
                 
-                # Enriquecer publicaciones con categorías SJR
-                for pub in publication_list:
-                    if not pub.categories:
-                        pub.categories = self._sjr_repository.get_journal_categories(pub.source, pub.year)
+                # Solo agregar autores que tengan publicaciones
+                # Esto evita crear entradas vacías para Scopus IDs que no existen o no tienen publicaciones
+                if publication_list:
+                    # Enriquecer publicaciones con categorías SJR
+                    for pub in publication_list:
+                        if not pub.categories:
+                            pub.categories = self._sjr_repository.get_journal_categories(pub.source, pub.year)
 
-                author = AuthorPublications(author_id=scopus_id, publications_list=publication_list)
-                authors.append(author)
+                    author = AuthorPublications(author_id=scopus_id, publications_list=publication_list)
+                    authors.append(author)
                 
-            except Exception as e:
-                author_with_error = AuthorPublications(author_id=scopus_id, publications_list=[], error=str(e))
-                authors.append(author_with_error)
+            except Exception:
+                # Solo agregar error si es relevante (no agregar autores sin publicaciones como error)
+                # Si un Scopus ID no existe en Scopus, simplemente lo ignoramos
+                pass
         
         return PublicationsCollection(authors=authors)
 

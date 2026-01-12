@@ -9,9 +9,10 @@ from src.infrastructure.database.models.base import Base
 
 # Importar todos los modelos para que SQLAlchemy los registre
 from src.infrastructure.database.models.author import (
-    DepartmentModel, AuthorModel, ScopusAccountModel, 
+    AuthorModel, ScopusAccountModel,
     SubjectAreaModel, SubjectCategoryModel
 )
+from backend.src.infrastructure.database.models import DepartmentModel
 from src.infrastructure.database.models.position import PositionModel
 from src.infrastructure.database.models.publication import PublicationModel
 from src.infrastructure.database.models.journal import (

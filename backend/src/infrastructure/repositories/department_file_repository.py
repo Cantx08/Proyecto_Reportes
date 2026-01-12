@@ -2,11 +2,11 @@ import pandas as pd
 from typing import List, Optional
 from pathlib import Path
 from ...domain.entities.department import Department
-from ...domain.value_objects.faculty import Faculty
-from ...domain.repositories.department_repository import DepartmentRepository
+from backend.src.domain.enums.faculty import Faculty
+from ...domain.repositories.department_repository import IDepartmentRepository
 
 
-class DepartmentFileRepository(DepartmentRepository):
+class DepartmentFileRepository(IDepartmentRepository):
     """Implementación del repositorio de departamentos usando archivos CSV."""
     
     def __init__(self, csv_path: str = None):
@@ -29,7 +29,7 @@ class DepartmentFileRepository(DepartmentRepository):
                         dep_id=dep_id,
                         dep_code=str(row.get('DEP_SIGLA', '')),
                         dep_name=str(row.get('NOMBRE', '')),
-                        fac_name=Faculty.from_string(str(row.get('FACULTAD_NOMBRE', '')))
+                        faculty=Faculty.from_string(str(row.get('FACULTAD_NOMBRE', '')))
                     )
                     self._departments_cache[department.dep_id] = department
         except Exception as e:
@@ -56,7 +56,7 @@ class DepartmentFileRepository(DepartmentRepository):
         """Obtiene un departamento por su ID."""
         return self._departments_cache.get(dep_id)
     
-    async def get_by_code(self, dep_code: str) -> Optional[Department]:
+    async def get_by_name(self, dep_code: str) -> Optional[Department]:
         """Obtiene un departamento por su código/sigla."""
         for dept in self._departments_cache.values():
             if dept.dep_code.upper() == dep_code.upper():

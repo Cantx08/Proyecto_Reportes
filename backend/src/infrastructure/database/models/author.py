@@ -11,28 +11,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from .base import Base, GenderEnum, FacultyEnum
+from .base import Base, GenderEnum
 from .associations import publication_authors
 
 
 # ============================================================================
 # MODELOS DE AUTORES Y DEPARTAMENTOS
 # ============================================================================
-
-class DepartmentModel(Base):
-    """Modelo para departamentos/facultades."""
-    __tablename__ = 'departments'
-    
-    id = Column(Integer, primary_key=True)
-    dep_id = Column(String(50), unique=True, nullable=False)  # ID del departamento
-    dep_code = Column(String(50), nullable=False)  # Código/sigla del departamento
-    dep_name = Column(String(255), nullable=False)  # Nombre del departamento
-    fac_name = Column(SQLEnum(FacultyEnum), nullable=False)  # Facultad como enum
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-    
-    # Relaciones
-    authors = relationship("AuthorModel", back_populates="department")
 
 
 class AuthorModel(Base):

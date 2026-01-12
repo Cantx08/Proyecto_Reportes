@@ -238,17 +238,17 @@ export const scopusAccountsApi = {
   /**
    * Obtener todas las cuentas Scopus
    */
-  async getAll(): Promise<ScopusAccountsResponse> {
+  async getAll(): Promise<ScopusAccountResponse[]> {
     const response = await api.get<ScopusAccountsResponse>('/scopus-accounts');
-    return response.data;
+    return response.data.data; // Retornar directamente el array de cuentas
   },
 
   /**
    * Obtener una cuenta Scopus por ID
    */
   async getById(scopusId: string): Promise<ScopusAccountResponse> {
-    const response = await api.get<ScopusAccountResponse>(`/scopus-accounts/${scopusId}`);
-    return response.data;
+    const response = await api.get<{ success: boolean; data: ScopusAccountResponse; message: string }>(`/scopus-accounts/${scopusId}`);
+    return response.data.data; // Acceder a la propiedad 'data' de la respuesta estructurada
   },
 
   /**
@@ -263,16 +263,16 @@ export const scopusAccountsApi = {
    * Crear una nueva cuenta Scopus
    */
   async create(accountData: ScopusAccountCreateRequest): Promise<ScopusAccountResponse> {
-    const response = await api.post<ScopusAccountResponse>('/scopus-accounts', accountData);
-    return response.data;
+    const response = await api.post<{ success: boolean; data: ScopusAccountResponse; message: string }>('/scopus-accounts', accountData);
+    return response.data.data; // Acceder a la propiedad 'data' de la respuesta estructurada
   },
 
   /**
    * Actualizar una cuenta Scopus existente
    */
   async update(scopusId: string, accountData: ScopusAccountUpdateRequest): Promise<ScopusAccountResponse> {
-    const response = await api.put<ScopusAccountResponse>(`/scopus-accounts/${scopusId}`, accountData);
-    return response.data;
+    const response = await api.put<{ success: boolean; data: ScopusAccountResponse; message: string }>(`/scopus-accounts/${scopusId}`, accountData);
+    return response.data.data; // Acceder a la propiedad 'data' de la respuesta estructurada
   },
 
   /**
@@ -287,8 +287,8 @@ export const scopusAccountsApi = {
    * Vincular un autor con una cuenta Scopus
    */
   async linkAuthor(linkData: LinkAuthorScopusRequest): Promise<ScopusAccountResponse> {
-    const response = await api.post<ScopusAccountResponse>('/scopus-accounts/link', linkData);
-    return response.data;
+    const response = await api.post<{ success: boolean; data: ScopusAccountResponse; message: string }>('/scopus-accounts/link', linkData);
+    return response.data.data; // Acceder a la propiedad 'data' de la respuesta estructurada
   },
 
   /**

@@ -340,7 +340,7 @@ class ReportLabContentBuilder(IContentBuilder):
             text += "publicación."
         
         conclusion.append(Paragraph(text, justified_style))
-        conclusion.append(Spacer(1, 15))
+        conclusion.append(Spacer(1, 20))
         
         conclusion_paragraph = f"{author_text_line.capitalize()} {author.name} puede hacer uso del presente certificado para lo que considere necesario."
         conclusion.append(Paragraph(conclusion_paragraph, justified_style))

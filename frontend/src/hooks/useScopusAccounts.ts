@@ -50,10 +50,10 @@ export function useScopusAccounts(): UseScopusAccountsState & UseScopusAccountsA
   const fetchAccounts = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const response = await scopusAccountsApi.getAll();
+      const accounts = await scopusAccountsApi.getAll();
       setState(prev => ({
         ...prev,
-        accounts: response.scopus_accounts,
+        accounts: accounts,
         loading: false,
       }));
     } catch (error) {

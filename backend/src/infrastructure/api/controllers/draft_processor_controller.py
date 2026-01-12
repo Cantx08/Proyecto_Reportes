@@ -1,16 +1,15 @@
 """
 Controlador para procesar borradores PDF.
 """
-from fastapi import UploadFile, HTTPException, Depends, Form
-from fastapi.responses import Response
 from typing import Optional
-from src.application.services.draft_processor_service import DraftProcessorService
-from src.application.dto.report_dto import ProcessDraftRequestDTO
+from fastapi import UploadFile, HTTPException, Form
+from fastapi.responses import Response
+from ....application.services.draft_processor_service import DraftProcessorService
+from ....application.dto.report_dto import ProcessDraftRequestDTO
 
 
 class DraftProcessorController:
-    """Controlador para manejar el procesamiento de borradores PDF."""
-    
+    """Controlador para manejar el procesamiento de borradores PDF."""    
     def __init__(self, draft_processor_service: DraftProcessorService):
         """
         Inicializa el controlador.
@@ -19,7 +18,7 @@ class DraftProcessorController:
             draft_processor_service: Servicio de procesamiento de borradores
         """
         self.draft_processor_service = draft_processor_service
-    
+
     async def process_draft(
         self,
         file: UploadFile,
@@ -50,24 +49,22 @@ class DraftProcessorController:
                 status_code=400,
                 detail="El archivo debe ser un PDF"
             )
-        
+
         # Leer contenido del archivo
         try:
             draft_pdf_bytes = await file.read()
         except Exception as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Error al leer el archivo: {str(e)}"
-            )
-        
+            raise HTTPException(status_code=400,
+                                detail=f"Error al leer el archivo: {str(e)}"
+                                ) from e
+
         # Validar tamaño máximo (10MB)
         max_size = 10 * 1024 * 1024  # 10 MB
         if len(draft_pdf_bytes) > max_size:
-            raise HTTPException(
-                status_code=400,
-                detail=f"El archivo excede el tamaño máximo permitido (10MB)"
-            )
-        
+            raise HTTPException(status_code=400,
+                                detail="El archivo excede el tamaño máximo permitido (10MB)"
+                                )
+
         # Crear DTO con metadatos (para extensión futura)
         metadata = ProcessDraftRequestDTO(
             memorando=memorando,
@@ -75,7 +72,7 @@ class DraftProcessorController:
             firmante_nombre=firmante_nombre,
             fecha=fecha
         )
-        
+
         # Procesar el borrador
         try:
             final_pdf_bytes = await self.draft_processor_service.process_draft(
@@ -83,21 +80,18 @@ class DraftProcessorController:
                 metadata
             )
         except ValueError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=str(e)
-            )
+            raise HTTPException(status_code=400,
+                                detail=str(e)
+                                ) from e
         except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error al procesar el borrador: {str(e)}"
-            )
-        
+            raise HTTPException(status_code=500,
+                                detail=f"Error al procesar el borrador: {str(e)}"
+                                ) from e
+
         # Retornar PDF final
-        return Response(
-            content=final_pdf_bytes,
-            media_type="application/pdf",
-            headers={
-                "Content-Disposition": "attachment; filename=certificado_final.pdf"
-            }
+        return Response(content=final_pdf_bytes,
+                        media_type="application/pdf",
+                        headers={
+                            "Content-Disposition": "attachment; filename=certificado_final.pdf"
+                        }
         )

@@ -89,7 +89,7 @@ class AuthorDatabaseRepository(AuthorRepository):
                 
                 # Buscar o crear departamento
                 if author.department:
-                    from ..database.models.author import DepartmentModel
+                    from ..database.models import DepartmentModel
                     dept = session.query(DepartmentModel).filter(
                         DepartmentModel.dep_name == author.department
                     ).first()
@@ -150,7 +150,7 @@ class AuthorDatabaseRepository(AuthorRepository):
                 
                 # Actualizar departamento
                 if author.department:
-                    from ..database.models.author import DepartmentModel
+                    from ..database.models import DepartmentModel
                     dept = session.query(DepartmentModel).filter(
                         DepartmentModel.dep_name == author.department
                     ).first()
@@ -215,8 +215,8 @@ class AuthorDatabaseRepository(AuthorRepository):
     async def get_by_department(self, department: str) -> List[Author]:
         """Obtiene autores por departamento."""
         with self.db_config.get_session() as session:
-            from ..database.models.author import DepartmentModel
-            
+            from ..database.models import DepartmentModel
+
             models = session.query(AuthorModel).join(
                 DepartmentModel
             ).filter(

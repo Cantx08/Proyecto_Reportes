@@ -88,7 +88,6 @@ celerybeat-schedule
 
 # Environments
 .env
-.env.example
 .venv
 env/
 venv/
@@ -114,7 +113,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# LaTeX temporary files
+# LaTeX temporary files (keep latex/ directory but ignore temp files)
 latex/
 *.aux
 *.fdb_latexmk
@@ -131,6 +130,21 @@ latex/
 # Database
 *.db
 *.sqlite
+
+# Alembic
+alembic/
+*.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Temporary files
 temp/

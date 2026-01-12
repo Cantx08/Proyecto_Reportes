@@ -2,14 +2,14 @@ from fastapi import FastAPI, Query, Depends, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from typing import List, Optional
-from src.dependencies import container
+from src.infrastructure.dependencies import container
 from src.application.dto import (
     ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO,
     DocumentsByYearResponseDTO,
-    AuthorDTO, AuthorCreateDTO, AuthorUpdateDTO, AuthorsResponseDTO, AuthorResponseDTO,
-    DepartmentDTO, DepartmentCreateDTO, DepartmentUpdateDTO, DepartmentResponseDTO, DepartmentsResponseDTO,
-    PositionDTO, PositionCreateDTO, PositionUpdateDTO, PositionsResponseDTO, PositionResponseDTO,
-    ScopusAccountDTO, ScopusAccountCreateDTO, ScopusAccountUpdateDTO,
+    AuthorCreateDTO, AuthorUpdateDTO, AuthorsResponseDTO, AuthorResponseDTO,
+    DepartmentCreateDTO, DepartmentUpdateDTO, DepartmentResponseDTO, DepartmentsResponseDTO,
+    PositionCreateDTO, PositionUpdateDTO, PositionsResponseDTO, PositionResponseDTO,
+    ScopusAccountCreateDTO, ScopusAccountUpdateDTO,
     ScopusAccountsResponseDTO, ScopusAccountResponseDTO, LinkAuthorScopusDTO
 )
 from src.infrastructure.api.controllers.subject_areas_controller import SubjectAreasController
@@ -139,7 +139,7 @@ async def delete_author(
 @app.get("/faculties", tags=["Departamentos"])
 async def get_faculties():
     """Obtiene todas las facultades disponibles."""
-    from src.domain.value_objects.faculty import Faculty
+    from backend.src.domain.enums.faculty import Faculty
     return {
         "success": True,
         "data": [{"key": f.name, "value": f.value} for f in Faculty if f != Faculty.DESCONOCIDA],

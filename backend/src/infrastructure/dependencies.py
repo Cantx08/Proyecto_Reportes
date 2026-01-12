@@ -1,47 +1,52 @@
 """
 Configuración de dependencias e inyección de dependencias.
 """
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from typing import Generator
 import os
 from functools import lru_cache
 from pathlib import Path
 from dotenv import load_dotenv
 
+
+
 # Servicios de aplicación
-from .application.services.subject_area_service import SubjectAreaService
-from .application.services.publication_service import PublicationService
-from .application.services.author_service import AuthorService
-from .application.services.position_service import PositionService
-from .application.services.scopus_account_service import ScopusAccountService
-from .application.services.department_service import DepartmentService
-from .application.services.draft_processor_service import DraftProcessorService
+from src.application.services.subject_area_service import SubjectAreaService
+from src.application.services.publication_service import PublicationService
+from src.application.services.author_service import AuthorService
+from src.application.services.position_service import PositionService
+from src.application.services.scopus_account_service import ScopusAccountService
+from src.application.services.department_service import DepartmentService
+from src.application.services.draft_processor_service import DraftProcessorService
 
 # Controladores
-from .infrastructure.api.controllers.reports_controller import ReportsController
-from .infrastructure.api.controllers.subject_areas_controller import SubjectAreasController
-from .infrastructure.api.controllers.publications_controller import PublicationsController
-from .infrastructure.api.controllers.authors_controller import AuthorsController
-from .infrastructure.api.controllers.positions_controller import PositionsController
-from .infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
-from .infrastructure.api.controllers.departments_controller import DepartmentsController
-from .infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
+from src.infrastructure.api.controllers.reports_controller import ReportsController
+from src.infrastructure.api.controllers.subject_areas_controller import SubjectAreasController
+from src.infrastructure.api.controllers.publications_controller import PublicationsController
+from src.infrastructure.api.controllers.authors_controller import AuthorsController
+from src.infrastructure.api.controllers.positions_controller import PositionsController
+from src.infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
+from src.infrastructure.api.controllers.departments_controller import DepartmentsController
+from src.infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
 
 # Repositorios de base de datos
-from .infrastructure.repositories.author_db_repository import AuthorDatabaseRepository
-from .infrastructure.repositories.department_db_repository import DepartmentDatabaseRepository
-from .infrastructure.repositories.position_db_repository import PositionDatabaseRepository
-from .infrastructure.repositories.scopus_account_db_repository import ScopusAccountDBRepository
+from src.infrastructure.repositories.author_db_repository import AuthorDatabaseRepository
+from src.infrastructure.repositories.db_department_repository import DBDepartmentRepository
+from src.infrastructure.repositories.position_db_repository import PositionDatabaseRepository
+from src.infrastructure.repositories.scopus_account_db_repository import ScopusAccountDBRepository
 
 # Repositorios CSV (para datos que aún no están en BD)
-from .infrastructure.repositories.sjr_file_repository import SJRFileRepository
-from .infrastructure.repositories.subject_areas_file_repository import SubjectAreasFileRepository
-from .infrastructure.repositories.scopus_account_file_repository import ScopusAccountFileRepository
+from src.infrastructure.repositories.sjr_file_repository import SJRFileRepository
+from src.infrastructure.repositories.subject_areas_file_repository import SubjectAreasFileRepository
+from src.infrastructure.repositories.scopus_account_file_repository import ScopusAccountFileRepository
 
 # Clientes y conexiones
-from .infrastructure.external.scopus_api_client import ScopusApiClient
-from .infrastructure.repositories.scopus_publication_repository import ScopusPublicationsRepository
-from .infrastructure.repositories.scopus_subject_areas_repository import ScopusSubjectAreasRepository
-from .infrastructure.database.connection import DatabaseConfig
-from .infrastructure.repositories.report.template_overlay_service import TemplateOverlayService
+from src.infrastructure.external.scopus_api_client import ScopusApiClient
+from src.infrastructure.repositories.scopus_publication_repository import ScopusPublicationsRepository
+from src.infrastructure.repositories.scopus_subject_areas_repository import ScopusSubjectAreasRepository
+from src.infrastructure.database.connection import DatabaseConfig
+from src.infrastructure.repositories.report.template_overlay_service import TemplateOverlayService
 
 load_dotenv()
 
@@ -91,7 +96,7 @@ class DependencyContainer:
 
         # Repositorios de base de datos (reemplazan CSV para autores, departamentos y cargos)
         self._author_repo = AuthorDatabaseRepository(self._db_config)
-        self._department_repo = DepartmentDatabaseRepository(self._db_config)
+        self._department_repo = DBDepartmentRepository(self._db_config)
         self._position_repo = PositionDatabaseRepository(self._db_config)
         self._scopus_account_repo = ScopusAccountDBRepository(self._db_config)
 

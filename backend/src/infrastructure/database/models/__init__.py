@@ -42,12 +42,12 @@ from .associations import (
 # ============================================================================
 
 from .author import (
-    DepartmentModel,
     AuthorModel,
     ScopusAccountModel,
     SubjectAreaModel,
     SubjectCategoryModel
 )
+from .department import DepartmentModel
 
 from .position import (
     PositionModel

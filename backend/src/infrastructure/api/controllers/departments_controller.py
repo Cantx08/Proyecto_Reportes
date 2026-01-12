@@ -26,7 +26,7 @@ class DepartmentsController:
                 dep_id=department_data.dep_id,
                 dep_code=department_data.dep_code,
                 dep_name=department_data.dep_name,
-                fac_name=department_data.fac_name
+                faculty=department_data.fac_name
             )
 
             created_department = await self.department_service.create_department(department)
@@ -77,7 +77,7 @@ class DepartmentsController:
     async def get_departments_by_faculty(self, fac_name: str) -> List[DepartmentResponseDTO]:
         """Obtiene departamentos por facultad."""
         try:
-            departments = await self.department_service.get_departments_by_faculty(fac_name)
+            departments = await self.department_service.filter_departments_by_faculty(fac_name)
             return [DepartmentResponseDTO.from_entity(dept) for dept in departments]
 
         except Exception as e:
@@ -102,7 +102,7 @@ class DepartmentsController:
                 dep_id=dep_id,
                 dep_code=department_data.dep_code or existing_department.dep_code,
                 dep_name=department_data.dep_name or existing_department.dep_name,
-                fac_name=department_data.fac_name or existing_department.fac_name
+                faculty=department_data.fac_name or existing_department.faculty
             )
 
             result = await self.department_service.update_department(updated_department)
