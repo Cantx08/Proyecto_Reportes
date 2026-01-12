@@ -2,31 +2,27 @@ from typing import List, Union
 from ...domain.entities.publication import Publication
 from ...domain.repositories.report_repository import IReportGenerator
 from ...domain.value_objects.report import (AuthorInfo, ReportConfiguration, PublicationCollections,
-                                            PublicationsStatistics, Gender, Authority)
-from ...infrastructure.repositories.report.style_manager import ReportLabStyleManager
-from ...infrastructure.repositories.report.chart_generator import MatplotlibChartGenerator
-from ...infrastructure.repositories.report.publication_formatter import ReportLabPublicationFormatter
-from ...infrastructure.repositories.report.content_builder import ReportLabContentBuilder
-from ...infrastructure.repositories.report.pdf_generator import ReportLabReportGenerator
+                                            PublicationsStatistics)
+from ...domain.enums import Gender, Authority
 
 
 class ReportService:
-    """Servicio de aplicación para generar reportes de certificación."""
+    """
+    Servicio de aplicación para generar reportes de certificación.
+    
+    Sigue el principio de Inversión de Dependencias (DIP):
+    - Depende de abstracciones (IReportGenerator), no de implementaciones concretas
+    - Las implementaciones se inyectan desde el contenedor de dependencias
+    """
 
-    def __init__(self):
-        self._report_generator = self._initialize_dependencies()
-
-    @staticmethod
-    def _initialize_dependencies() -> IReportGenerator:
-        """Configura las dependencias siguiendo el patrón de inyección de dependencias."""
-        # Configurar componentes de infraestructura
-        style_manager = ReportLabStyleManager()
-        chart_generator = MatplotlibChartGenerator()
-        publication_formatter = ReportLabPublicationFormatter(style_manager)
-        content_builder = ReportLabContentBuilder(style_manager, chart_generator, publication_formatter)
-
-        # Crear generador principal
-        return ReportLabReportGenerator(content_builder)
+    def __init__(self, report_generator: IReportGenerator):
+        """
+        Inicializa el servicio con el generador de reportes inyectado.
+        
+        Args:
+            report_generator: Implementación de IReportGenerator inyectada desde infrastructure
+        """
+        self._report_generator = report_generator
 
     def generate_report(
             self,

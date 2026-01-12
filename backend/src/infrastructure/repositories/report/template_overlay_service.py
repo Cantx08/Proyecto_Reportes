@@ -1,5 +1,6 @@
 """
 Servicio para superponer contenido generado sobre plantillas PDF.
+Implementación concreta de ITemplateOverlayService usando pypdf y reportlab.
 """
 from io import BytesIO
 from pathlib import Path
@@ -8,10 +9,18 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
+from ....domain.repositories.template_overlay_repository import ITemplateOverlayService
+
 logger = logging.getLogger(__name__)
 
-class TemplateOverlayService:
-    """Servicio para superponer contenido PDF sobre plantillas."""
+
+class TemplateOverlayService(ITemplateOverlayService):
+    """
+    Implementación del servicio de superposición de plantillas usando pypdf.
+    
+    Esta clase implementa ITemplateOverlayService y proporciona la funcionalidad
+    concreta para superponer contenido PDF sobre plantillas institucionales.
+    """
     
     def __init__(self, template_path: str = None):
         """
@@ -28,10 +37,15 @@ class TemplateOverlayService:
         self.template_path = Path(template_path)
         if not self.template_path.exists():
             logger.warning(f"Plantilla no encontrada en: {self.template_path}")
-            self.template_available = False
+            self._template_available = False
         else:
-            self.template_available = True
+            self._template_available = True
             logger.info(f"Plantilla cargada desde: {self.template_path}")
+    
+    @property
+    def template_available(self) -> bool:
+        """Indica si la plantilla está disponible para uso."""
+        return self._template_available
     
     def overlay_content_on_template(self, content_pdf_bytes: bytes) -> bytes:
         """

@@ -9,11 +9,22 @@ from ....application.dto import ReportRequestDTO
 
 
 class ReportsController:
-    """Controlador para endpoints de generación de reportes."""
-    def __init__(self, publication_service: PublicationService, subject_area_service: SubjectAreaService):
+    """
+    Controlador para endpoints de generación de reportes.
+    
+    Sigue el principio de Inversión de Dependencias (DIP):
+    - Recibe todas las dependencias inyectadas en el constructor
+    - No crea instancias de servicios internamente
+    """
+    def __init__(
+        self, 
+        publication_service: PublicationService, 
+        subject_area_service: SubjectAreaService,
+        report_service: ReportService
+    ):
         self._publication_service = publication_service
         self._subject_area_service = subject_area_service
-        self._report_service = ReportService()
+        self._report_service = report_service
     
     async def generate_report(self, request: ReportRequestDTO) -> Response:
         """Genera un reporte de certificación de publicaciones en PDF."""

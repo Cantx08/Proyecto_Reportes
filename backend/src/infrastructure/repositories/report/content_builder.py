@@ -4,7 +4,8 @@ from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.units import cm
 from reportlab.lib import colors
 from ....domain.repositories.report_repository import IContentBuilder, IStyleManager, IChartGenerator, IPublicationFormatter
-from ....domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections, Authority
+from ....domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections
+from ....domain.enums import Authority
 
 DIRECCION_DI = "Dra. María Monserrate Intriago Pazmiño"
 VICERRECTORADO_IIV = "Dra. Sandra Patricia Sánchez Gordón"

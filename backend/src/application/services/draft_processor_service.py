@@ -1,24 +1,30 @@
 """
 Servicio para procesar borradores PDF y convertirlos en certificados finales.
+
+Este servicio de aplicación sigue el principio de Inversión de Dependencias (DIP),
+dependiendo de la abstracción ITemplateOverlayService en lugar de implementaciones concretas.
 """
 import io
 from typing import Optional
 from pypdf import PdfReader
 from src.application.dto.report_dto import ProcessDraftRequestDTO
-from src.infrastructure.repositories.report.template_overlay_service import TemplateOverlayService
+from src.domain.repositories.template_overlay_repository import ITemplateOverlayService
 
 
 class DraftProcessorService:
     """
     Servicio que procesa borradores PDF existentes y les aplica la plantilla institucional.
+    
+    Sigue Clean Architecture: depende de abstracciones (ITemplateOverlayService),
+    no de implementaciones concretas.
     """
     
-    def __init__(self, template_service: TemplateOverlayService):
+    def __init__(self, template_service: ITemplateOverlayService):
         """
         Inicializa el servicio.
         
         Args:
-            template_service: Servicio para aplicar plantilla sobre PDF
+            template_service: Servicio para aplicar plantilla sobre PDF (abstracción)
         """
         self.template_service = template_service
     

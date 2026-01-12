@@ -1,21 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Dict, Union
 from datetime import datetime
-from enum import Enum
 
 from ..entities.publication import Publication
-
-
-class Gender(Enum):
-    """Enum para el género del docente."""
-    MASCULINO = "M"
-    FEMENINO = "F"
-
-
-class Authority(Enum):
-    """Enum para el tipo de firmante."""
-    DIRECTORA_INVESTIGACION = 1
-    VICERRECTOR_INVESTIGACION = 2
+from ..enums import Gender, Authority
 
 
 @dataclass(frozen=True)
