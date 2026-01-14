@@ -29,7 +29,7 @@ class AuthorModel(Base):
     first_name = Column(String(255), nullable=False)
     last_name = Column(String(255), nullable=False)
     title = Column(String(255))  # Dr., PhD, etc.
-    birth_date = Column(DateTime)  # Fecha de nacimiento
+    institutional_email = Column(String(255))  # Correo institucional
     position_id = Column(Integer, ForeignKey('positions.id'))  # Referencia a la tabla positions
     gender = Column(SQLEnum(GenderEnum))
     department_id = Column(Integer, ForeignKey('departments.id'))

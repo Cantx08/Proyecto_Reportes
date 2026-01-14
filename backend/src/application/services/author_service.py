@@ -100,3 +100,17 @@ class AuthorService:
             "by_position": positions,
             "by_gender": genders
         }
+
+    async def get_authors_for_export(self) -> List[dict]:
+        """Obtiene todos los autores con datos completos para exportación."""
+        return await self._author_repository.get_all_for_export()
+
+    async def import_authors(self, authors_data: List[dict]) -> dict:
+        """
+        Importa autores masivamente desde datos de CSV.
+        Retorna estadísticas de la operación.
+        """
+        if not authors_data:
+            raise ValueError("No hay datos para importar")
+        
+        return await self._author_repository.bulk_create_or_update(authors_data)

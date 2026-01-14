@@ -27,7 +27,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
     surname: '',
     dni: '',
     title: '',
-    birth_date: '',
+    institutional_email: '',
     gender: 'M',
     position: '',
     department: ''
@@ -43,7 +43,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
         surname: author.surname || '',
         dni: author.dni || '',
         title: author.title || '',
-        birth_date: author.birth_date || '',
+        institutional_email: author.institutional_email || '',
         gender: author.gender || 'M',
         position: author.position || '',
         department: author.department || ''
@@ -55,7 +55,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
         surname: '',
         dni: '',
         title: '',
-        birth_date: '',
+        institutional_email: '',
         gender: 'M',
         position: '',
         department: ''
@@ -101,19 +101,11 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
       newErrors.dni = 'El DNI/Cédula debe tener al menos 5 caracteres';
     }
 
-    if (!formData.birth_date) {
-      newErrors.birth_date = 'La fecha de nacimiento es requerida';
-    } else {
-      // Validar que la fecha no sea en el futuro
-      const birthDate = new Date(formData.birth_date);
-      const today = new Date();
-      if (birthDate > today) {
-        newErrors.birth_date = 'La fecha de nacimiento no puede ser en el futuro';
-      }
-      // Validar edad mínima (por ejemplo, 18 años)
-      const age = today.getFullYear() - birthDate.getFullYear();
-      if (age < 18 || age > 100) {
-        newErrors.birth_date = 'La edad debe estar entre 18 y 100 años';
+    // Validar email institucional (opcional pero si se proporciona debe ser válido)
+    if (formData.institutional_email && formData.institutional_email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.institutional_email.trim())) {
+        newErrors.institutional_email = 'El correo institucional no es válido';
       }
     }
 
@@ -216,20 +208,21 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
         </div>
 
         <div>
-          <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de Nacimiento *
+          <label htmlFor="institutional_email" className="block text-sm font-medium text-gray-700 mb-1">
+            Correo Institucional
           </label>
           <input
-            type="date"
-            id="birth_date"
-            name="birth_date"
-            value={formData.birth_date}
+            type="email"
+            id="institutional_email"
+            name="institutional_email"
+            value={formData.institutional_email}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              errors.birth_date ? 'border-red-500' : 'border-gray-300'
+              errors.institutional_email ? 'border-red-500' : 'border-gray-300'
             }`}
+            placeholder="correo@epn.edu.ec"
           />
-          {errors.birth_date && <p className="mt-1 text-sm text-red-600">{errors.birth_date}</p>}
+          {errors.institutional_email && <p className="mt-1 text-sm text-red-600">{errors.institutional_email}</p>}
         </div>
 
         <div>

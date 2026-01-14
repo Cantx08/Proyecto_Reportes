@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Query, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List, Optional
+import io
+import csv
 from src.infrastructure.dependencies import container
 from src.application.dto import (
     ReportRequestDTO, SubjectAreaResponseDTO, PublicationsResponseDTO,
@@ -280,6 +282,168 @@ async def get_all_authors(
     return await controller.get_all_authors()
 
 
+@app.get("/authors/export", tags=["Autores"])
+async def export_authors(
+        controller: AuthorsController = Depends(get_authors_controller),
+        current_user: User = Depends(get_current_user)
+):
+    """
+    Exporta todos los autores en formato CSV.
+    Solo disponible para usuarios administradores.
+    Campos: Cédula, Título, Nombres, Apellidos, Correo Institucional, Género, Cargo, Departamento, Facultad
+    """
+    # Verificar que el usuario sea administrador
+    if current_user.role != Role.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los administradores pueden exportar autores"
+        )
+    
+    authors_data = await controller.export_authors()
+    
+    # Crear CSV en memoria
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+    
+    # Escribir encabezados
+    headers = ['Cédula', 'Título', 'Nombres', 'Apellidos', 'Correo Institucional', 'Género', 'Cargo', 'Departamento', 'Facultad']
+    writer.writerow(headers)
+    
+    # Escribir datos
+    for author in authors_data:
+        writer.writerow([
+            author.get('dni', ''),
+            author.get('title', ''),
+            author.get('name', ''),
+            author.get('surname', ''),
+            author.get('institutional_email', ''),
+            author.get('gender', ''),
+            author.get('position', ''),
+            author.get('department', ''),
+            author.get('faculty', '')
+        ])
+    
+    # Preparar respuesta
+    output.seek(0)
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=autores_export.csv"
+        }
+    )
+
+
+@app.post("/authors/import", tags=["Autores"])
+async def import_authors(
+        file: UploadFile = File(...),
+        controller: AuthorsController = Depends(get_authors_controller),
+        current_user: User = Depends(get_current_user)
+):
+    """
+    Importa autores desde un archivo CSV.
+    Solo disponible para usuarios administradores.
+    
+    El CSV debe tener el siguiente formato (separado por punto y coma):
+    CEDULA;TITULO;APELLIDOS;NOMBRES;CORREO INSTITUCIONAL;GENERO;DENOMINACION PUESTO / HOMOLOGADO;UNIDAD ORGANICA;FACULTAD
+    
+    Los autores existentes (por DNI) serán actualizados, los nuevos serán creados.
+    """
+    # Verificar que el usuario sea administrador
+    if current_user.role != Role.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo los administradores pueden importar autores"
+        )
+    
+    # Verificar que sea un archivo CSV
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El archivo debe ser un CSV"
+        )
+    
+    try:
+        # Leer el contenido del archivo
+        content = await file.read()
+        
+        # Intentar decodificar con diferentes encodings
+        text = None
+        for encoding in ['utf-8', 'latin-1', 'cp1252']:
+            try:
+                text = content.decode(encoding)
+                break
+            except UnicodeDecodeError:
+                continue
+        
+        if text is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No se pudo decodificar el archivo. Verifique la codificación."
+            )
+        
+        # Eliminar BOM si existe
+        if text.startswith('\ufeff'):
+            text = text[1:]
+        
+        # Parsear CSV
+        csv_reader = csv.DictReader(io.StringIO(text), delimiter=';')
+        
+        # Log para debugging - ver las columnas encontradas
+        print(f"[IMPORT] Columnas encontradas en CSV: {csv_reader.fieldnames}")
+        
+        authors_data = []
+        for row in csv_reader:
+            # Log para ver la primera fila
+            if len(authors_data) == 0:
+                print(f"[IMPORT] Primera fila del CSV: {dict(row)}")
+            
+            # Mapear columnas del CSV a los campos esperados
+            author_data = {
+                'dni': row.get('CEDULA', '').strip(),
+                'title': row.get('TITULO', '').strip(),
+                'surname': row.get('APELLIDOS', '').strip(),
+                'name': row.get('NOMBRES', '').strip(),
+                'institutional_email': row.get('CORREO INSTITUCIONAL', '').strip(),
+                'gender': row.get('GENERO', '').strip(),
+                'position': row.get('DENOMINACION PUESTO / HOMOLOGADO', '').strip(),
+                'department': row.get('UNIDAD ORGANICA', '').strip(),
+                'faculty': row.get('FACULTAD', '').strip()
+            }
+            authors_data.append(author_data)
+        
+        if not authors_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El archivo CSV está vacío o no tiene el formato correcto"
+            )
+        
+        # Importar autores
+        result = await controller.import_authors(authors_data)
+        
+        # Log para debugging
+        print(f"[IMPORT] Total procesados: {result.get('total', 0)}")
+        print(f"[IMPORT] Creados: {result.get('created', 0)}")
+        print(f"[IMPORT] Actualizados: {result.get('updated', 0)}")
+        if result.get('errors'):
+            print(f"[IMPORT] Errores: {result.get('errors')}")
+        
+        return {
+            "success": True,
+            "message": f"Importación completada. Creados: {result['created']}, Actualizados: {result['updated']}",
+            "data": result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al procesar el archivo: {str(e)}"
+        )
+
+
 # ===========================
 # ENDPOINTS - AUTORES
 # ===========================
@@ -344,6 +508,15 @@ async def get_all_departments(
     return await controller.get_all_departments()
 
 
+@app.get("/departments/faculty/{fac_name}", response_model=DepartmentsResponseDTO, tags=["Departamentos"])
+async def get_departments_by_faculty(
+        fac_name: str,
+        controller: DepartmentsController = Depends(get_departments_controller)
+):
+    """Obtiene departamentos por facultad."""
+    return await controller.get_departments_by_faculty(fac_name)
+
+
 @app.get("/departments/{dep_id}", response_model=DepartmentResponseDTO, tags=["Departamentos"])
 async def get_department(
         dep_id: str,
@@ -351,15 +524,6 @@ async def get_department(
 ):
     """Obtiene un departamento por ID."""
     return await controller.get_department(dep_id)
-
-
-@app.get("/departments/faculty/{fac_name}", response_model=List[DepartmentResponseDTO], tags=["Departamentos"])
-async def get_departments_by_faculty(
-        fac_name: str,
-        controller: DepartmentsController = Depends(get_departments_controller)
-):
-    """Obtiene departamentos por facultad."""
-    return await controller.get_departments_by_faculty(fac_name)
 
 
 @app.post("/departments", response_model=DepartmentResponseDTO, tags=["Departamentos"])

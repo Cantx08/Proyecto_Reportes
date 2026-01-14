@@ -9,7 +9,8 @@ from ....application.dto.department_dto import (
     DepartmentCreateDTO,
     DepartmentUpdateDTO,
     DepartmentResponseDTO,
-    DepartmentsResponseDTO
+    DepartmentsResponseDTO,
+    DepartmentDTO
 )
 
 
@@ -73,11 +74,11 @@ class DepartmentsController:
                 detail=f"Error al obtener departamentos: {str(e)}"
             )
 
-    async def get_departments_by_faculty(self, fac_name: str) -> List[DepartmentResponseDTO]:
+    async def get_departments_by_faculty(self, fac_name: str) -> DepartmentsResponseDTO:
         """Obtiene departamentos por facultad."""
         try:
             departments = await self.department_service.filter_departments_by_faculty(fac_name)
-            return [DepartmentResponseDTO.from_entity(dept) for dept in departments]
+            return DepartmentsResponseDTO.from_entities(departments)
 
         except Exception as e:
             raise HTTPException(

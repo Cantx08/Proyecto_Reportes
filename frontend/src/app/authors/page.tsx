@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthors } from '@/hooks/useAuthors';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Plus, 
   Edit, 
@@ -13,7 +14,9 @@ import {
   Filter,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Download,
+  Upload
 } from 'lucide-react';
 
 interface Faculty {
@@ -29,6 +32,7 @@ interface Department {
 
 export default function AuthorsPage() {
   const { authors, loading, error, fetchAuthors, deleteAuthor } = useAuthors();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -37,7 +41,12 @@ export default function AuthorsPage() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{success: boolean; message: string} | null>(null);
   const itemsPerPage = 10;
+
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchAuthors();
@@ -124,6 +133,97 @@ export default function AuthorsPage() {
   // Verificar si hay filtros activos
   const hasActiveFilters = searchTerm !== '' || selectedFaculty !== 'all' || selectedDepartment !== 'all';
 
+  // Función para exportar autores a CSV
+  const handleExportAuthors = async () => {
+    if (!isAdmin) return;
+    
+    setExporting(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('http://localhost:8000/authors/export', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Error al exportar autores');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'autores_export.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting authors:', error);
+      alert('Error al exportar autores. Por favor intente de nuevo.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Función para importar autores desde CSV
+  const handleImportAuthors = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAdmin) return;
+    
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    // Validar que sea un archivo CSV
+    if (!file.name.endsWith('.csv')) {
+      setImportResult({ success: false, message: 'El archivo debe ser un CSV' });
+      return;
+    }
+    
+    setImporting(true);
+    setImportResult(null);
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('http://localhost:8000/authors/import', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.detail || 'Error al importar autores');
+      }
+      
+      setImportResult({ 
+        success: true, 
+        message: result.message || `Importación completada. Creados: ${result.data?.created || 0}, Actualizados: ${result.data?.updated || 0}`
+      });
+      
+      // Recargar la lista de autores
+      fetchAuthors();
+      
+    } catch (error) {
+      console.error('Error importing authors:', error);
+      setImportResult({ 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Error al importar autores'
+      });
+    } finally {
+      setImporting(false);
+      // Limpiar el input para permitir subir el mismo archivo de nuevo
+      event.target.value = '';
+    }
+  };
+
   // Paginación
   const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -207,6 +307,53 @@ export default function AuthorsPage() {
             </p>
           </div>
           <div className="flex space-x-3">
+            {isAdmin && (
+              <>
+                {/* Input file oculto para importar */}
+                <input
+                  type="file"
+                  id="import-csv"
+                  accept=".csv"
+                  onChange={handleImportAuthors}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="import-csv"
+                  className={`px-4 py-2 bg-info-500 hover:bg-info-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm cursor-pointer ${importing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title="Importar autores desde CSV"
+                >
+                  {importing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Importando...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Importar CSV
+                    </>
+                  )}
+                </label>
+                <button
+                  onClick={handleExportAuthors}
+                  disabled={exporting}
+                  className="px-4 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Exportar autores a CSV"
+                >
+                  {exporting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Exportando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar CSV
+                    </>
+                  )}
+                </button>
+              </>
+            )}
             <Link href="/authors/authors-new">
               <button className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />
@@ -231,6 +378,47 @@ export default function AuthorsPage() {
                   <p>{error}</p>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Import Result Message */}
+        {importResult && (
+          <div className={`border rounded-lg p-4 mb-6 ${
+            importResult.success 
+              ? 'bg-success-50 border-success-200' 
+              : 'bg-error-50 border-error-200'
+          }`}>
+            <div className="flex justify-between items-start">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  {importResult.success ? (
+                    <svg className="h-5 w-5 text-success-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5 text-error-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <div className="ml-3">
+                  <h3 className={`text-sm font-medium ${importResult.success ? 'text-success-800' : 'text-error-800'}`}>
+                    {importResult.success ? 'Importación exitosa' : 'Error en la importación'}
+                  </h3>
+                  <div className={`mt-2 text-sm ${importResult.success ? 'text-success-700' : 'text-error-700'}`}>
+                    <p>{importResult.message}</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setImportResult(null)}
+                className={`p-1 rounded-full hover:bg-opacity-20 ${
+                  importResult.success ? 'hover:bg-success-600' : 'hover:bg-error-600'
+                }`}
+              >
+                <X className={`h-4 w-4 ${importResult.success ? 'text-success-500' : 'text-error-500'}`} />
+              </button>
             </div>
           </div>
         )}
@@ -268,7 +456,7 @@ export default function AuthorsPage() {
             >
               <option value="all">Todas las Facultades</option>
               {faculties.map((faculty) => (
-                <option key={faculty.key} value={faculty.value}>
+                <option key={faculty.key} value={faculty.key}>
                   {faculty.value}
                 </option>
               ))}

@@ -13,7 +13,7 @@ export interface Author {
     surname: string;
     dni: string;
     title: string;
-    birth_date?: string;
+    institutional_email?: string;
     gender: string;
     position: string;
     department: string;
@@ -25,7 +25,7 @@ export interface AuthorCreateRequest {
     surname: string;
     dni: string;
     title: string;
-    birth_date?: string;
+    institutional_email?: string;
     gender: string;
     position: string;
     department: string;
@@ -36,7 +36,7 @@ export interface AuthorUpdateRequest {
     surname?: string;
     dni?: string;
     title?: string;
-    birth_date?: string;
+    institutional_email?: string;
     gender?: string;
     position?: string;
     department?: string;
@@ -48,7 +48,7 @@ export interface AuthorResponse {
     surname: string;
     dni: string;
     title: string;
-    birth_date?: string;
+    institutional_email?: string;
     gender: string;
     position: string;
     department: string;

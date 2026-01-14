@@ -3,7 +3,6 @@ Repositorio de autores usando base de datos PostgreSQL.
 """
 
 from typing import List, Optional
-from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
@@ -22,17 +21,19 @@ class AuthorDatabaseRepository(AuthorRepository):
     
     def _to_entity(self, model: AuthorModel) -> Author:
         """Convierte un modelo de base de datos a una entidad de dominio."""
-        return Author(
+        author = Author(
             author_id=str(model.id),
-            name=model.first_name,
-            surname=model.last_name,
+            name=model.first_name or '',
+            surname=model.last_name or '',
             dni=model.dni or '',
             title=model.title or '',
-            birth_date=model.birth_date,
+            institutional_email=model.institutional_email or '',
             gender=model.gender.name if model.gender else 'M',  # Usar .name para obtener "M" o "F"
             position=model.position_rel.name if model.position_rel else '',
-            department=model.department.dep_name if model.department else ''
+            department=model.department.dep_name if model.department else '',
+            _skip_validation=True  # Saltar validación al cargar desde BD
         )
+        return author
     
     def _to_model(self, author: Author, model: Optional[AuthorModel] = None) -> AuthorModel:
         """Convierte una entidad de dominio a un modelo de base de datos."""
@@ -47,7 +48,7 @@ class AuthorDatabaseRepository(AuthorRepository):
         model.first_name = author.name
         model.last_name = author.surname
         model.title = author.title
-        model.birth_date = author.birth_date
+        model.institutional_email = author.institutional_email
         model.gender = author.gender
         # position_id se manejará por separado en create/update
         # department se manejará por separado
@@ -245,3 +246,165 @@ class AuthorDatabaseRepository(AuthorRepository):
             ).all()
             
             return [self._to_entity(model) for model in models]
+
+    async def get_all_for_export(self) -> List[dict]:
+        """Obtiene todos los autores con datos completos para exportación."""
+        with self.db_config.get_session() as session:
+            models = session.query(AuthorModel).filter(
+                AuthorModel.is_active == True
+            ).all()
+            
+            result = []
+            for model in models:
+                faculty_name = ""
+                if model.department and model.department.fac_name:
+                    faculty_name = model.department.fac_name.value if hasattr(model.department.fac_name, 'value') else str(model.department.fac_name)
+                
+                result.append({
+                    'dni': model.dni or '',
+                    'title': model.title or '',
+                    'name': model.first_name or '',
+                    'surname': model.last_name or '',
+                    'institutional_email': model.institutional_email or '',
+                    'gender': model.gender.value if model.gender and hasattr(model.gender, 'value') else (model.gender.name if model.gender else ''),
+                    'position': model.position_rel.name if model.position_rel else '',
+                    'department': model.department.dep_name if model.department else '',
+                    'faculty': faculty_name
+                })
+            
+            return result
+
+    async def bulk_create_or_update(self, authors_data: List[dict]) -> dict:
+        """
+        Crea o actualiza autores masivamente desde datos de importación.
+        Retorna estadísticas de la operación.
+        """
+        from ..database.models import DepartmentModel
+        from ..database.models.position import PositionModel
+        
+        print(f"[BULK_CREATE] Iniciando importación de {len(authors_data)} registros")
+        
+        stats = {
+            'created': 0,
+            'updated': 0,
+            'errors': [],
+            'total': len(authors_data)
+        }
+        
+        with self.db_config.get_session() as session:
+            try:
+                for idx, data in enumerate(authors_data):
+                    try:
+                        dni = str(data.get('dni', '')).strip()
+                        if not dni:
+                            stats['errors'].append(f"Fila {idx + 1}: DNI vacío")
+                            continue
+                        
+                        print(f"[BULK_CREATE] Procesando fila {idx + 1}: DNI={dni}")
+                        
+                        # Buscar autor existente por DNI
+                        existing = session.query(AuthorModel).filter(
+                            AuthorModel.dni == dni
+                        ).first()
+                        
+                        # Obtener o crear departamento
+                        department_id = None
+                        dep_name = data.get('department', '').strip()
+                        fac_name = data.get('faculty', '').strip()
+                        
+                        if dep_name:
+                            dept = session.query(DepartmentModel).filter(
+                                DepartmentModel.dep_name.ilike(dep_name)
+                            ).first()
+                            
+                            if not dept:
+                                # Crear departamento con la facultad proporcionada
+                                from ..database.models.base import FacultyEnum
+                                
+                                # Intentar mapear la facultad
+                                faculty_enum = FacultyEnum.DESCONOCIDA
+                                if fac_name:
+                                    for fac in FacultyEnum:
+                                        if fac.value.lower() == fac_name.lower():
+                                            faculty_enum = fac
+                                            break
+                                
+                                dept = DepartmentModel(
+                                    dep_code=dep_name[:3].upper(),
+                                    dep_name=dep_name,
+                                    fac_name=faculty_enum
+                                )
+                                session.add(dept)
+                                session.flush()
+                            
+                            department_id = dept.id
+                        
+                        # Obtener o crear cargo
+                        position_id = None
+                        pos_name = data.get('position', '').strip()
+                        
+                        if pos_name:
+                            pos = session.query(PositionModel).filter(
+                                PositionModel.name.ilike(pos_name)
+                            ).first()
+                            
+                            if not pos:
+                                pos = PositionModel(name=pos_name)
+                                session.add(pos)
+                                session.flush()
+                            
+                            position_id = pos.id
+                        
+                        # Mapear género
+                        gender_str = data.get('gender', '').strip().upper()
+                        gender = None
+                        if gender_str in ['M', 'MASCULINO', 'MALE']:
+                            gender = 'M'
+                        elif gender_str in ['F', 'FEMENINO', 'FEMALE']:
+                            gender = 'F'
+                        
+                        if existing:
+                            # Actualizar autor existente
+                            existing.first_name = data.get('name', '').strip() or existing.first_name
+                            existing.last_name = data.get('surname', '').strip() or existing.last_name
+                            existing.title = data.get('title', '').strip() or existing.title
+                            existing.institutional_email = data.get('institutional_email', '').strip() or existing.institutional_email
+                            if gender:
+                                existing.gender = gender
+                            if department_id:
+                                existing.department_id = department_id
+                            if position_id:
+                                existing.position_id = position_id
+                            existing.is_active = True
+                            stats['updated'] += 1
+                        else:
+                            # Crear nuevo autor
+                            new_author = AuthorModel(
+                                dni=dni,
+                                first_name=data.get('name', '').strip(),
+                                last_name=data.get('surname', '').strip(),
+                                title=data.get('title', '').strip(),
+                                institutional_email=data.get('institutional_email', '').strip(),
+                                gender=gender,
+                                department_id=department_id,
+                                position_id=position_id,
+                                is_active=True
+                            )
+                            session.add(new_author)
+                            stats['created'] += 1
+                            print(f"[BULK_CREATE] Autor creado: {dni}")
+                            
+                    except Exception as e:
+                        print(f"[BULK_CREATE] Error en fila {idx + 1}: {str(e)}")
+                        stats['errors'].append(f"Fila {idx + 1}: {str(e)}")
+                        continue
+                
+                session.commit()
+                print(f"[BULK_CREATE] Commit exitoso. Creados: {stats['created']}, Actualizados: {stats['updated']}")
+                
+            except Exception as e:
+                session.rollback()
+                print(f"[BULK_CREATE] Error general, rollback: {str(e)}")
+                stats['errors'].append(f"Error general: {str(e)}")
+        
+        return stats

@@ -4,7 +4,6 @@ Módulo que define la entidad Autor.
 
 from dataclasses import dataclass
 from typing import List, Optional, TYPE_CHECKING
-from datetime import date
 
 if TYPE_CHECKING:
     from .publication import Publication
@@ -21,18 +20,21 @@ class Author:
     position: str  # Cargo que ocupa
     department: str  # Departamento al que pertenece
     author_id: Optional[str] = None
-    birth_date: Optional[date] = None
+    institutional_email: Optional[str] = None  # Correo institucional
     publications_list: Optional[List["Publication"]] = None
     error: Optional[str] = None
+    _skip_validation: bool = False  # Flag interno para saltar validación
 
     def __post_init__(self):
         """Validaciones post-inicialización."""
         if self.publications_list is None:
             self.publications_list = []
 
-        # Validaciones de campos requeridos (author_id es opcional en creación)
-        if not self.name or not self.surname or not self.dni:
-            raise ValueError("name, surname y dni son requeridos")
+        # Validaciones de campos requeridos (solo si no se salta la validación)
+        # La validación se salta cuando se carga desde la BD
+        if not self._skip_validation:
+            if not self.name or not self.surname or not self.dni:
+                raise ValueError("name, surname y dni son requeridos")
 
     def get_full_name(self) -> str:
         """Retorna el nombre completo del autor."""
@@ -56,12 +58,3 @@ class Author:
     def count_publications(self) -> int:
         """Cuenta el total de publicaciones del autor."""
         return len(self.publications_list)
-
-    def get_age(self) -> Optional[int]:
-        """Calcula la edad del autor si se conoce la fecha de nacimiento."""
-        if self.birth_date:
-            today = date.today()
-            return today.year - self.birth_date.year - (
-                (today.month, today.day) < (self.birth_date.month, self.birth_date.day)
-                )
-        return None

@@ -168,9 +168,8 @@ export const newDepartmentsApi = {
    * Obtener departamentos por facultad
    */
   async getByFaculty(facName: string): Promise<DepartmentResponse[]> {
-    const response = await api.get<DepartmentResponse[]>(`/departments/faculty/${facName}`);
-    // Este endpoint puede devolver directamente el array o estructura anidada
-    return Array.isArray(response.data) ? response.data : [];
+    const response = await api.get<BackendDepartmentsResponse>(`/departments/faculty/${facName}`);
+    return response.data.data || [];
   },
 
   /**

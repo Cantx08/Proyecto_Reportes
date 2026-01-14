@@ -1,6 +1,5 @@
 from typing import List, Optional, TYPE_CHECKING, Union
 from pydantic import BaseModel, Field, field_validator
-from datetime import date
 
 if TYPE_CHECKING:
     from .publication_dto import PublicationDTO
@@ -13,7 +12,7 @@ class AuthorDTO(BaseModel):
     surname: str = Field(..., description="Apellido del autor")
     dni: str = Field(..., description="Documento Nacional de Identidad")
     title: str = Field("", description="Título académico (Dr., PhD., Ing., etc.)")
-    birth_date: Optional[Union[date, str]] = Field(None, description="Fecha de nacimiento")
+    institutional_email: Optional[str] = Field(None, description="Correo institucional")
     gender: str = Field("M", description="Género del autor")
     position: str = Field("", description="Cargo que ocupa")
     department: str = Field("", description="Departamento al que pertenece")
@@ -31,22 +30,20 @@ class AuthorCreateDTO(BaseModel):
     surname: str = Field(..., description="Apellido del autor")
     dni: str = Field(..., description="Documento Nacional de Identidad")
     title: str = Field("", description="Título académico")
-    birth_date: Optional[Union[date, str]] = Field(None, description="Fecha de nacimiento")
+    institutional_email: Optional[str] = Field(None, description="Correo institucional")
     gender: str = Field("M", description="Género del autor")
     position: str = Field("", description="Cargo que ocupa")
     department: str = Field("", description="Departamento al que pertenece")
 
-    @field_validator('birth_date', mode='before')
+    @field_validator('institutional_email', mode='before')
     @classmethod
-    def parse_birth_date(cls, v):
-        """Convierte string a date si es necesario."""
-        if isinstance(v, str) and v:
-            from datetime import datetime
-            try:
-                return datetime.strptime(v, '%Y-%m-%d').date()
-            except ValueError:
+    def validate_email(cls, v):
+        """Valida el formato del correo institucional."""
+        if v and isinstance(v, str) and v.strip():
+            v = v.strip().lower()
+            if '@' not in v:
                 return None
-        return v
+        return v if v else None
 
 
 class AuthorUpdateDTO(BaseModel):
@@ -55,22 +52,20 @@ class AuthorUpdateDTO(BaseModel):
     surname: Optional[str] = Field(None, description="Apellido del autor")
     dni: Optional[str] = Field(None, description="Documento Nacional de Identidad")
     title: Optional[str] = Field(None, description="Título académico")
-    birth_date: Optional[Union[date, str]] = Field(None, description="Fecha de nacimiento")
+    institutional_email: Optional[str] = Field(None, description="Correo institucional")
     gender: Optional[str] = Field(None, description="Género del autor")
     position: Optional[str] = Field(None, description="Cargo que ocupa")
     department: Optional[str] = Field(None, description="Departamento al que pertenece")
 
-    @field_validator('birth_date', mode='before')
+    @field_validator('institutional_email', mode='before')
     @classmethod
-    def parse_birth_date(cls, v):
-        """Convierte string a date si es necesario."""
-        if isinstance(v, str) and v:
-            from datetime import datetime
-            try:
-                return datetime.strptime(v, '%Y-%m-%d').date()
-            except ValueError:
+    def validate_email(cls, v):
+        """Valida el formato del correo institucional."""
+        if v and isinstance(v, str) and v.strip():
+            v = v.strip().lower()
+            if '@' not in v:
                 return None
-        return v
+        return v if v else None
 
 
 class AuthorsResponseDTO(BaseModel):

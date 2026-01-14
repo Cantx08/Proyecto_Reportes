@@ -250,7 +250,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
                 >
                   <option value="all">Todas las Facultades</option>
                   {faculties.map((faculty) => (
-                    <option key={faculty.key} value={faculty.value}>
+                    <option key={faculty.key} value={faculty.key}>
                       {faculty.value}
                     </option>
                   ))}
@@ -286,7 +286,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
               )}
               {viewMode === 'departments' && selectedFaculty !== 'all' && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary-100 text-secondary-700 border border-secondary-200">
-                  Facultad: {selectedFaculty}
+                  Facultad: {faculties.find(f => f.key === selectedFaculty)?.value || selectedFaculty}
                   <button
                     onClick={() => setSelectedFaculty('all')}
                     className="ml-2 hover:text-secondary-900"

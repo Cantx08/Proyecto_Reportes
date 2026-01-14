@@ -27,15 +27,10 @@ class PositionService:
     
     async def create_position(self, position: Position) -> Position:
         """Crea un nuevo cargo."""
-        if not position.pos_id:
-            raise ValueError("Position ID is required")
+        if not position.pos_name:
+            raise ValueError("Position name is required")
         
-        # Verificar que no exista ya
-        existing_pos = await self._position_repository.get_by_id(position.pos_id)
-        if existing_pos:
-            raise ValueError(f"Position with ID {position.pos_id} already exists")
-        
-        # Verificar que no exista el nombre
+        # Verificar que no exista el nombre (es el único campo único relevante)
         existing_name = await self._position_repository.get_by_name(position.pos_name)
         if existing_name:
             raise ValueError(f"Position with name {position.pos_name} already exists")

@@ -30,8 +30,9 @@ class PositionDatabaseRepository(PositionRepository):
         if model is None:
             model = PositionModel()
         
-        # Si el pos_id es numérico, úsalo
-        if position.pos_id and position.pos_id.isdigit():
+        # Solo asignar el ID si ya existe en el modelo (para updates)
+        # Para creates, el ID es autogenerado por la base de datos
+        if model.id is None and position.pos_id and position.pos_id.isdigit():
             model.id = int(position.pos_id)
         
         model.name = position.pos_name
@@ -40,6 +41,10 @@ class PositionDatabaseRepository(PositionRepository):
     
     async def get_by_id(self, pos_id: str) -> Optional[Position]:
         """Obtiene un cargo por su ID."""
+        # Verificar que el pos_id sea numérico
+        if not pos_id or not pos_id.isdigit():
+            return None
+            
         with self.db_config.get_session() as session:
             model = session.query(PositionModel).filter(
                 PositionModel.id == int(pos_id)
@@ -83,6 +88,9 @@ class PositionDatabaseRepository(PositionRepository):
     
     async def update(self, position: Position) -> Position:
         """Actualiza un cargo existente."""
+        if not position.pos_id or not position.pos_id.isdigit():
+            raise ValueError(f"Invalid position ID: {position.pos_id}")
+            
         with self.db_config.get_session() as session:
             try:
                 model = session.query(PositionModel).filter(
@@ -104,6 +112,9 @@ class PositionDatabaseRepository(PositionRepository):
     
     async def delete(self, pos_id: str) -> bool:
         """Elimina un cargo por su ID."""
+        if not pos_id or not pos_id.isdigit():
+            raise ValueError(f"Invalid position ID: {pos_id}")
+            
         with self.db_config.get_session() as session:
             try:
                 model = session.query(PositionModel).filter(

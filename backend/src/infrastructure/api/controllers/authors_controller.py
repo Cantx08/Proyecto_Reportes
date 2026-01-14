@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from typing import List
 
 from ....application.dto import (
     AuthorDTO, AuthorCreateDTO, AuthorUpdateDTO,
@@ -13,6 +14,22 @@ class AuthorsController:
     
     def __init__(self, author_service: AuthorService):
         self.author_service = author_service
+
+    async def export_authors(self) -> List[dict]:
+        """Exporta todos los autores con datos completos para CSV."""
+        try:
+            return await self.author_service.get_authors_for_export()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    async def import_authors(self, authors_data: List[dict]) -> dict:
+        """Importa autores desde datos de CSV."""
+        try:
+            return await self.author_service.import_authors(authors_data)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
     
     async def get_author_by_id(self, author_id: str) -> AuthorResponseDTO:
         """Obtiene un autor por su ID."""
@@ -31,7 +48,7 @@ class AuthorsController:
                 surname=author.surname,
                 dni=author.dni,
                 title=author.title,
-                birth_date=author.birth_date.isoformat() if author.birth_date else None,
+                institutional_email=author.institutional_email,
                 gender=author.gender,
                 position=author.position,
                 department=author.department,
@@ -59,7 +76,7 @@ class AuthorsController:
                     surname=author.surname,
                     dni=author.dni,
                     title=author.title,
-                    birth_date=author.birth_date.isoformat() if author.birth_date else None,
+                    institutional_email=author.institutional_email,
                     gender=author.gender,
                     position=author.position,
                     department=author.department,
@@ -87,7 +104,7 @@ class AuthorsController:
                 surname=author_create.surname,
                 dni=author_create.dni,
                 title=author_create.title,
-                birth_date=author_create.birth_date,
+                institutional_email=author_create.institutional_email,
                 gender=author_create.gender,
                 position=author_create.position,
                 department=author_create.department
@@ -101,7 +118,7 @@ class AuthorsController:
                 surname=created_author.surname,
                 dni=created_author.dni,
                 title=created_author.title,
-                birth_date=created_author.birth_date.isoformat() if created_author.birth_date else None,
+                institutional_email=created_author.institutional_email,
                 gender=created_author.gender,
                 position=created_author.position,
                 department=created_author.department,
@@ -134,7 +151,7 @@ class AuthorsController:
                 surname=author_update.surname if author_update.surname is not None else existing_author.surname,
                 dni=author_update.dni if author_update.dni is not None else existing_author.dni,
                 title=author_update.title if author_update.title is not None else existing_author.title,
-                birth_date=author_update.birth_date if author_update.birth_date is not None else existing_author.birth_date,
+                institutional_email=author_update.institutional_email if author_update.institutional_email is not None else existing_author.institutional_email,
                 gender=author_update.gender if author_update.gender is not None else existing_author.gender,
                 position=author_update.position if author_update.position is not None else existing_author.position,
                 department=author_update.department if author_update.department is not None else existing_author.department,
@@ -149,7 +166,7 @@ class AuthorsController:
                 surname=result_author.surname,
                 dni=result_author.dni,
                 title=result_author.title,
-                birth_date=result_author.birth_date.isoformat() if result_author.birth_date else None,
+                institutional_email=result_author.institutional_email,
                 gender=result_author.gender,
                 position=result_author.position,
                 department=result_author.department,
@@ -196,7 +213,7 @@ class AuthorsController:
                     surname=author.surname,
                     dni=author.dni,
                     title=author.title,
-                    birth_date=author.birth_date.isoformat() if author.birth_date else None,
+                    institutional_email=author.institutional_email,
                     gender=author.gender,
                     position=author.position,
                     department=author.department,
@@ -229,7 +246,7 @@ class AuthorsController:
                     surname=author.surname,
                     dni=author.dni,
                     title=author.title,
-                    birth_date=author.birth_date.isoformat() if author.birth_date else None,
+                    institutional_email=author.institutional_email,
                     gender=author.gender,
                     position=author.position,
                     department=author.department,
@@ -260,7 +277,7 @@ class AuthorsController:
                     surname=author.surname,
                     dni=author.dni,
                     title=author.title,
-                    birth_date=author.birth_date.isoformat() if author.birth_date else None,
+                    institutional_email=author.institutional_email,
                     gender=author.gender,
                     position=author.position,
                     department=author.department,
