@@ -7,7 +7,7 @@ from ....domain.repositories.report_repository import IContentBuilder, IStyleMan
 from ....domain.value_objects.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections
 from ....domain.enums import Authority
 
-DIRECCION_DI = "Dra. María Monserrate Intriago Pazmiño"
+DIRECCION_DI = "Dr. Jaime Paúl Sayago Heredia"
 VICERRECTORADO_IIV = "Dra. Sandra Patricia Sánchez Gordón"
 AUTHOR_REPORT = "M. Vásquez"
 
@@ -365,7 +365,7 @@ class ReportLabContentBuilder(IContentBuilder):
         if isinstance(config.signatory, Authority):
             if config.signatory == Authority.DIRECTORA_INVESTIGACION:
                 authority = DIRECCION_DI
-                signatory_role = "DIRECTORA DE INVESTIGACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
+                signatory_role = "DIRECTOR DE INVESTIGACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
             else:
                 authority = VICERRECTORADO_IIV
                 signatory_role = "VICERRECTORA DE INVESTIGACIÓN, INNOVACIÓN Y VINCULACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
