@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Query, Depends, UploadFile, File, Form
+from fastapi import FastAPI, Query, Depends, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List, Optional
 from src.infrastructure.dependencies import container
 from src.application.dto import (
@@ -12,6 +13,10 @@ from src.application.dto import (
     ScopusAccountCreateDTO, ScopusAccountUpdateDTO,
     ScopusAccountsResponseDTO, ScopusAccountResponseDTO, LinkAuthorScopusDTO
 )
+from src.application.dto.auth_dto import (
+    UserRegisterDTO, UserLoginDTO, UserUpdateDTO, PasswordChangeDTO,
+    TokenResponseDTO, UserResponseDTO, UsersResponseDTO, AuthResponseDTO, MessageResponseDTO
+)
 from src.infrastructure.api.controllers.subject_areas_controller import SubjectAreasController
 from src.infrastructure.api.controllers.publications_controller import PublicationsController
 from src.infrastructure.api.controllers.reports_controller import ReportsController
@@ -20,6 +25,9 @@ from src.infrastructure.api.controllers.authors_controller import AuthorsControl
 from src.infrastructure.api.controllers.positions_controller import PositionsController
 from src.infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
 from src.infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
+from src.infrastructure.api.controllers.auth_controller import AuthController
+from src.domain.entities.user import User
+from src.domain.enums.role import Role
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
@@ -77,10 +85,191 @@ def get_draft_processor_controller() -> DraftProcessorController:
     return container.draft_processor_controller
 
 
+def get_auth_controller() -> AuthController:
+    """Dependencia para obtener el controlador de autenticación."""
+    return container.auth_controller
+
+
+# Esquema de seguridad
+security = HTTPBearer()
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> User:
+    """Dependencia para obtener el usuario actual autenticado."""
+    token = credentials.credentials
+    user = await container.auth_service.get_current_user(token)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido o expirado",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return user
+
+
+async def get_current_active_user(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    """Dependencia para obtener el usuario activo actual."""
+    if not current_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuario desactivado"
+        )
+    return current_user
+
+
+async def require_admin(
+    current_user: User = Depends(get_current_active_user)
+) -> User:
+    """Dependencia que requiere rol de administrador."""
+    if current_user.role != Role.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acceso denegado. Se requiere rol de administrador"
+        )
+    return current_user
+
+
 @app.get("/health")
 async def health_check():
     """Endpoint de salud."""
     return {"status": "healthy", "message": "API funcionando correctamente"}
+
+
+# ===========================
+# ENDPOINTS - AUTENTICACIÓN
+# ===========================
+
+@app.post("/auth/register", response_model=AuthResponseDTO, tags=["Autenticación"])
+async def register(
+        register_data: UserRegisterDTO,
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """
+    Registra un nuevo usuario.
+    
+    El primer usuario registrado será automáticamente administrador.
+    """
+    try:
+        return await controller.register(register_data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post("/auth/login", response_model=AuthResponseDTO, tags=["Autenticación"])
+async def login(
+        login_data: UserLoginDTO,
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Autentica un usuario y retorna un token JWT."""
+    try:
+        return await controller.login(login_data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+
+@app.get("/auth/me", response_model=UserResponseDTO, tags=["Autenticación"])
+async def get_me(
+        current_user: User = Depends(get_current_active_user),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Obtiene la información del usuario actual autenticado."""
+    return await controller.get_me(current_user)
+
+
+@app.put("/auth/me", response_model=UserResponseDTO, tags=["Autenticación"])
+async def update_me(
+        update_data: UserUpdateDTO,
+        current_user: User = Depends(get_current_active_user),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Actualiza la información del usuario actual."""
+    try:
+        return await controller.update_me(current_user, update_data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post("/auth/me/change-password", response_model=MessageResponseDTO, tags=["Autenticación"])
+async def change_my_password(
+        password_data: PasswordChangeDTO,
+        current_user: User = Depends(get_current_active_user),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Cambia la contraseña del usuario actual."""
+    try:
+        return await controller.change_my_password(current_user, password_data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+# ===========================
+# ENDPOINTS - GESTIÓN DE USUARIOS (SOLO ADMIN)
+# ===========================
+
+@app.get("/users", response_model=UsersResponseDTO, tags=["Usuarios (Admin)"])
+async def get_all_users(
+        admin_user: User = Depends(require_admin),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Obtiene todos los usuarios. Solo accesible por administradores."""
+    return await controller.get_all_users()
+
+
+@app.get("/users/{user_id}", response_model=UserResponseDTO, tags=["Usuarios (Admin)"])
+async def get_user(
+        user_id: int,
+        admin_user: User = Depends(require_admin),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Obtiene un usuario por ID. Solo accesible por administradores."""
+    try:
+        return await controller.get_user(user_id)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@app.post("/users", response_model=UserResponseDTO, tags=["Usuarios (Admin)"])
+async def create_user(
+        user_data: UserRegisterDTO,
+        admin_user: User = Depends(require_admin),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Crea un nuevo usuario. Solo accesible por administradores."""
+    try:
+        return await controller.create_user(user_data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.put("/users/{user_id}", response_model=UserResponseDTO, tags=["Usuarios (Admin)"])
+async def update_user(
+        user_id: int,
+        update_data: UserUpdateDTO,
+        admin_user: User = Depends(require_admin),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Actualiza un usuario. Solo accesible por administradores."""
+    try:
+        return await controller.update_user(user_id, update_data)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.delete("/users/{user_id}", response_model=MessageResponseDTO, tags=["Usuarios (Admin)"])
+async def delete_user(
+        user_id: int,
+        admin_user: User = Depends(require_admin),
+        controller: AuthController = Depends(get_auth_controller)
+):
+    """Elimina un usuario. Solo accesible por administradores."""
+    try:
+        return await controller.delete_user(user_id, admin_user)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @app.get("/authors", response_model=AuthorsResponseDTO, tags=["Autores"])

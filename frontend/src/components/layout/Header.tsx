@@ -2,6 +2,7 @@
 
 import React from 'react';
 import {usePathname} from 'next/navigation';
+import UserMenu from './UserMenu';
 
 const Header: React.FC = () => {
     const pathname = usePathname();
@@ -23,6 +24,11 @@ const Header: React.FC = () => {
                 {/* Page Title */}
                 <div>
                     <h1 className="text-2xl font-semibold text-white">{getPageTitle()}</h1>
+                </div>
+
+                {/* User Menu */}
+                <div className="bg-white rounded-lg">
+                    <UserMenu />
                 </div>
             </div>
         </header>

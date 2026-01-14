@@ -1,10 +1,9 @@
 import './globals.css'
 import type {Metadata} from 'next'
 import {Inter} from 'next/font/google'
-import Sidebar from '@/components/layout/Sidebar'
-import Header from '@/components/layout/Header'
-import Breadcrumb from '@/components/layout/Breadcrumb'
 import {SidebarProvider} from '@/contexts/SidebarContext'
+import {AuthProvider} from '@/contexts/AuthContext'
+import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout'
 import React from "react";
 
 const inter = Inter({subsets: ['latin']})
@@ -34,24 +33,13 @@ export default function RootLayout({
             <title>Sistema de Certificaciones DI</title>
         </head>
         <body className={inter.className}>
-        <SidebarProvider>
-            <div className="flex h-screen bg-neutral-50">
-                {/* Sidebar */}
-                <Sidebar/>
-
-                {/* Main Content */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    {/* Header */}
-                    <Header/>
-
-                    {/* Page Content */}
-                    <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 py-4 bg-neutral-50">
-                        <Breadcrumb/>
-                        {children}
-                    </main>
-                </div>
-            </div>
-        </SidebarProvider>
+        <AuthProvider>
+            <SidebarProvider>
+                <AuthenticatedLayout>
+                    {children}
+                </AuthenticatedLayout>
+            </SidebarProvider>
+        </AuthProvider>
         </body>
         </html>
     )

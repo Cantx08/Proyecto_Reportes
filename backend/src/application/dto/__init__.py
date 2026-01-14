@@ -24,6 +24,11 @@ from .scopus_account_dto import (
     ScopusAccountDTO, ScopusAccountCreateDTO, ScopusAccountUpdateDTO,
     ScopusAccountsResponseDTO, ScopusAccountResponseDTO, LinkAuthorScopusDTO
 )
+from .auth_dto import (
+    UserRegisterDTO, UserLoginDTO, UserUpdateDTO, PasswordChangeDTO,
+    TokenResponseDTO, UserResponseDTO, UsersResponseDTO, AuthResponseDTO,
+    MessageResponseDTO
+)
 
 # Resolver referencias circulares después de importar todos los modelos
 AuthorDTO.model_rebuild()
@@ -45,6 +50,10 @@ __all__ = [
     # ScopusAccount DTOs
     "ScopusAccountDTO", "ScopusAccountCreateDTO", "ScopusAccountUpdateDTO",
     "ScopusAccountsResponseDTO", "ScopusAccountResponseDTO", "LinkAuthorScopusDTO",
+    # Auth DTOs
+    "UserRegisterDTO", "UserLoginDTO", "UserUpdateDTO", "PasswordChangeDTO",
+    "TokenResponseDTO", "UserResponseDTO", "UsersResponseDTO", "AuthResponseDTO",
+    "MessageResponseDTO",
     # Legacy DTOs
     "SubjectAreaResponseDTO", "ReportRequestDTO"
 ]
