@@ -27,7 +27,7 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* User Menu */}
-                <div className="bg-white rounded-lg">
+                <div>
                     <UserMenu />
                 </div>
             </div>

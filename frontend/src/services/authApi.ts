@@ -97,6 +97,38 @@ export const authApi = {
     } catch {
       return false;
     }
+  },
+
+  /**
+   * Obtener todos los usuarios (solo para administradores)
+   */
+  async getAllUsers(): Promise<{ users: User[], total: number }> {
+    const response = await api.get<{ users: User[], total: number }>('/users');
+    return response.data;
+  },
+
+  /**
+   * Obtener un usuario por ID (solo para administradores)
+   */
+  async getUserById(userId: number): Promise<User> {
+    const response = await api.get<User>(`/users/${userId}`);
+    return response.data;
+  },
+
+  /**
+   * Actualizar un usuario (solo para administradores)
+   */
+  async updateUser(userId: number, data: UserUpdateRequest): Promise<User> {
+    const response = await api.put<User>(`/users/${userId}`, data);
+    return response.data;
+  },
+
+  /**
+   * Eliminar un usuario (solo para administradores)
+   */
+  async deleteUser(userId: number): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/users/${userId}`);
+    return response.data;
   }
 };
 

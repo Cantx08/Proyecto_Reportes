@@ -52,6 +52,7 @@ class UserLoginDTO(BaseModel):
 
 class UserUpdateDTO(BaseModel):
     """DTO para actualización de usuario."""
+    username: Optional[str] = Field(None, min_length=3, max_length=50, description="Nuevo nombre de usuario")
     email: Optional[EmailStr] = Field(None, description="Nuevo correo electrónico")
     full_name: Optional[str] = Field(None, max_length=255, description="Nuevo nombre completo")
     is_active: Optional[bool] = Field(None, description="Estado activo del usuario")
@@ -60,6 +61,7 @@ class UserUpdateDTO(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
+                "username": "johnupdated",
                 "email": "newemail@example.com",
                 "full_name": "John Updated Doe",
                 "is_active": True,

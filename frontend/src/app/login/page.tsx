@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const { login, isLoading } = useAuth();
@@ -149,8 +150,21 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {/* Link a registro */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-neutral-400">
+            ¿No tienes una cuenta?{' '}
+            <Link
+              href="/register"
+              className="font-medium text-neutral-600 hover:underline"
+            >
+              Regístrate aquí
+            </Link>
+          </p>
+        </div>
+
         {/* Información adicional */}
-        <p className="text-center text-xs text-neutral-500">
+        <p className="text-center text-xs text-neutral-500 mt-4">
           Si tienes problemas para acceder, contacta al administrador
         </p>
       </div>

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useSidebar} from '@/contexts/SidebarContext';
+import {useAuth} from '@/contexts/AuthContext';
 import {
     Home,
     Users,
@@ -11,7 +12,8 @@ import {
     BookOpen,
     ClipboardCheck,
     ChevronsLeft,
-    ChevronsRight
+    ChevronsRight,
+    Shield
 } from 'lucide-react';
 
 const navigation = [
@@ -22,16 +24,21 @@ const navigation = [
     {name: 'Certificados', href: '/reports', icon: ClipboardCheck},
 ];
 
+const adminNavigation = [
+    {name: 'Gestión de Usuarios', href: '/users', icon: Shield},
+];
+
 const Sidebar: React.FC = () => {
     const pathname = usePathname();
     const {isCollapsed, toggleSidebar} = useSidebar();
+    const {user} = useAuth();
 
     return (
         <div className={`flex h-full flex-col bg-primary-500 transition-all duration-300 ${
             isCollapsed ? 'w-16' : 'w-64'
         }`}>
             {/* Logo del Departamento */}
-            <div className={`relative flex h-16 items-center border-b border-primary-400/30 bg-white ${
+            <div className={`relative flex h-24 items-center border-b border-primary-400/30 bg-white ${
                 isCollapsed ? 'px-2 justify-center' : 'px-6 justify-between'
             }`}>
                 <div className="flex items-center space-x-3">
@@ -97,6 +104,44 @@ const Sidebar: React.FC = () => {
                             </li>
                         );
                     })}
+                    
+                    {/* Opciones de administrador */}
+                    {user?.role === 'admin' && (
+                        <>
+                            {/* Separador */}
+                            <li className="py-2">
+                                <div className={`border-t border-primary-400/30 ${isCollapsed ? 'mx-2' : 'mx-3'}`}></div>
+                            </li>
+                            
+                            {adminNavigation.map((item) => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <li key={item.name}>
+                                        <Link
+                                            href={item.href}
+                                            className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group relative ${
+                                                isActive
+                                                    ? 'bg-primary-600 text-white shadow-md'
+                                                    : 'text-primary-100 hover:bg-primary-600/80 hover:text-white'
+                                            } ${isCollapsed ? 'justify-center' : ''}`}
+                                            title={isCollapsed ? item.name : undefined}
+                                        >
+                                            <item.icon className={`h-5 w-5 ${
+                                                !isCollapsed ? 'mr-3' : ''
+                                            }`}/>
+                                            {!isCollapsed && item.name}
+                                            {isCollapsed && (
+                                                <span
+                                                    className="absolute left-16 bg-neutral-900 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 shadow-lg">
+                              {item.name}
+                            </span>
+                                            )}
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </>
+                    )}
                 </ul>
             </nav>
 

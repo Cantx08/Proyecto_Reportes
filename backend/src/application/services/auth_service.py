@@ -322,14 +322,21 @@ class AuthService:
             UserResponseDTO con el usuario actualizado
             
         Raises:
-            ValueError: Si el usuario no existe o el email ya está en uso
+            ValueError: Si el usuario no existe, el username o email ya están en uso
         """
         user = await self._user_repository.get_by_id(user_id)
         if not user:
             raise ValueError(f"Usuario con ID {user_id} no encontrado")
         
         # Actualizar campos proporcionados
+        if update_dto.username is not None and update_dto.username != user.username:
+            # Verificar que el nuevo username no esté en uso
+            if await self._user_repository.exists_by_username(update_dto.username):
+                raise ValueError(f"El nombre de usuario '{update_dto.username}' ya está en uso")
+            user.username = update_dto.username
+        
         if update_dto.email is not None and update_dto.email != user.email:
+            # Verificar que el nuevo email no esté en uso
             if await self._user_repository.exists_by_email(update_dto.email):
                 raise ValueError(f"El correo electrónico '{update_dto.email}' ya está en uso")
             user.email = update_dto.email

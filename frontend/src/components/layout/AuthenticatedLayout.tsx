@@ -12,17 +12,21 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   const router = useRouter();
   const pathname = usePathname();
 
+  // Rutas públicas que no requieren autenticación
+  const publicRoutes = ['/login', '/register'];
+  const isPublicRoute = publicRoutes.includes(pathname);
+
   useEffect(() => {
-    // Si no está autenticado y no está en login, redirigir
-    if (!isLoading && !isAuthenticated && pathname !== '/login') {
+    // Si no está autenticado y no está en una ruta pública, redirigir a login
+    if (!isLoading && !isAuthenticated && !isPublicRoute) {
       router.push('/login');
     }
     
-    // Si está autenticado y está en login, redirigir al dashboard
-    if (!isLoading && isAuthenticated && pathname === '/login') {
+    // Si está autenticado y está en una ruta pública, redirigir al dashboard
+    if (!isLoading && isAuthenticated && isPublicRoute) {
       router.push('/');
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isAuthenticated, isLoading, pathname, router, isPublicRoute]);
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
@@ -36,8 +40,8 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
     );
   }
 
-  // Si está en la página de login, mostrar solo el contenido sin layout
-  if (pathname === '/login') {
+  // Si está en una ruta pública, mostrar solo el contenido sin layout
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 

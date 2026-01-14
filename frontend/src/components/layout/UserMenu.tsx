@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, LogOut, ChevronDown } from 'lucide-react';
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -48,19 +50,10 @@ export default function UserMenu() {
         className="flex items-center space-x-3 hover:bg-neutral-100 rounded-lg px-3 py-2 transition-colors"
       >
         {/* Avatar circular con iniciales */}
-        <div className="w-10 h-10 rounded-full bg-[#042a53] text-white flex items-center justify-center font-semibold text-sm">
+        <div className="w-12 h-12 rounded-full bg-neutral-300 text-[#042a53] flex items-center justify-center font-semibold text-m">
           {getInitials()}
         </div>
 
-        {/* Información del usuario */}
-        <div className="hidden md:block text-left">
-          <p className="text-sm font-medium text-neutral-900">
-            {user.full_name || user.username}
-          </p>
-          <p className="text-xs text-neutral-500 capitalize">
-            {user.role === 'admin' ? 'Administrador' : 'Usuario'}
-          </p>
-        </div>
 
         {/* Icono de flecha */}
         <ChevronDown 
@@ -88,7 +81,7 @@ export default function UserMenu() {
           <div className="py-1">
             <button
               onClick={() => {
-                setIsOpen(false);
+                router.push('/profile');
                 // TODO: Implementar navegación a perfil
               }}
               className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100 flex items-center space-x-2"
