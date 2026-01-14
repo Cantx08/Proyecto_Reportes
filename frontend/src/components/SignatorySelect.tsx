@@ -28,7 +28,7 @@ const FirmanteSelect: React.FC<SignatorySelectProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const firmanteOptions = [
-    { value: 1, label: 'Directora de Investigación' },
+    { value: 1, label: 'Director de Investigación' },
     { value: 2, label: 'Vicerrectora de Investigación' }
   ];
 

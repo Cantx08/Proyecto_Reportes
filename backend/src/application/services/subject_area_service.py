@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 from ...domain.repositories.subject_areas_repository import SubjectAreasRepository
 from ...domain.repositories.scopus_account_repository import ScopusAccountRepository
@@ -60,16 +61,21 @@ class SubjectAreaService:
         categories = set()
 
         # Obtener todas las subáreas específicas de Scopus
-        for scopus_id in scopus_ids:
+        async def fetch_author_areas(scopus_id):
             try:
                 areas = await self._scopus_repository.get_subject_areas_by_author(scopus_id)
-                for area in areas:
-                    categories.add(area.name)
+                return areas
             except Exception as e:
-                # Log error silently and continue
                 print(f"Error obteniendo áreas para autor {scopus_id}: {e}")
-                continue
+                return []
+            
+        tasks = [fetch_author_areas(sid) for sid in scopus_ids]
+        results = await asyncio.gather(*tasks)
 
+        for areas_list in results:
+            for area in areas_list:
+                categories.add(area.name)
+        
         # Mapear subáreas a áreas temáticas principales
         subject_areas = set()
         for category in categories:
