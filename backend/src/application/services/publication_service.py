@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 from ...domain.entities.author_publications import AuthorPublications
 from ...domain.entities.publication import PublicationsCollection
@@ -61,25 +62,26 @@ class PublicationService:
         
         authors = []
         
-        for scopus_id in scopus_ids:
+        async def fetch_single_author(scopus_id: str):
             try:
-                publication_list = await self._publications_repository.get_publications_by_author(scopus_id)
-                
-                # Solo agregar autores que tengan publicaciones
-                # Esto evita crear entradas vacías para Scopus IDs que no existen o no tienen publicaciones
-                if publication_list:
-                    # Enriquecer publicaciones con categorías SJR
-                    for pub in publication_list:
+                pub_list = await self._publications_repository.get_publications_by_author(scopus_id)
+
+                if pub_list:
+                    for pub in pub_list:
                         if not pub.categories:
                             pub.categories = self._sjr_repository.get_journal_categories(pub.source, pub.year)
 
-                    author = AuthorPublications(author_id=scopus_id, publications_list=publication_list)
-                    authors.append(author)
-                
-            except Exception:
-                # Solo agregar error si es relevante (no agregar autores sin publicaciones como error)
-                # Si un Scopus ID no existe en Scopus, simplemente lo ignoramos
-                pass
+                    return AuthorPublications(author_id=scopus_id, publications_list=pub_list)
+            except Exception as e:
+                print(f"Error al obtener el autor {scopus_id}: {e}")
+                return None
+            return None
+        
+        tasks = [fetch_single_author(sid) for sid in scopus_ids]
+
+        results = await asyncio.gather(*tasks)
+
+        authors = [res for res in results if res is not None]
         
         return PublicationsCollection(authors=authors)
 

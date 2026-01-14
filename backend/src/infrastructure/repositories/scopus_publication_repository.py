@@ -47,7 +47,7 @@ class ScopusPublicationsRepository(PublicationsRepository):
     
     async def get_publications_by_author(self, author_id: str) -> List[Publication]:
         """Obtiene las publicaciones de un autor específico."""
-        data = self._client.get_publications_by_author(author_id)
+        data = await self._client.get_publications_by_author(author_id)
         entries = data.get("search-results", {}).get("entry", [])
         
         publication_list = []
@@ -61,6 +61,6 @@ class ScopusPublicationsRepository(PublicationsRepository):
     async def get_publication_details(self, scopus_id: str) -> Optional[dict]:
         """Obtiene los detalles completos de una publicación."""
         try:
-            return self._client.get_publication_details(scopus_id)
-        except RuntimeError:
+            return await self._client.get_publication_details(scopus_id)
+        except Exception:
             return None

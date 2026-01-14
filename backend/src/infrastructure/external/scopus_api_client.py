@@ -1,4 +1,4 @@
-import requests
+import httpx
 from typing import Dict, Any
 
 
@@ -12,8 +12,9 @@ class ScopusApiClient:
             "Accept": "application/json",
             "X-ELS-APIKey": self._api_key
         }
+        self._timeout = httpx.Timeout(60.0, connect=10.0)
 
-    def get_publications_by_author(self, author_id: str) -> Dict[str, Any]:
+    async def get_publications_by_author(self, author_id: str) -> Dict[str, Any]:
         """Busca publicaciones de un autor en Scopus."""
         url = f"{self._base_url}/content/search/scopus"
         start = 0
@@ -24,14 +25,16 @@ class ScopusApiClient:
             "count": count
         }
 
-        response = requests.get(url, headers=self._headers, params=params, timeout=180)
-        response.raise_for_status()
-        return response.json()
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            response = await client.get(url, headers=self._headers, params=params)
+            response.raise_for_status()
+            return response.json()
 
-    def get_publication_details(self, scopus_id: str) -> Dict[str, Any]:
+    async def get_publication_details(self, scopus_id: str) -> Dict[str, Any]:
         """Obtiene detalles completos de una publicación."""
         url = f"{self._base_url}/content/abstract/scopus_id/{scopus_id}"
 
-        response = requests.get(url, headers=self._headers, timeout=180)
-        response.raise_for_status()
-        return response.json()
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            response = await client.get(url, headers=self._headers)
+            response.raise_for_status()
+            return response.json()

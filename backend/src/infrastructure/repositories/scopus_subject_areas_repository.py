@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 from ...domain.entities.subject_area import SubjectArea
 from ..external.scopus_api_client import ScopusApiClient
@@ -10,14 +11,14 @@ class ScopusSubjectAreasRepository(SubjectAreasRepository):
     def __init__(self, scopus_client: ScopusApiClient):
         self._client = scopus_client
     
-    def _extract_publication_subject_areas(self, entry: dict) -> List[SubjectArea]:
+    async def _extract_publication_subject_areas(self, entry: dict) -> List[SubjectArea]:
         """Extrae las áreas temáticas de una publicación."""
         scopus_id = entry.get("dc:identifier", "").replace("SCOPUS_ID:", "")
         if not scopus_id:
             return []
         
         try:
-            detail_data = self._client.get_publication_details(scopus_id)
+            detail_data = await self._client.get_publication_details(scopus_id)
             abstracts_retrieval = detail_data.get("abstracts-retrieval-response", {})
             subject_areas_data = abstracts_retrieval.get("subject-areas", {})
             
@@ -36,22 +37,30 @@ class ScopusSubjectAreasRepository(SubjectAreasRepository):
                         areas.append(SubjectArea(name=area_name))
 
             return areas
-        except RuntimeError:
+        except Exception:
             return []
         
+    
     async def get_subject_areas_by_author(self, author_id: str) -> List[SubjectArea]:
         """Obtiene las áreas temáticas de un autor."""
-        data = self._client.get_publications_by_author(author_id)
+        data = await self._client.get_publications_by_author(author_id)
         entries = data.get("search-results", {}).get("entry", [])
         
         subject_areas = set()
         
-        for entry in entries:
-            areas = self._extract_publication_subject_areas(entry)
+        tasks = [self._extract_publication_subject_areas(entry) for entry in entries]
+        
+        if not tasks:
+            return []
+            
+        results = await asyncio.gather(*tasks)
+        
+        for areas in results:
             subject_areas.update(areas)
         
         return list(subject_areas)
 
+    
     def get_all_subject_areas(self) -> List[SubjectArea]:
         """
         Obtiene todas las áreas temáticas disponibles.

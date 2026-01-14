@@ -1,6 +1,6 @@
 import unicodedata
 import pandas as pd
-from typing import Optional
+from typing import Optional, Dict, Tuple
 from ...domain.repositories.sjr_repository import SJRRepository
 
 
@@ -9,34 +9,36 @@ class SJRFileRepository(SJRRepository):
     
     def __init__(self, csv_path: str):
         self._csv_path = csv_path
-        self._df: Optional[pd.DataFrame] = None
+        self._data_cache: Dict[Tuple[str, str], str] = {}
         self._load_data()
     
     def _load_data(self) -> None:
         """Carga los datos del archivo CSV."""
         try:
-            self._df = pd.read_csv(self._csv_path, sep=';')
-            self._df['Title_norm'] = self._df['Title'].apply(self.normalize_journal_name)
+            df = pd.read_csv(self._csv_path, sep=';')
+            # Pre-calcular la columna normalizada una sola vez
+            df['Title_norm'] = df['Title'].apply(self.normalize_journal_name)
+            
+            # Construir el diccionario de caché
+            # Iteramos una vez y guardamos en memoria para acceso rápido
+            for _, row in df.iterrows():
+                key = (str(row['Title_norm']), str(row['year']))
+                self._data_cache[key] = row['Categories']
+                
         except FileNotFoundError:
-            self._df = None
+            print(f"Advertencia: No se encontró el archivo SJR en {self._csv_path}")
+            self._data_cache = {}
     
     def get_journal_categories(self, journal_name: str, year: str) -> str:
         """Obtiene las categorías de una revista en un año específico."""
-        if self._df is None:
+        if not self._data_cache:
             return "No disponible"
         
         edition_year = str(year)
         normalized_journal = self.normalize_journal_name(journal_name)
         
-        match = self._df[
-            (self._df['Title_norm'] == normalized_journal) &
-            (self._df['year'].astype(str) == edition_year)
-        ]
-        
-        if not match.empty:
-            return match.iloc[0]["Categories"]
-        
-        return "No indexada"
+        # Búsqueda directa en diccionario (Milisegundos vs Segundos)
+        return self._data_cache.get((normalized_journal, edition_year), "No indexada")
     
     def normalize_journal_name(self, name: str) -> str:
         """

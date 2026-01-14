@@ -36,7 +36,7 @@ class ReportsController:
             subject_areas = await self._subject_area_service.get_subject_areas(request.author_ids)
             
             # Obtener estadísticas por año
-            pubs_by_year = await self._publication_service.get_statistics_by_year(request.author_ids)
+            pubs_by_year = collection.count_publications_by_year()
             
             # Consolidar todas las publicaciones de todos los autores
             publications_list = []
