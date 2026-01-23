@@ -131,9 +131,8 @@ latex/
 *.db
 *.sqlite
 
-# Alembic
-alembic/
-*.ini
+# alembic
+alembic/versions/
 
 # IDE
 .vscode/

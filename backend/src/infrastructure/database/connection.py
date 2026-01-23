@@ -2,10 +2,15 @@ import os
 from contextlib import contextmanager
 from typing import Generator
 from urllib.parse import quote_plus
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+load_dotenv()
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-
 from .models.base import Base
 
 
@@ -29,15 +34,24 @@ class DatabaseConfig:
     @staticmethod
     def _build_database_url() -> str:
         """Construye la URL de conexión a la base de datos."""
-        # Variables de entorno para la conexión
+        
+        # 1. Leer variables de entorno
         db_user = os.getenv("DB_USER", "postgres")
-        db_password = os.getenv("DB_PASSWORD", "P@ssw0rd")
         db_host = os.getenv("DB_HOST", "localhost")
         db_port = os.getenv("DB_PORT", "5432")
         db_name = os.getenv("DB_NAME", "reportes_publicaciones_epn")
+        
+        # 2. VALIDACIÓN CRÍTICA (Aquí estaba el error)
+        db_password = os.getenv("DB_PASSWORD")
+        
+        if not db_password:
+            # Si es None o vacío, detenemos todo con un mensaje claro.
+            raise ValueError(
+                "❌ ERROR FATAL: La variable de entorno 'DB_PASSWORD' no está definida. "
+                "Asegúrate de tener un archivo .env con la contraseña de la base de datos."
+            )
 
-        # Si la contraseña ya está escapada (contiene %), no escapar
-        # Si contiene caracteres especiales sin escapar, escapar
+        # 3. Procesar contraseña (escape de caracteres)
         if '%' in db_password:
             db_password_escaped = db_password
         else:

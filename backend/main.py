@@ -30,6 +30,9 @@ from src.infrastructure.api.controllers.draft_processor_controller import DraftP
 from src.infrastructure.api.controllers.auth_controller import AuthController
 from src.domain.entities.user import User
 from src.domain.enums.role import Role
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(
     title="Sistema de Publicaciones Académicas",
