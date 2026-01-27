@@ -1,76 +1,62 @@
-import asyncio
 from typing import List
-from ...domain.entities.subject_area import SubjectArea
+
 from ..external.scopus_api_client import ScopusApiClient
+from ...domain.entities.subject_area import SubjectArea
 from ...domain.repositories.subject_areas_repository import SubjectAreasRepository
 
 
 class ScopusSubjectAreasRepository(SubjectAreasRepository):
-    """Repositorio de áreas temáticas usando la API de Scopus."""
-    
+    """Repositorio de áreas temáticas usando la API de Author Retrieval de Scopus."""
+
     def __init__(self, scopus_client: ScopusApiClient):
         self._client = scopus_client
-    
-    async def _extract_publication_subject_areas(self, entry: dict) -> List[SubjectArea]:
-        """Extrae las áreas temáticas de una publicación."""
-        scopus_id = entry.get("dc:identifier", "").replace("SCOPUS_ID:", "")
-        if not scopus_id:
-            return []
-        
+
+    async def get_subject_areas_by_author(self, author_id: str) -> List[SubjectArea]:
+        """
+        Obtiene las áreas temáticas de un autor directamente desde su perfil.
+        Esto es mucho más eficiente y completo que iterar sobre todas las publicaciones.
+        """
         try:
-            detail_data = await self._client.get_publication_details(scopus_id)
-            abstracts_retrieval = detail_data.get("abstracts-retrieval-response", {})
-            subject_areas_data = abstracts_retrieval.get("subject-areas", {})
-            
+            data = await self._client.get_author_details(author_id)
+
+            # Navegar la respuesta JSON de Scopus Author Retrieval
+            # Estructura típica: author-retrieval-response -> subject-areas -> subject-area
+            retrieval_response = data.get("author-retrieval-response", [])
+
+            # A veces viene como lista si se consultan varios, pero aquí es por ID único
+            if isinstance(retrieval_response, list):
+                if not retrieval_response: return []
+                retrieval_response = retrieval_response[0]
+
+            subject_areas_container = retrieval_response.get("subject-areas", {})
+            subject_area_list = subject_areas_container.get("subject-area", [])
+
             areas = []
-            if subject_areas_data and "subject-area" in subject_areas_data:
-                subject_area_list = subject_areas_data["subject-area"]
-                
-                if isinstance(subject_area_list, list):
-                    for sa in subject_area_list:
-                        area_name = sa.get("$", "")
-                        if area_name:
-                            areas.append(SubjectArea(name=area_name))
-                elif isinstance(subject_area_list, dict):
-                    area_name = subject_area_list.get("$", "")
-                    if area_name:
-                        areas.append(SubjectArea(name=area_name))
+
+            # Normalizar a lista si es un solo objeto
+            if isinstance(subject_area_list, dict):
+                subject_area_list = [subject_area_list]
+
+            for item in subject_area_list:
+                # El nombre suele estar en '$' o a veces '@abbrev' dependiendo de lo que necesites
+                # Usamos '$' que es el nombre completo (ej: "Computer Science")
+                area_name = item.get("$", "")
+                if area_name:
+                    areas.append(SubjectArea(name=area_name))
 
             return areas
-        except Exception:
-            return []
-        
-    
-    async def get_subject_areas_by_author(self, author_id: str) -> List[SubjectArea]:
-        """Obtiene las áreas temáticas de un autor."""
-        data = await self._client.get_publications_by_author(author_id)
-        entries = data.get("search-results", {}).get("entry", [])
-        
-        subject_areas = set()
-        
-        tasks = [self._extract_publication_subject_areas(entry) for entry in entries]
-        
-        if not tasks:
-            return []
-            
-        results = await asyncio.gather(*tasks)
-        
-        for areas in results:
-            subject_areas.update(areas)
-        
-        return list(subject_areas)
 
-    
+        except Exception as e:
+            print(f"Error obteniendo áreas para el autor {author_id}: {e}")
+            return []
+
+    # Métodos no utilizados o auxiliares
+    @staticmethod
+    async def _extract_publication_subject_areas() -> List[SubjectArea]:
+        return []  # Ya no se usa
+
     def get_all_subject_areas(self) -> List[SubjectArea]:
-        """
-        Obtiene todas las áreas temáticas disponibles.
-        Implementación básica - devuelve lista vacía, ya que Scopus no provee un endpoint directo.
-        """
         return []
-    
+
     def map_category_to_area(self, category: str) -> str:
-        """
-        Mapeo básico de subáreas - debe ser sobrescrito por el repositorio de archivos.
-        Esta implementación devuelve la misma subárea.
-        """
         return category

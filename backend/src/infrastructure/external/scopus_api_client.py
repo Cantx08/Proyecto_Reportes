@@ -1,7 +1,6 @@
 import httpx
 from typing import Dict, Any
 
-
 class ScopusApiClient:
     """Cliente para la API de Scopus."""
 
@@ -18,13 +17,12 @@ class ScopusApiClient:
         """Busca publicaciones de un autor en Scopus."""
         url = f"{self._base_url}/content/search/scopus"
         start = 0
-        count = 200
+        count = 200 # Nota: Si el autor tiene >200, se requeriría paginación aquí.
         params = {
             "query": f"AU-ID({author_id})",
             "start": start,
             "count": count
         }
-
         async with httpx.AsyncClient(timeout=self._timeout) as client:
             response = await client.get(url, headers=self._headers, params=params)
             response.raise_for_status()
@@ -33,8 +31,21 @@ class ScopusApiClient:
     async def get_publication_details(self, scopus_id: str) -> Dict[str, Any]:
         """Obtiene detalles completos de una publicación."""
         url = f"{self._base_url}/content/abstract/scopus_id/{scopus_id}"
-
         async with httpx.AsyncClient(timeout=self._timeout) as client:
             response = await client.get(url, headers=self._headers)
+            response.raise_for_status()
+            return response.json()
+
+    async def get_author_details(self, author_id: str) -> Dict[str, Any]:
+        """
+        Obtiene los detalles del perfil del autor, incluyendo sus áreas temáticas.
+        Utiliza la vista 'ENHANCED' para asegurar que vengan los subject-areas.
+        """
+        url = f"{self._base_url}/content/author/author_id/{author_id}"
+        params = {
+            "view": "ENHANCED"
+        }
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            response = await client.get(url, headers=self._headers, params=params)
             response.raise_for_status()
             return response.json()
