@@ -2,7 +2,7 @@
 Data Transfer Objects para la API.
 """
 from pydantic import BaseModel
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Union, Any
 
 if TYPE_CHECKING:
     from .author_dto import AuthorDTO
@@ -16,7 +16,7 @@ class PublicationDTO(BaseModel):
     document_type: str
     affiliation: str
     doi: str
-    categories: str = ""
+    categories: Union[str, List[Any]] = ""
 
 
 class PublicationsResponseDTO(BaseModel):

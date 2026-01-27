@@ -171,7 +171,7 @@ export interface Publication {
     document_type: string;
     affiliation: string;
     doi: string;
-    categories: string;
+    categories: string | CategoryDetail[]; 
 }
 
 export interface PublicationsResponse {
@@ -203,4 +203,14 @@ scopusIds: string[];
 export interface ValidationResult {
   isValid: boolean;
   message?: string;
+}
+
+
+// ---------- DETALLE DE CATEGORÍAS ----------
+export interface CategoryDetail {
+    name: string;
+    quartile: string;
+    percentile: number;
+    rank: number;
+    total: number;
 }
