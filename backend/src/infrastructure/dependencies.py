@@ -26,7 +26,6 @@ from src.application.services.scopus_account_service import ScopusAccountService
 from src.application.services.department_service import DepartmentService
 from src.application.services.draft_processor_service import DraftProcessorService
 from src.application.services.report_service import ReportService
-from src.application.services.auth_service import AuthService
 
 # ============================================================================
 # CONTROLADORES (Infrastructure Layer - API/Presentation)
@@ -40,7 +39,6 @@ from src.infrastructure.api.controllers.positions_controller import PositionsCon
 from src.infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
 from src.infrastructure.api.controllers.departments_controller import DepartmentsController
 from src.infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
-from src.infrastructure.api.controllers.auth_controller import AuthController
 
 # ============================================================================
 # REPOSITORIOS - IMPLEMENTACIONES (Infrastructure Layer)
@@ -51,7 +49,6 @@ from src.infrastructure.repositories.author_db_repository import AuthorDatabaseR
 from src.infrastructure.repositories.db_department_repository import DBDepartmentRepository
 from src.infrastructure.repositories.position_db_repository import PositionDatabaseRepository
 from src.infrastructure.repositories.scopus_account_db_repository import ScopusAccountDBRepository
-from src.infrastructure.repositories.user_db_repository import UserDatabaseRepository
 
 # Archivos (datos estáticos/externos)
 from src.infrastructure.repositories.sjr_file_repository import SJRFileRepository
@@ -73,9 +70,6 @@ from src.infrastructure.repositories.report.chart_generator import MatplotlibCha
 from src.infrastructure.repositories.report.publication_formatter import ReportLabPublicationFormatter
 from src.infrastructure.repositories.report.content_builder import ReportLabContentBuilder
 from src.infrastructure.repositories.report.pdf_generator import ReportLabReportGenerator
-
-# Dependencias de seguridad
-from src.infrastructure.api.security import SecurityDependencies, create_security_dependencies
 
 load_dotenv()
 
@@ -101,12 +95,12 @@ def get_settings() -> Settings:
 class DependencyContainer:
     """
     Contenedor de dependencias siguiendo el patrón Composition Root.
-    
+
     Responsabilidades:
     - Crear y configurar todas las dependencias de la aplicación
     - Ensamblar las capas siguiendo Clean Architecture
     - Proveer acceso a los controladores para los endpoints
-    
+
     Flujo de dependencias (de adentro hacia afuera):
     Domain ← Application ← Infrastructure
     """
@@ -132,7 +126,7 @@ class DependencyContainer:
         """Configura componentes de infraestructura base."""
         # Base de datos
         self._db_config = DatabaseConfig()
-        
+
         # Cliente API externa (Scopus)
         self._scopus_client = ScopusApiClient(self._settings.scopus_api_key)
 
@@ -149,13 +143,12 @@ class DependencyContainer:
         self._department_repo = DBDepartmentRepository(self._db_config)
         self._position_repo = PositionDatabaseRepository(self._db_config)
         self._scopus_account_repo = ScopusAccountDBRepository(self._db_config)
-        self._user_repo = UserDatabaseRepository(self._db_config)
 
         # Repositorios de Archivos (datos estáticos/externos)
         self._sjr_file_repository = SJRFileRepository(self._settings.sjr_csv_path)
         self._subject_areas_repo = SubjectAreasFileRepository(self._settings.areas_csv_path)
 
-        # Repositorios de APIs Externas (Scopus)
+        # Repositorios de API Externa (Scopus)
         self._scopus_publications_repository = ScopusPublicationsRepository(self._scopus_client)
         self._scopus_subject_areas_repository = ScopusSubjectAreasRepository(self._scopus_client)
 
@@ -170,18 +163,18 @@ class DependencyContainer:
         # Componentes base
         self._style_manager = ReportLabStyleManager()
         self._chart_generator = MatplotlibChartGenerator()
-        
+
         # Componentes compuestos
         self._publication_formatter = ReportLabPublicationFormatter(self._style_manager)
         self._content_builder = ReportLabContentBuilder(
-            self._style_manager, 
-            self._chart_generator, 
+            self._style_manager,
+            self._chart_generator,
             self._publication_formatter
         )
-        
+
         # Generador principal (implementa IReportGenerator)
         self._report_generator = ReportLabReportGenerator(self._content_builder)
-        
+
         # Servicio de plantillas (implementa ITemplateOverlayService)
         self._template_overlay_service = TemplateOverlayService()
 
@@ -216,9 +209,6 @@ class DependencyContainer:
         self._report_service = ReportService(self._report_generator)
         self._draft_processor_service = DraftProcessorService(self._template_overlay_service)
 
-        # Servicio de autenticación
-        self._auth_service = AuthService(self._user_repo)
-
     # =========================================================================
     # SETUP CONTROLLERS (Capa de presentación/API)
     # =========================================================================
@@ -244,12 +234,6 @@ class DependencyContainer:
             self._report_service
         )
         self._draft_processor_controller = DraftProcessorController(self._draft_processor_service)
-
-        # Controlador de autenticación
-        self._auth_controller = AuthController(self._auth_service)
-        
-        # Dependencias de seguridad
-        self._security_dependencies = create_security_dependencies(self._auth_service)
 
     # =========================================================================
     # PROPIEDADES PÚBLICAS - Acceso a Controladores
@@ -293,22 +277,6 @@ class DependencyContainer:
     def draft_processor_controller(self) -> DraftProcessorController:
         """Obtiene el controlador de procesamiento de borradores."""
         return self._draft_processor_controller
-
-    @property
-    def auth_controller(self) -> AuthController:
-        """Obtiene el controlador de autenticación."""
-        return self._auth_controller
-
-    @property
-    def security_dependencies(self) -> SecurityDependencies:
-        """Obtiene las dependencias de seguridad."""
-        return self._security_dependencies
-
-    @property
-    def auth_service(self) -> AuthService:
-        """Obtiene el servicio de autenticación."""
-        return self._auth_service
-
 
 # Instancia global del contenedor
 container = DependencyContainer()
