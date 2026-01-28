@@ -24,6 +24,14 @@ async def get_departments(service: DepartmentService = Depends(get_service)):
     return await service.get_all_departments()
 
 
+@router.get("/{dep_id}", response_model=DepartmentResponseDTO)
+async def get_department_by_id(dep_id: UUID, service: DepartmentService = Depends(get_service)):
+    try:
+        return await service.get_department_by_id(dep_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.get("/faculty/{faculty_code}", response_model=List[DepartmentResponseDTO])
 async def get_departments_by_faculty(faculty_code: str, service: DepartmentService = Depends(get_service)):
     try:

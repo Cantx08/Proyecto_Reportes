@@ -23,6 +23,14 @@ async def get_positions(service: JobPositionService = Depends(get_service)):
     return await service.get_all_positions()
 
 
+@router.get("/{pos_id}", response_model=JobPositionResponseDTO)
+async def get_position_by_id(pos_id: UUID, service: JobPositionService = Depends(get_service)):
+    try:
+        return await service.get_position_by_id(pos_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @router.post("", response_model=JobPositionResponseDTO, status_code=201)
 async def create_position(dto: JobPositionCreateDTO, service: JobPositionService = Depends(get_service)):
     return await service.create_position(dto)

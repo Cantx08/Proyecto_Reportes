@@ -14,6 +14,12 @@ class JobPositionService:
         positions = await self.pos_repo.get_all()
         return [JobPositionResponseDTO(pos_id=job.pos_id, pos_name=job.pos_name) for job in positions]
 
+    async def get_position_by_id(self, pos_id: UUID) -> JobPositionResponseDTO:
+        position = await self.pos_repo.get_by_id(pos_id)
+        if not position:
+            raise ValueError(f"El cargo con ID {pos_id} no existe.")
+        return JobPositionResponseDTO.from_entity(position)
+
     async def create_position(self, dto: JobPositionCreateDTO) -> JobPositionResponseDTO:
         new_pos = JobPosition(
             pos_id=uuid4(),

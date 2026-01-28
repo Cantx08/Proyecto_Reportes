@@ -26,6 +26,12 @@ class DepartmentService:
         deps = await self.dept_repo.get_by_faculty(faculty_enum)
         return [DepartmentResponseDTO.from_entity(dep) for dep in deps]
 
+    async def get_department_by_id(self, dept_id: UUID) -> DepartmentResponseDTO:
+        department = await self.dept_repo.get_by_id(dept_id)
+        if not department:
+            raise ValueError(f"El departamento con ID {dept_id} no existe.")
+        return DepartmentResponseDTO.from_entity(department)
+
     async def create_department(self, dto: DepartmentCreateDTO) -> DepartmentResponseDTO:
         new_dept = Department(
             dep_id=uuid4(),
