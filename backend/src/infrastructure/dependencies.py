@@ -21,9 +21,7 @@ from dotenv import load_dotenv
 from src.application.services.subject_area_service import SubjectAreaService
 from src.application.services.publication_service import PublicationService
 from src.application.services.author_service import AuthorService
-from src.application.services.position_service import PositionService
 from src.application.services.scopus_account_service import ScopusAccountService
-from src.application.services.department_service import DepartmentService
 from src.application.services.draft_processor_service import DraftProcessorService
 from src.application.services.report_service import ReportService
 
@@ -35,9 +33,7 @@ from src.infrastructure.api.controllers.reports_controller import ReportsControl
 from src.infrastructure.api.controllers.subject_areas_controller import SubjectAreasController
 from src.infrastructure.api.controllers.publications_controller import PublicationsController
 from src.infrastructure.api.controllers.authors_controller import AuthorsController
-from src.infrastructure.api.controllers.positions_controller import PositionsController
 from src.infrastructure.api.controllers.scopus_accounts_controller import ScopusAccountsController
-from src.infrastructure.api.controllers.departments_controller import DepartmentsController
 from src.infrastructure.api.controllers.draft_processor_controller import DraftProcessorController
 
 # ============================================================================
@@ -46,8 +42,6 @@ from src.infrastructure.api.controllers.draft_processor_controller import DraftP
 # ============================================================================
 # Base de datos
 from src.infrastructure.repositories.author_db_repository import AuthorDatabaseRepository
-from src.infrastructure.repositories.db_department_repository import DBDepartmentRepository
-from src.infrastructure.repositories.position_db_repository import PositionDatabaseRepository
 from src.infrastructure.repositories.scopus_account_db_repository import ScopusAccountDBRepository
 
 # Archivos (datos estáticos/externos)
@@ -140,8 +134,6 @@ class DependencyContainer:
         """
         # Repositorios de Base de Datos (Implementan interfaces de Domain)
         self._author_repo = AuthorDatabaseRepository(self._db_config)
-        self._department_repo = DBDepartmentRepository(self._db_config)
-        self._position_repo = PositionDatabaseRepository(self._db_config)
         self._scopus_account_repo = ScopusAccountDBRepository(self._db_config)
 
         # Repositorios de Archivos (datos estáticos/externos)
@@ -189,8 +181,6 @@ class DependencyContainer:
         """
         # Servicios CRUD básicos
         self._author_service = AuthorService(self._author_repo)
-        self._department_service = DepartmentService(self._department_repo)
-        self._position_service = PositionService(self._position_repo)
         self._scopus_account_service = ScopusAccountService(self._scopus_account_repo)
 
         # Servicios de integración con Scopus
@@ -219,8 +209,6 @@ class DependencyContainer:
         """
         # Controladores CRUD
         self._authors_controller = AuthorsController(self._author_service)
-        self._departments_controller = DepartmentsController(self._department_service)
-        self._positions_controller = PositionsController(self._position_service)
         self._scopus_accounts_controller = ScopusAccountsController(self._scopus_account_service)
 
         # Controladores de consulta Scopus
@@ -257,16 +245,6 @@ class DependencyContainer:
     def authors_controller(self) -> AuthorsController:
         """Obtiene el controlador de autores."""
         return self._authors_controller
-
-    @property
-    def departments_controller(self) -> DepartmentsController:
-        """Obtiene el controlador de departamentos."""
-        return self._departments_controller
-
-    @property
-    def positions_controller(self) -> PositionsController:
-        """Obtiene el controlador de posiciones."""
-        return self._positions_controller
 
     @property
     def scopus_accounts_controller(self) -> ScopusAccountsController:
