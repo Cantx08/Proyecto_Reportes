@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy import Column, UUID, String, Enum
 
-from backend.src.shared.database import Base
+from ....shared.database import Base
 
 from ..domain.department import Department
 from ..domain.faculty import Faculty

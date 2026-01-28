@@ -1,9 +1,10 @@
 from typing import List
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import UUID
 from sqlalchemy.orm import Session
 
-from backend.src.shared.database import get_db
+from ....shared.database import get_db
 
 from .db_department_repository import DBDepartmentRepository
 from ..application.department_dto import DepartmentResponseDTO, DepartmentCreateDTO, DepartmentUpdateDTO

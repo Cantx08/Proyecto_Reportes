@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.src.shared.database import get_db
+from ....shared.database import get_db
 
 from .db_job_position_repository import DBJobPositionRepository
 from ..application.job_position_dto import JobPositionResponseDTO, JobPositionCreateDTO, JobPositionUpdateDTO
