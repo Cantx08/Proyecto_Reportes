@@ -1,42 +1,12 @@
-from typing import Optional, List
-from uuid import UUID, uuid4
-from pydantic import BaseModel
+from typing import List
+from uuid import uuid4, UUID
 
-from .domain import Faculty, Department, IDepartmentRepository
-
-
-# ============== DTOS para la gestión de departamentos ==============
-class DepartmentCreateDTO(BaseModel):
-    dep_name: str
-    dep_code: str
-    faculty: Faculty
+from .department_dto import DepartmentResponseDTO, DepartmentCreateDTO, DepartmentUpdateDTO
+from ..domain.department import Department
+from ..domain.department_repository import IDepartmentRepository
+from ..domain.faculty import Faculty
 
 
-class DepartmentUpdateDTO(BaseModel):
-    dep_name: Optional[str] = None
-    dep_code: Optional[str] = None
-    faculty: Optional[Faculty] = None
-
-
-class DepartmentResponseDTO(BaseModel):
-    dep_id: UUID
-    dep_name: str
-    dep_code: str
-    faculty_code: str
-    faculty_name: str
-
-    @staticmethod
-    def from_entity(dept: Department) -> 'DepartmentResponseDTO':
-        return DepartmentResponseDTO(
-            dep_id=dept.dep_id,
-            dep_name=dept.dep_name,
-            dep_code=dept.dep_code,
-            faculty_code=dept.faculty.fac_code,
-            faculty_name=dept.faculty.fac_name
-        )
-
-
-# ============== Servicios para la gestión de departamentos ==============
 class DepartmentService:
     """Servicio de aplicación para la gestión de departamentos."""
 

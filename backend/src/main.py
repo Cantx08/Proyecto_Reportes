@@ -3,11 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 # 1. Importación del Contenedor Global (Configuración)
-from container import get_container
+from .container import get_container
 
 # 2. Importación de los Routers
-from modules.departments.infra import router as department_router
-from modules.job_positions.infra import router as job_position_router
+from .modules.departments.infrastructure.department_router import router as department_router
+from .modules.job_positions.infrastructure.job_position_router import router as job_position_router
 
 # Obtener configuración
 container = get_container()

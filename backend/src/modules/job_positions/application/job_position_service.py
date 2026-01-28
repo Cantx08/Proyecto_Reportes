@@ -1,32 +1,11 @@
-from typing import Optional, List
-from uuid import UUID, uuid4
-from pydantic import BaseModel, Field
+from typing import List
+from uuid import uuid4, UUID
 
-from .domain import JobPosition, IJobPositionRepository
-
-
-# ============== DTOS para la gestión de cargos ==============
-class JobPositionCreateDTO(BaseModel):
-    pos_name: str = Field(..., description="Ej: Profesor Principal A Tiempo Completo")
+from .job_position_dto import JobPositionResponseDTO, JobPositionCreateDTO, JobPositionUpdateDTO
+from ..domain.job_position import JobPosition
+from ..domain.job_position_repository import IJobPositionRepository
 
 
-class JobPositionUpdateDTO(BaseModel):
-    pos_name: Optional[str] = None
-
-
-class JobPositionResponseDTO(BaseModel):
-    pos_id: UUID
-    pos_name: str
-
-    @staticmethod
-    def from_entity(job_pos: JobPosition):
-        return JobPositionResponseDTO(
-            pos_id=job_pos.pos_id,
-            pos_name=job_pos.pos_name
-        )
-
-
-# ================= Servicio para la gestión de cargos =================
 class JobPositionService:
     def __init__(self, pos_repo: IJobPositionRepository):
         self.pos_repo = pos_repo

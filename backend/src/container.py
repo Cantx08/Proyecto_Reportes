@@ -4,7 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Importamos componentes compartidos
-from shared.database import db_config
+from .shared.database import db_config
 # from src.shared.scopus_client import ScopusApiClient
 
 load_dotenv()

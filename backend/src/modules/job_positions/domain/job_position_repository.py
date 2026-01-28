@@ -1,20 +1,8 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import List, Optional
 from uuid import UUID
 
-
-@dataclass
-class JobPosition:
-    """
-    Entidad que representa un cargo/posición.
-    """
-    pos_id: UUID
-    pos_name: str
-
-    def is_full_time(self) -> bool:
-        """Indica si el cargo es a tiempo completo."""
-        return "Tiempo Completo" in self.pos_name
+from .job_position import JobPosition
 
 
 class IJobPositionRepository(ABC):
