@@ -3,9 +3,10 @@ import type {
   PublicationsResponse,
   DocumentsByYearResponse,
   SubjectAreasResponse,
-  DepartmentsResponse,
+
 
 } from '@/types/api';
+import {DepartmentsResponse} from "@/features/departments/types";
 
 export interface ReportRequest {
   author_ids: string[];

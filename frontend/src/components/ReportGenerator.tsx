@@ -7,7 +7,8 @@ import DepartmentSelect from './DepartmentSelect';
 import PositionSelect from './PositionSelect';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
-import type { AuthorResponse } from '@/types/api';
+
+import {AuthorResponse} from "@/features/authors/types";
 
 interface ReportGeneratorProps {
   authorIds: string[];

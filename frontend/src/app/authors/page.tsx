@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthors } from '@/hooks/useAuthors';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   Plus, 
   Edit, 
@@ -32,7 +31,6 @@ interface Department {
 
 export default function AuthorsPage() {
   const { authors, loading, error, fetchAuthors, deleteAuthor } = useAuthors();
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -46,7 +44,6 @@ export default function AuthorsPage() {
   const [importResult, setImportResult] = useState<{success: boolean; message: string} | null>(null);
   const itemsPerPage = 10;
 
-  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchAuthors();
@@ -86,7 +83,7 @@ export default function AuthorsPage() {
     const success = await deleteAuthor(authorId);
     if (success) {
       setDeleteConfirm(null);
-      fetchAuthors(); // Recargar la lista
+      await fetchAuthors(); // Recargar la lista
     }
   };
 
@@ -135,7 +132,6 @@ export default function AuthorsPage() {
 
   // Función para exportar autores a CSV
   const handleExportAuthors = async () => {
-    if (!isAdmin) return;
     
     setExporting(true);
     try {
@@ -170,8 +166,6 @@ export default function AuthorsPage() {
 
   // Función para importar autores desde CSV
   const handleImportAuthors = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!isAdmin) return;
-    
     const file = event.target.files?.[0];
     if (!file) return;
     
@@ -209,7 +203,7 @@ export default function AuthorsPage() {
       });
       
       // Recargar la lista de autores
-      fetchAuthors();
+      await fetchAuthors();
       
     } catch (error) {
       console.error('Error importing authors:', error);
@@ -307,9 +301,6 @@ export default function AuthorsPage() {
             </p>
           </div>
           <div className="flex space-x-3">
-            {isAdmin && (
-              <>
-                {/* Input file oculto para importar */}
                 <input
                   type="file"
                   id="import-csv"
@@ -352,8 +343,6 @@ export default function AuthorsPage() {
                     </>
                   )}
                 </button>
-              </>
-            )}
             <Link href="/authors/authors-new">
               <button className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />

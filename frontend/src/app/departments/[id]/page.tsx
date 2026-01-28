@@ -3,10 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useDepartments } from '@/hooks/useDepartments';
-import { DepartmentUpdateRequest } from '@/types/api';
 import { FacultySelect } from '@/components/FacultySelect';
 import { Building, ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import {DepartmentUpdateRequest} from "@/features/departments/types";
 
 export default function EditDepartmentPage() {
   const router = useRouter();

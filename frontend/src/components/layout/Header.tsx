@@ -2,7 +2,6 @@
 
 import React from 'react';
 import {usePathname} from 'next/navigation';
-import UserMenu from './UserMenu';
 
 const Header: React.FC = () => {
     const pathname = usePathname();
@@ -19,16 +18,11 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="px-6 py-4 bg-primary-500 border-b border-primary-600 shadow-sm">
+        <header className="px-6 pt-5 pb-6 bg-primary-500 border-b border-primary-600 shadow-sm">
             <div className="flex items-center justify-between">
                 {/* Page Title */}
                 <div>
-                    <h1 className="text-2xl font-semibold text-white">{getPageTitle()}</h1>
-                </div>
-
-                {/* User Menu */}
-                <div>
-                    <UserMenu />
+                    <h1 className="text-3xl font-semibold text-white">{getPageTitle()}</h1>
                 </div>
             </div>
         </header>

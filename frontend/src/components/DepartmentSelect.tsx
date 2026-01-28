@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useDepartments as useDepartments } from '@/hooks/useDepartments';
-import type { DepartmentResponse } from '@/types/api';
+
+import {DepartmentResponse} from "@/features/departments/types";
 
 interface DepartmentSelectProps {
   value: string;

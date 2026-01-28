@@ -1,16 +1,7 @@
 import axios from 'axios';
 import type {
   // Autores
-  Author,
-  AuthorCreateRequest,
-  AuthorUpdateRequest,
-  AuthorResponse,
-  AuthorsResponse,
   // Departamentos
-  NewDepartment,
-  DepartmentCreateRequest,
-  DepartmentUpdateRequest,
-  DepartmentResponse,
   // Posiciones
   Position,
   PositionCreateRequest,
@@ -25,6 +16,19 @@ import type {
   ScopusAccountsResponse,
   LinkAuthorScopusRequest
 } from '@/types/api';
+import {
+  Author,
+  AuthorCreateRequest,
+  AuthorResponse,
+  AuthorsResponse,
+  AuthorUpdateRequest
+} from "@/features/authors/types";
+import {
+  DepartmentCreateRequest,
+  DepartmentResponse,
+  DepartmentUpdateRequest,
+  NewDepartment
+} from "@/features/departments/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 

@@ -19,7 +19,8 @@ import { ErrorNotification } from '@/components/ErrorNotification';
 import ReportGenerator from '@/components/ReportGenerator';
 import { useScopusData } from '@/hooks/useScopusData';
 import { useAuthors } from '@/hooks/useAuthors';
-import type { AuthorResponse } from '@/types/api';
+
+import {AuthorResponse} from "@/features/authors/types";
 
 export default function PublicationsPage() {
   const {

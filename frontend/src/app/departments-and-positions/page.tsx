@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useDepartments } from '@/hooks/useDepartments';
 import { usePositions } from '@/hooks/usePositions';
-import { DepartmentResponse, PositionResponse } from '@/types/api';
+import { PositionResponse } from '@/types/api';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import {DepartmentResponse} from "@/features/departments/types";
 
 interface Faculty {
   key: string;

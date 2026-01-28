@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { useAuthors } from '@/hooks/useAuthors';
-import { Author } from '@/types/api';
 import AuthorForm from './AuthorForm';
 import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
+import {Author} from "@/features/authors/types";
 
 const AuthorsManager: React.FC = () => {
   const { 

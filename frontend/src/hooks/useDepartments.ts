@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { newDepartmentsApi, apiUtils } from '@/services/servicesApi';
-import type { 
-  DepartmentResponse, 
-  DepartmentCreateRequest, 
-  DepartmentUpdateRequest 
-} from '@/types/api';
+import {DepartmentCreateRequest, DepartmentResponse, DepartmentUpdateRequest} from "@/features/departments/types";
 
 export interface UseDepartmentsState {
   departments: DepartmentResponse[];
