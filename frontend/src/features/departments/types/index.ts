@@ -1,13 +1,13 @@
 export interface DepartmentCreateRequest {
     dep_name: string;
     dep_code: string;
-    faculty_name: string;
+    faculty: string;
 }
 
 export interface DepartmentUpdateRequest {
     dep_name?: string;
     dep_code?: string;
-    faculty_name?: string;
+    faculty?: string;
 }
 
 export interface DepartmentResponse {

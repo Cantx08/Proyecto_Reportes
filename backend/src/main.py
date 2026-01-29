@@ -53,7 +53,7 @@ async def health_check():
 @app.get("/faculties", response_model=List[Dict[str, str]], tags=["Facultades"])
 async def get_faculties():
     return [
-        {"key": f.value, "value": f.fac_name}
+        {"key": f.fac_code, "value": f.fac_name}
         for f in Faculty
     ]
 

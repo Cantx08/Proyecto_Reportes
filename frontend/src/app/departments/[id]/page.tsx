@@ -104,7 +104,7 @@ export default function EditDepartmentPage() {
       const updateData: DepartmentUpdateRequest = {
         dep_code: formData.depCode,
         dep_name: formData.depName,
-        faculty_name: formData.facultyName
+        faculty: formData.facultyName
       };
       
       const result = await updateDepartment(depId, updateData);

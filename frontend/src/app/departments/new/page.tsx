@@ -77,7 +77,7 @@ export default function NewDepartmentPage() {
       const createData: DepartmentCreateRequest = {
         dep_code: formData.depCode,
         dep_name: formData.depName,
-        faculty_name: formData.facultyName
+        faculty: formData.facultyName
       };
       
       const result = await createDepartment(createData);
@@ -132,9 +132,6 @@ export default function NewDepartmentPage() {
             {errors.depCode && (
               <p className="mt-1 text-sm text-error-600">{errors.depCode}</p>
             )}
-            <p className="mt-1 text-sm text-neutral-500">
-              Código único del departamento (siglas)
-            </p>
           </div>
 
           <div>

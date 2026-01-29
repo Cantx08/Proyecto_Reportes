@@ -21,6 +21,7 @@ import {
 import {DepartmentResponse} from "@/features/departments/types";
 import {JobPositionResponse} from "@/features/job-positions/types";
 import {Faculty} from "@/features/faculties/types";
+import {facultyService} from "@/features/faculties/services/facultyService";
 
 type ViewMode = 'departments' | 'positions';
 
@@ -58,11 +59,8 @@ const DepartmentsAndPositionsPage: React.FC = () => {
     // Cargar facultades
     const loadFaculties = async () => {
       try {
-        const response = await fetch('http://localhost:8000/faculties');
-        const data = await response.json();
-        if (data.success) {
-          setFaculties(data.data);
-        }
+        const data = await facultyService.getFaculties()
+        setFaculties(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error loading faculties:', error);
       }
@@ -88,7 +86,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
       department.dep_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (department.dep_code && department.dep_code.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesFaculty = selectedFaculty === 'all' || department.faculty_name === selectedFaculty;
+    const matchesFaculty = selectedFaculty === 'all' || department.faculty_code === selectedFaculty;
     
     return matchesSearch && matchesFaculty;
   });
