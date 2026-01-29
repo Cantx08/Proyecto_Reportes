@@ -3,27 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
-import { usePositions } from '@/hooks/usePositions';
-import { PositionUpdateRequest, PositionResponse } from '@/types/api';
+import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { Briefcase, Save, ArrowLeft, Loader2 } from 'lucide-react';
+import {JobPositionResponse, JobPositionUpdateRequest} from "@/features/job-positions/types";
 
 const EditPositionPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const posId = params?.id as string;
   
-  const { getPosition, updatePosition, updating, error } = usePositions();
+  const { getPosition, updatePosition, updating, error } = useJobPositions();
 
   const [loading, setLoading] = useState(true);
-  const [position, setPosition] = useState<PositionResponse | null>(null);
-  const [formData, setFormData] = useState<PositionUpdateRequest>({
+  const [position, setPosition] = useState<JobPositionResponse | null>(null);
+  const [formData, setFormData] = useState<JobPositionUpdateRequest>({
     pos_name: '',
   });
 
   const [validationErrors, setValidationErrors] = useState<{
-    pos_name?: string;
+    posName?: string;
   }>({});
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const EditPositionPage: React.FC = () => {
     const errors: typeof validationErrors = {};
 
     if (!formData.pos_name?.trim()) {
-      errors.pos_name = 'El nombre del cargo es requerido';
+      errors.posName = 'El nombre del cargo es requerido';
     }
 
     setValidationErrors(errors);
@@ -72,7 +72,7 @@ const EditPositionPage: React.FC = () => {
     }
   };
 
-  const handleChange = (field: keyof PositionUpdateRequest, value: string) => {
+  const handleChange = (field: keyof JobPositionUpdateRequest, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Limpiar error de validación del campo cuando el usuario empieza a escribir
     if (validationErrors[field]) {
@@ -135,21 +135,21 @@ const EditPositionPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Nombre del Cargo */}
           <div>
-            <label htmlFor="pos_name" className="block text-sm font-medium text-neutral-700 mb-2">
+            <label htmlFor="posName" className="block text-sm font-medium text-neutral-700 mb-2">
               Nombre del Cargo <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="pos_name"
+              id="posName"
               value={formData.pos_name}
               onChange={(e) => handleChange('pos_name', e.target.value)}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                validationErrors.pos_name ? 'border-error-500' : 'border-neutral-300'
+                validationErrors.posName ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ej: Profesor Principal"
             />
-            {validationErrors.pos_name && (
-              <p className="mt-1 text-sm text-error-600">{validationErrors.pos_name}</p>
+            {validationErrors.posName && (
+              <p className="mt-1 text-sm text-error-600">{validationErrors.posName}</p>
             )}
           </div>
 

@@ -80,11 +80,6 @@ from .report import (
     ReportModel
 )
 
-from .user import (
-    UserModel,
-    RoleEnum
-)
-
 # ============================================================================
 # EXPORTACIONES PÚBLICAS
 # ============================================================================
@@ -123,8 +118,4 @@ __all__ = [
     
     # Modelos de reportes
     "ReportModel",
-    
-    # Modelos de usuarios
-    "UserModel",
-    "RoleEnum"
 ]

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authorsApi, apiUtils } from '@/services/servicesApi';
-import type { 
-  Author, 
-  AuthorResponse, 
-  AuthorsResponse, 
-  AuthorCreateRequest, 
-  AuthorUpdateRequest 
-} from '@/types/api';
+import {
+  Author,
+  AuthorCreateRequest,
+  AuthorResponse,
+  AuthorsResponse,
+  AuthorUpdateRequest
+} from "@/features/authors/types";
 
 export interface UseAuthorsState {
   authors: AuthorResponse[];

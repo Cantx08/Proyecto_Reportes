@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { scopusApi, ReportRequest } from '@/services/scopusApi';
 import { formatDateToSpanish } from '@/utils/helpers';
-import DepartmentSelect from './DepartmentSelect';
-import PositionSelect from './PositionSelect';
+import DepartmentSelect from '../features/departments/components/DepartmentSelect';
+import JobPositionSelect from '../features/job-positions/components/JobPositionSelect';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
-import type { AuthorResponse } from '@/types/api';
+
+import {AuthorResponse} from "@/features/authors/types";
 
 interface ReportGeneratorProps {
   authorIds: string[];
@@ -162,7 +163,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
           <label className="block text-sm font-medium text-neutral-700 mb-2">
             Cargo *
           </label>
-          <PositionSelect
+          <JobPositionSelect
             value={formData.cargo || ''}
             onChange={(value) => handleInputChange('cargo', value)}
             placeholder="Seleccione un cargo"

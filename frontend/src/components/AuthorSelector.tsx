@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Check, Loader2 } from 'lucide-react';
 import { useAuthors } from '@/hooks/useAuthors';
-import type { AuthorResponse } from '@/types/api';
 
 interface AuthorSelectorProps {
   onAuthorSelect: (authorId: string) => void;

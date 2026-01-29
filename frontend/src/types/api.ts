@@ -1,129 +1,4 @@
-
-// ------------------- AUTORES -------------------
-export interface Autor {
-    author_id: string;
-    publications_list: Publication[];
-    error?: string;
-}
-
-// Autor
-export interface Author {
-    author_id: string;
-    name: string;
-    surname: string;
-    dni: string;
-    title: string;
-    institutional_email?: string;
-    gender: string;
-    position: string;
-    department: string;
-}
-
-export interface AuthorCreateRequest {
-    author_id?: string;
-    name: string;
-    surname: string;
-    dni: string;
-    title: string;
-    institutional_email?: string;
-    gender: string;
-    position: string;
-    department: string;
-}
-
-export interface AuthorUpdateRequest {
-    name?: string;
-    surname?: string;
-    dni?: string;
-    title?: string;
-    institutional_email?: string;
-    gender?: string;
-    position?: string;
-    department?: string;
-}
-
-export interface AuthorResponse {
-    author_id: string;
-    name: string;
-    surname: string;
-    dni: string;
-    title: string;
-    institutional_email?: string;
-    gender: string;
-    position: string;
-    department: string;
-}
-
-export interface AuthorsResponse {
-    authors: AuthorResponse[];
-}
-
-
-
-// ------------------- DEPARTAMENTOS -------------------
-export interface Department {
-dep_code: string;
-dep_name: string;
-fac_name: string;
-}
-
-export interface DepartmentsResponse {
-success: boolean;
-data: Department[];
-message: string;
-}
-
-// Departamento (nuevo)
-export interface NewDepartment {
-dep_id: string;
-dep_code: string;
-dep_name: string;
-fac_name: string;
-}
-
-export interface DepartmentCreateRequest {
-dep_id: string;
-dep_code: string;
-dep_name: string;
-fac_name: string;
-}
-
-export interface DepartmentUpdateRequest {
-dep_code?: string;
-dep_name?: string;
-fac_name?: string;
-}
-
-export interface DepartmentResponse {
-dep_id: string;
-dep_code: string;
-dep_name: string;
-fac_name: string;
-}
-
-// ------------------- CARGOS -------------------
-export interface Position {
-pos_id: string;
-pos_name: string;
-}
-
-export interface PositionCreateRequest {
-pos_id: string;
-pos_name: string;
-}
-
-export interface PositionUpdateRequest {
-pos_name?: string;
-}
-
-export interface PositionResponse {
-pos_id: string;
-pos_name: string;
-}
-
-export interface PositionsResponse {
-positions: PositionResponse[];
-}
+import {Autor} from "@/features/authors/types";
 
 // ------------------- CUENTAS SCOPUS -------------------
 export interface ScopusAccount {
@@ -171,7 +46,7 @@ export interface Publication {
     document_type: string;
     affiliation: string;
     doi: string;
-    categories: string;
+    categories: string | CategoryDetail[]; 
 }
 
 export interface PublicationsResponse {
@@ -203,4 +78,14 @@ scopusIds: string[];
 export interface ValidationResult {
   isValid: boolean;
   message?: string;
+}
+
+
+// ---------- DETALLE DE CATEGORÍAS ----------
+export interface CategoryDetail {
+    name: string;
+    quartile: string;
+    percentile: number;
+    rank: number;
+    total: number;
 }

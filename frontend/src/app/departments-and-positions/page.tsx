@@ -1,17 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import Link from 'next/link';
-import { useDepartments } from '@/hooks/useDepartments';
-import { usePositions } from '@/hooks/usePositions';
-import { DepartmentResponse, PositionResponse } from '@/types/api';
-import { ErrorNotification } from '@/components/ErrorNotification';
-import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface Faculty {
-  key: string;
-  value: string;
-}
+import {useDepartments} from '@/features/departments/hooks/useDepartments';
+import {useJobPositions} from '@/features/job-positions/hooks/useJobPositions';
+import {ErrorNotification} from '@/components/ErrorNotification';
+import {
+  Briefcase,
+  Building,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Filter,
+  Loader2,
+  Plus,
+  Search,
+  Trash2,
+  X
+} from 'lucide-react';
+import {DepartmentResponse} from "@/features/departments/types";
+import {JobPositionResponse} from "@/features/job-positions/types";
+import {Faculty} from "@/features/faculties/types";
+import {facultyService} from "@/features/faculties/services/facultyService";
 
 type ViewMode = 'departments' | 'positions';
 
@@ -34,7 +44,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
     error: errorPositions, 
     deletePosition, 
     fetchPositions 
-  } = usePositions();
+  } = useJobPositions();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -49,11 +59,8 @@ const DepartmentsAndPositionsPage: React.FC = () => {
     // Cargar facultades
     const loadFaculties = async () => {
       try {
-        const response = await fetch('http://localhost:8000/faculties');
-        const data = await response.json();
-        if (data.success) {
-          setFaculties(data.data);
-        }
+        const data = await facultyService.getFaculties()
+        setFaculties(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error loading faculties:', error);
       }
@@ -79,14 +86,14 @@ const DepartmentsAndPositionsPage: React.FC = () => {
       department.dep_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (department.dep_code && department.dep_code.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesFaculty = selectedFaculty === 'all' || department.fac_name === selectedFaculty;
+    const matchesFaculty = selectedFaculty === 'all' || department.faculty_code === selectedFaculty;
     
     return matchesSearch && matchesFaculty;
   });
 
-  const filteredPositions = positions.filter((position: PositionResponse) => 
-    position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (position.pos_id && position.pos_id.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredPositions = positions.filter((position: JobPositionResponse) =>
+    position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (position.pos_id && position.pos_id?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Check if filters are active
@@ -171,12 +178,12 @@ const DepartmentsAndPositionsPage: React.FC = () => {
           </div>
           <div className="flex space-x-3">
             {viewMode === 'departments' ? (
-              <Link href="/departments/departments-new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
+              <Link href="/departments/new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Departamento
               </Link>
             ) : (
-              <Link href="/positions/positions-new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
+              <Link href="/positions/new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Cargo
               </Link>
@@ -347,7 +354,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
         />
       ) : (
         <PositionsTable 
-          filteredPositions={paginatedData as PositionResponse[]}
+          filteredPositions={paginatedData as JobPositionResponse[]}
           searchTerm={searchTerm}
           setDeleteConfirm={setDeleteConfirm}
         />
@@ -503,7 +510,7 @@ const DepartmentsTable: React.FC<{
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <Link 
-                        href={`/departments/${department.dep_id}`} 
+                        href={`/departments/${department.dep_id}`}
                         className="p-2 text-info-600 hover:bg-info-50 rounded-lg transition-colors" 
                         title="Editar"
                       >
@@ -530,7 +537,7 @@ const DepartmentsTable: React.FC<{
 
 // Positions Table Component
 const PositionsTable: React.FC<{
-  filteredPositions: PositionResponse[];
+  filteredPositions: JobPositionResponse[];
   searchTerm: string;
   setDeleteConfirm: (id: string) => void;
 }> = ({ filteredPositions, searchTerm, setDeleteConfirm }) => {
@@ -567,7 +574,7 @@ const PositionsTable: React.FC<{
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-neutral-200">
-              {filteredPositions.map((position: PositionResponse) => (
+              {filteredPositions.map((position: JobPositionResponse) => (
                 <tr key={position.pos_id} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-neutral-900">
@@ -582,7 +589,7 @@ const PositionsTable: React.FC<{
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <Link 
-                        href={`/positions/${position.pos_id}`} 
+                        href={`/positions/${position.pos_id}`}
                         className="p-2 text-info-600 hover:bg-info-50 rounded-lg transition-colors" 
                         title="Editar"
                       >

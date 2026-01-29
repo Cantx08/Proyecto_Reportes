@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Author, Department, Position } from '@/types/api';
-import DepartmentSelectNew from './DepartmentSelect';
-import PositionSelectNew from './PositionSelect';
-import type { DepartmentResponse, PositionResponse } from '@/types/api';
+import DepartmentSelectNew from '../features/departments/components/DepartmentSelect';
+import PositionSelectNew from '../features/job-positions/components/JobPositionSelect';
 import { Save, X } from 'lucide-react';
+import {Author} from "@/features/authors/types";
 
 interface AuthorFormProps {
   author?: Author | null;
