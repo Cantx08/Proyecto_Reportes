@@ -50,7 +50,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
     // Cargar facultades
     const loadFaculties = async () => {
       try {
-        const response = await fetch('http://localhost:8000/deparments/faculties');
+        const response = await fetch('http://localhost:8000/faculties');
         const data = await response.json();
         if (data.success) {
           setFaculties(data.data);

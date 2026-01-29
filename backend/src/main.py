@@ -1,11 +1,13 @@
+from typing import List, Dict
+
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 
 # 1. Importación del Contenedor Global (Configuración)
 from .container import get_container
-
 # 2. Importación de los Routers
+from .modules.departments.domain.faculty import Faculty
 from .modules.departments.infrastructure.department_router import router as department_router
 from .modules.job_positions.infrastructure.job_position_router import router as job_position_router
 
@@ -29,19 +31,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ==============================================================================
-# ROUTERS
-# ==============================================================================
-app.include_router(department_router)
-app.include_router(job_position_router)
-
-# app.include_router(authors_router)
-# app.include_router(reports_router)
-
-
-# ==============================================================================
-# ENDPOINTS GLOBALES / UTILITARIOS
-# ==============================================================================
 
 @app.get("/health", tags=["Sistema"])
 async def health_check():
@@ -59,6 +48,29 @@ async def health_check():
         "database": db_status,
         "modules_loaded": ["organization"]
     }
+
+
+@app.get("/faculties", response_model=List[Dict[str, str]], tags=["Facultades"])
+async def get_faculties():
+    return [
+        {"key": f.value, "value": f.fac_name}
+        for f in Faculty
+    ]
+
+
+# ==============================================================================
+# ROUTERS
+# ==============================================================================
+app.include_router(department_router)
+app.include_router(job_position_router)
+
+# app.include_router(authors_router)
+# app.include_router(reports_router)
+
+
+# ==============================================================================
+# ENDPOINTS GLOBALES / UTILITARIOS
+# ==============================================================================
 
 if __name__ == "__main__":
     uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)

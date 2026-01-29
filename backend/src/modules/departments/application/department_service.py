@@ -60,9 +60,3 @@ class DepartmentService:
 
     async def delete_department(self, dep_id: UUID) -> bool:
         return await self.dept_repo.delete(dep_id)
-
-    def get_faculties(self) -> list[dict]:
-        return [
-            {"key": faculty.fac_code, "value": faculty.fac_name}
-            for faculty in Faculty
-        ]

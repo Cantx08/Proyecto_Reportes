@@ -51,7 +51,7 @@ export default function AuthorsPage() {
         // Cargar facultades
         const loadFaculties = async () => {
             try {
-                const response = await fetch('http://localhost:8000/departments/faculties');
+                const response = await fetch('http://localhost:8000/faculties');
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     setFaculties(data);

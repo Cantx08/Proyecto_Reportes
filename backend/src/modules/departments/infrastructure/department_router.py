@@ -19,11 +19,6 @@ def get_service(db: Session = Depends(get_db)) -> DepartmentService:
     return DepartmentService(dept_repo)
 
 
-@router.get("/faculties", response_model=list[dict])
-async def get_faculties_list(service: DepartmentService = Depends(get_service)):
-    return service.get_faculties()
-
-
 @router.get("", response_model=List[DepartmentResponseDTO])
 async def get_departments(service: DepartmentService = Depends(get_service)):
     return await service.get_all_departments()
