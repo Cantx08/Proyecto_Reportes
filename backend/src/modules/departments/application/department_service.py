@@ -63,6 +63,6 @@ class DepartmentService:
 
     def get_faculties(self) -> list[dict]:
         return [
-            {"id": faculty.value, "name": faculty.fac_name, "acronym": faculty.value}
+            {"key": faculty.fac_code, "value": faculty.fac_name}
             for faculty in Faculty
         ]
