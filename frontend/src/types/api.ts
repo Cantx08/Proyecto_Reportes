@@ -1,29 +1,5 @@
 import {Autor} from "@/features/authors/types";
 
-// ------------------- CARGOS -------------------
-export interface Position {
-pos_id: string;
-pos_name: string;
-}
-
-export interface PositionCreateRequest {
-pos_id: string;
-pos_name: string;
-}
-
-export interface PositionUpdateRequest {
-pos_name?: string;
-}
-
-export interface PositionResponse {
-pos_id: string;
-pos_name: string;
-}
-
-export interface PositionsResponse {
-positions: PositionResponse[];
-}
-
 // ------------------- CUENTAS SCOPUS -------------------
 export interface ScopusAccount {
 id?: number;

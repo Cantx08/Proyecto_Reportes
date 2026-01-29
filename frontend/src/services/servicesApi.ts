@@ -1,34 +1,12 @@
 import axios from 'axios';
 import type {
-  // Autores
-  // Departamentos
-  // Posiciones
-  Position,
-  PositionCreateRequest,
-  PositionUpdateRequest,
-  PositionResponse,
-  PositionsResponse,
-  // Cuentas Scopus
-  ScopusAccount,
+  LinkAuthorScopusRequest,
   ScopusAccountCreateRequest,
-  ScopusAccountUpdateRequest,
   ScopusAccountResponse,
   ScopusAccountsResponse,
-  LinkAuthorScopusRequest
+  ScopusAccountUpdateRequest
 } from '@/types/api';
-import {
-  Author,
-  AuthorCreateRequest,
-  AuthorResponse,
-  AuthorsResponse,
-  AuthorUpdateRequest
-} from "@/features/authors/types";
-import {
-  DepartmentCreateRequest,
-  DepartmentResponse,
-  DepartmentUpdateRequest,
-  NewDepartment
-} from "@/features/departments/types";
+import {AuthorCreateRequest, AuthorResponse, AuthorsResponse, AuthorUpdateRequest} from "@/features/authors/types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -137,131 +115,9 @@ export const authorsApi = {
 // SERVICIOS PARA DEPARTAMENTOS
 // ===============================
 
-// Tipo de respuesta del backend para departamentos
-interface BackendDepartmentResponse {
-  success: boolean;
-  data: DepartmentResponse;
-  message: string;
-}
-
-interface BackendDepartmentsResponse {
-  success: boolean;
-  data: DepartmentResponse[];
-  message: string;
-  total: number;
-}
-
-export const newDepartmentsApi = {
-  /**
-   * Obtener todos los departamentos
-   */
-  async getAll(): Promise<DepartmentResponse[]> {
-    const response = await api.get<BackendDepartmentsResponse>('/departments');
-    return response.data.data || [];
-  },
-
-  /**
-   * Obtener un departamento por ID
-   */
-  async getById(depId: string): Promise<DepartmentResponse> {
-    const response = await api.get<BackendDepartmentResponse>(`/departments/${depId}`);
-    return response.data.data;
-  },
-
-  /**
-   * Obtener departamentos por facultad
-   */
-  async getByFaculty(facName: string): Promise<DepartmentResponse[]> {
-    const response = await api.get<BackendDepartmentsResponse>(`/departments/faculty/${facName}`);
-    return response.data.data || [];
-  },
-
-  /**
-   * Crear un nuevo departamento
-   */
-  async create(departmentData: DepartmentCreateRequest): Promise<DepartmentResponse> {
-    const response = await api.post<BackendDepartmentResponse>('/departments', departmentData);
-    return response.data.data;
-  },
-
-  /**
-   * Actualizar un departamento existente
-   */
-  async update(depId: string, departmentData: DepartmentUpdateRequest): Promise<DepartmentResponse> {
-    const response = await api.put<BackendDepartmentResponse>(`/departments/${depId}`, departmentData);
-    return response.data.data;
-  },
-
-  /**
-   * Eliminar un departamento
-   */
-  async delete(depId: string): Promise<{ message: string }> {
-    const response = await api.delete<BackendDepartmentResponse>(`/departments/${depId}`);
-    return { message: response.data.message };
-  },
-};
-
 // ===============================
 // SERVICIOS PARA POSICIONES
 // ===============================
-
-// Tipo de respuesta del backend para posiciones
-interface BackendPositionResponse {
-  success: boolean;
-  data: PositionResponse;
-  message: string;
-}
-
-interface BackendPositionsResponse {
-  success: boolean;
-  data: PositionResponse[];
-  message: string;
-  total: number;
-}
-
-export const positionsApi = {
-  /**
-   * Obtener todas las posiciones
-   */
-  async getAll(): Promise<PositionsResponse> {
-    const response = await api.get<BackendPositionsResponse>('/positions');
-    return {
-      positions: response.data.data || []
-    };
-  },
-
-  /**
-   * Obtener una posición por ID
-   */
-  async getById(posId: string): Promise<PositionResponse> {
-    const response = await api.get<BackendPositionResponse>(`/positions/${posId}`);
-    return response.data.data;
-  },
-
-  /**
-   * Crear una nueva posición
-   */
-  async create(positionData: PositionCreateRequest): Promise<PositionResponse> {
-    const response = await api.post<BackendPositionResponse>('/positions', positionData);
-    return response.data.data;
-  },
-
-  /**
-   * Actualizar una posición existente
-   */
-  async update(posId: string, positionData: PositionUpdateRequest): Promise<PositionResponse> {
-    const response = await api.put<BackendPositionResponse>(`/positions/${posId}`, positionData);
-    return response.data.data;
-  },
-
-  /**
-   * Eliminar una posición
-   */
-  async delete(posId: string): Promise<{ message: string }> {
-    const response = await api.delete<BackendPositionResponse>(`/positions/${posId}`);
-    return { message: response.data.message };
-  },
-};
 
 // ===============================
 // SERVICIOS PARA CUENTAS SCOPUS

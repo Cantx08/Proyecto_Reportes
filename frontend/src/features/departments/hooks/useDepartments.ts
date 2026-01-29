@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { newDepartmentsApi, apiUtils } from '@/services/servicesApi';
+import {useCallback, useEffect, useState} from 'react';
+import {apiUtils} from '@/services/servicesApi';
 import {DepartmentCreateRequest, DepartmentResponse, DepartmentUpdateRequest} from "@/features/departments/types";
+import {departmentService} from "@/features/departments/services/departmentService";
 
 export interface UseDepartmentsState {
   departments: DepartmentResponse[];
@@ -38,7 +39,7 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
   const fetchDepartments = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const departments = await newDepartmentsApi.getAll();
+      const departments = await departmentService.getAll();
       setState(prev => ({
         ...prev,
         departments: departments || [],
@@ -50,15 +51,14 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
         ...prev,
         loading: false,
         error: errorMessage,
-        departments: [], // Asegurar que departments sea un array vacío en caso de error
+        departments: [],
       }));
     }
   }, []);
 
   const getDepartment = useCallback(async (depId: string): Promise<DepartmentResponse | null> => {
     try {
-      const department = await newDepartmentsApi.getById(depId);
-      return department;
+      return await departmentService.getById(depId);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -68,8 +68,7 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
 
   const getDepartmentsByFaculty = useCallback(async (facName: string): Promise<DepartmentResponse[]> => {
     try {
-      const departments = await newDepartmentsApi.getByFaculty(facName);
-      return departments;
+      return await departmentService.getByFaculty(facName);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -80,7 +79,7 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
   const createDepartment = useCallback(async (departmentData: DepartmentCreateRequest): Promise<DepartmentResponse | null> => {
     setState(prev => ({ ...prev, creating: true, error: null }));
     try {
-      const newDepartment = await newDepartmentsApi.create(departmentData);
+      const newDepartment = await departmentService.create(departmentData);
       setState(prev => ({
         ...prev,
         departments: [...(prev.departments || []), newDepartment],
@@ -101,11 +100,11 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
   const updateDepartment = useCallback(async (depId: string, departmentData: DepartmentUpdateRequest): Promise<DepartmentResponse | null> => {
     setState(prev => ({ ...prev, updating: true, error: null }));
     try {
-      const updatedDepartment = await newDepartmentsApi.update(depId, departmentData);
+      const updatedDepartment = await departmentService.update(depId, departmentData);
       setState(prev => ({
         ...prev,
         departments: (prev.departments || []).map(dept => 
-          dept.dep_id === depId ? updatedDepartment : dept
+          dept.depId === depId ? updatedDepartment : dept
         ),
         updating: false,
       }));
@@ -124,10 +123,10 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
   const deleteDepartment = useCallback(async (depId: string): Promise<boolean> => {
     setState(prev => ({ ...prev, deleting: true, error: null }));
     try {
-      await newDepartmentsApi.delete(depId);
+      await departmentService.delete(depId);
       setState(prev => ({
         ...prev,
-        departments: (prev.departments || []).filter(dept => dept.dep_id !== depId),
+        departments: (prev.departments || []).filter(dept => dept.depId !== depId),
         deleting: false,
       }));
       return true;

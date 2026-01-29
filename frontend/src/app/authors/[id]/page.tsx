@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuthors } from '@/hooks/useAuthors';
-import { useDepartments } from '@/hooks/useDepartments';
-import { usePositions } from '@/hooks/usePositions';
+import { useDepartments } from '@/features/departments/hooks/useDepartments';
+import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
 import { ArrowLeft, Save, Loader2, User } from 'lucide-react';
 import Link from 'next/link';
 import ScopusAccountsManager from '@/components/ScopusAccountsManager';
@@ -16,7 +16,7 @@ export default function EditAuthorPage() {
 
   const { getAuthor, updateAuthor, updating, error } = useAuthors();
   const { departments, loading: loadingDepartments } = useDepartments();
-  const { positions, loading: loadingPositions } = usePositions();
+  const { positions, loading: loadingPositions } = useJobPositions();
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({

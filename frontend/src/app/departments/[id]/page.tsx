@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useDepartments } from '@/hooks/useDepartments';
+import { useDepartments } from '@/features/departments/hooks/useDepartments';
 import { FacultySelect } from '@/components/FacultySelect';
 import { Building, ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -17,9 +17,9 @@ export default function EditDepartmentPage() {
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    dep_code: '',
-    dep_name: '',
-    fac_name: ''
+    depCode: '',
+    depName: '',
+    facultyName: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -30,9 +30,9 @@ export default function EditDepartmentPage() {
         const department = await getDepartment(depId);
         if (department) {
           setFormData({
-            dep_code: department.dep_code || department.dep_id,
-            dep_name: department.dep_name,
-            fac_name: department.fac_name
+            depCode: department.depCode || department.depId,
+            depName: department.depName,
+            facultyName: department.facultyName
           });
         }
       } catch (error) {
@@ -50,16 +50,16 @@ export default function EditDepartmentPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.dep_code.trim()) {
-      newErrors.dep_code = 'El código del departamento es requerido';
+    if (!formData.depCode.trim()) {
+      newErrors.depCode = 'El código del departamento es requerido';
     }
 
-    if (!formData.dep_name.trim()) {
-      newErrors.dep_name = 'El nombre del departamento es requerido';
+    if (!formData.depName.trim()) {
+      newErrors.depName = 'El nombre del departamento es requerido';
     }
 
-    if (!formData.fac_name.trim()) {
-      newErrors.fac_name = 'La facultad es requerida';
+    if (!formData.facultyName.trim()) {
+      newErrors.facultyName = 'La facultad es requerida';
     }
 
     setErrors(newErrors);
@@ -84,13 +84,13 @@ export default function EditDepartmentPage() {
   const handleFacultyChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      fac_name: value
+      facultyName: value
     }));
     
-    if (errors.fac_name) {
+    if (errors.facultyName) {
       setErrors(prev => ({
         ...prev,
-        fac_name: ''
+        facultyName: ''
       }));
     }
   };
@@ -102,9 +102,9 @@ export default function EditDepartmentPage() {
     
     try {
       const updateData: DepartmentUpdateRequest = {
-        dep_code: formData.dep_code,
-        dep_name: formData.dep_name,
-        fac_name: formData.fac_name
+        depCode: formData.depCode,
+        depName: formData.depName,
+        facultyName: formData.facultyName
       };
       
       const result = await updateDepartment(depId, updateData);
@@ -154,22 +154,22 @@ export default function EditDepartmentPage() {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label htmlFor="dep_code" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="depCode" className="block text-sm font-medium text-neutral-700 mb-1">
               Código del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="dep_code"
-              name="dep_code"
-              value={formData.dep_code}
+              id="depCode"
+              name="depCode"
+              value={formData.depCode}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
-                errors.dep_code ? 'border-error-500' : 'border-neutral-300'
+                errors.depCode ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ejemplo: DCCO, DFIS, DICA"
             />
-            {errors.dep_code && (
-              <p className="mt-1 text-sm text-error-600">{errors.dep_code}</p>
+            {errors.depCode && (
+              <p className="mt-1 text-sm text-error-600">{errors.depCode}</p>
             )}
             <p className="mt-1 text-sm text-neutral-500">
               Código único del departamento (siglas)
@@ -177,33 +177,33 @@ export default function EditDepartmentPage() {
           </div>
 
           <div>
-            <label htmlFor="dep_name" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="depName" className="block text-sm font-medium text-neutral-700 mb-1">
               Nombre del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="dep_name"
-              name="dep_name"
-              value={formData.dep_name}
+              id="depName"
+              name="depName"
+              value={formData.depName}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
-                errors.dep_name ? 'border-error-500' : 'border-neutral-300'
+                errors.depName ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ejemplo: Departamento de Ciencias de la Computación"
             />
-            {errors.dep_name && (
-              <p className="mt-1 text-sm text-error-600">{errors.dep_name}</p>
+            {errors.depName && (
+              <p className="mt-1 text-sm text-error-600">{errors.depName}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="fac_name" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="facultyName" className="block text-sm font-medium text-neutral-700 mb-1">
               Facultad <span className="text-error-500">*</span>
             </label>
             <FacultySelect
-              value={formData.fac_name}
+              value={formData.facultyName}
               onChange={handleFacultyChange}
-              error={errors.fac_name}
+              error={errors.facultyName}
               required
             />
           </div>

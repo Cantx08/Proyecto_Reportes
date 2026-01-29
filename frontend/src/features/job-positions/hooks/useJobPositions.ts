@@ -1,14 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { positionsApi, apiUtils } from '@/services/servicesApi';
-import type { 
-  PositionResponse, 
-  PositionsResponse,
-  PositionCreateRequest, 
-  PositionUpdateRequest 
-} from '@/types/api';
+import {useCallback, useEffect, useState} from 'react';
+import {apiUtils} from '@/services/servicesApi';
+import {JobPositionCreateRequest, JobPositionResponse, JobPositionUpdateRequest} from "@/features/job-positions/types";
+import {jobPositionService} from "@/features/job-positions/services/jobPositionService";
 
-export interface UsePositionsState {
-  positions: PositionResponse[];
+export interface UseJobPositionsState {
+  positions: JobPositionResponse[];
   loading: boolean;
   error: string | null;
   creating: boolean;
@@ -16,17 +12,17 @@ export interface UsePositionsState {
   deleting: boolean;
 }
 
-export interface UsePositionsActions {
+export interface UseJobPositionsActions {
   fetchPositions: () => Promise<void>;
-  getPosition: (posId: string) => Promise<PositionResponse | null>;
-  createPosition: (positionData: PositionCreateRequest) => Promise<PositionResponse | null>;
-  updatePosition: (posId: string, positionData: PositionUpdateRequest) => Promise<PositionResponse | null>;
+  getPosition: (posId: string) => Promise<JobPositionResponse | null>;
+  createPosition: (positionData: JobPositionCreateRequest) => Promise<JobPositionResponse | null>;
+  updatePosition: (posId: string, positionData: JobPositionUpdateRequest) => Promise<JobPositionResponse | null>;
   deletePosition: (posId: string) => Promise<boolean>;
   clearError: () => void;
 }
 
-export function usePositions(): UsePositionsState & UsePositionsActions {
-  const [state, setState] = useState<UsePositionsState>({
+export function useJobPositions(): UseJobPositionsState & UseJobPositionsActions {
+  const [state, setState] = useState<UseJobPositionsState>({
     positions: [],
     loading: false,
     error: null,
@@ -42,10 +38,10 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
   const fetchPositions = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const response = await positionsApi.getAll();
+      const jobPositions = await jobPositionService.getAll();
       setState(prev => ({
         ...prev,
-        positions: response?.positions || [],
+        positions: jobPositions || [],
         loading: false,
       }));
     } catch (error) {
@@ -54,15 +50,14 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
         ...prev,
         loading: false,
         error: errorMessage,
-        positions: [], // Asegurar que positions sea un array vacío en caso de error
+        positions: [],
       }));
     }
   }, []);
 
-  const getPosition = useCallback(async (posId: string): Promise<PositionResponse | null> => {
+  const getPosition = useCallback(async (posId: string): Promise<JobPositionResponse | null> => {
     try {
-      const position = await positionsApi.getById(posId);
-      return position;
+      return await jobPositionService.getById(posId);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -70,10 +65,10 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
     }
   }, []);
 
-  const createPosition = useCallback(async (positionData: PositionCreateRequest): Promise<PositionResponse | null> => {
+  const createPosition = useCallback(async (positionData: JobPositionCreateRequest): Promise<JobPositionResponse | null> => {
     setState(prev => ({ ...prev, creating: true, error: null }));
     try {
-      const newPosition = await positionsApi.create(positionData);
+      const newPosition = await jobPositionService.create(positionData);
       setState(prev => ({
         ...prev,
         positions: [...(prev.positions || []), newPosition],
@@ -91,14 +86,14 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
     }
   }, []);
 
-  const updatePosition = useCallback(async (posId: string, positionData: PositionUpdateRequest): Promise<PositionResponse | null> => {
+  const updatePosition = useCallback(async (posId: string, positionData: JobPositionUpdateRequest): Promise<JobPositionResponse | null> => {
     setState(prev => ({ ...prev, updating: true, error: null }));
     try {
-      const updatedPosition = await positionsApi.update(posId, positionData);
+      const updatedPosition = await jobPositionService.update(posId, positionData);
       setState(prev => ({
         ...prev,
         positions: (prev.positions || []).map(pos => 
-          pos.pos_id === posId ? updatedPosition : pos
+          pos.posId === posId ? updatedPosition : pos
         ),
         updating: false,
       }));
@@ -117,10 +112,10 @@ export function usePositions(): UsePositionsState & UsePositionsActions {
   const deletePosition = useCallback(async (posId: string): Promise<boolean> => {
     setState(prev => ({ ...prev, deleting: true, error: null }));
     try {
-      await positionsApi.delete(posId);
+      await jobPositionService.delete(posId);
       setState(prev => ({
         ...prev,
-        positions: (prev.positions || []).filter(pos => pos.pos_id !== posId),
+        positions: (prev.positions || []).filter(pos => pos.posId !== posId),
         deleting: false,
       }));
       return true;

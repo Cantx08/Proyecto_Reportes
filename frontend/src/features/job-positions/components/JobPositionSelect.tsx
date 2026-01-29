@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { usePositions } from '@/hooks/usePositions';
-import type { PositionResponse } from '@/types/api';
+import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
 
-interface PositionSelectProps {
+import {JobPositionResponse} from "@/features/job-positions/types";
+
+interface JobPositionSelectProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
@@ -12,20 +13,20 @@ interface PositionSelectProps {
   placeholder?: string;
 }
 
-const PositionSelect: React.FC<PositionSelectProps> = ({
+const JobPositionSelect: React.FC<JobPositionSelectProps> = ({
   value,
   onChange,
   error,
   className = '',
   placeholder = 'Escriba o seleccione una posición'
 }) => {
-  const { positions, loading, error: fetchError } = usePositions();
+  const { positions, loading, error: fetchError } = useJobPositions();
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredPositions, setFilteredPositions] = useState<PositionResponse[]>([]);
+  const [filteredPositions, setFilteredPositions] = useState<JobPositionResponse[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filtrar posiciones basado en el texto ingresado
+  // Filtrar posiciones según se ingrese el texto
   useEffect(() => {
     if (!positions || !positions.length) return;
     
@@ -34,8 +35,8 @@ const PositionSelect: React.FC<PositionSelectProps> = ({
       return;
     }
 
-    const filtered = positions.filter((position: PositionResponse) => 
-      position.pos_name.toLowerCase().includes(value.toLowerCase())
+    const filtered = positions.filter((position: JobPositionResponse) =>
+      position.posName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredPositions(filtered);
   }, [value, positions]);
@@ -66,8 +67,8 @@ const PositionSelect: React.FC<PositionSelectProps> = ({
     setIsOpen(true);
   };
 
-  const handleSelectPosition = (position: PositionResponse) => {
-    onChange(position.pos_name);
+  const handleSelectPosition = (position: JobPositionResponse) => {
+    onChange(position.posName);
     setIsOpen(false);
     inputRef.current?.blur();
   };
@@ -107,14 +108,14 @@ const PositionSelect: React.FC<PositionSelectProps> = ({
       {/* Dropdown de sugerencias */}
       {isOpen && !loading && !fetchError && filteredPositions.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-          {filteredPositions.map((position: PositionResponse, index: number) => (
+          {filteredPositions.map((position: JobPositionResponse, index: number) => (
             <div
-              key={`${position.pos_id}-${index}`}
+              key={`${position.posId}-${index}`}
               onClick={() => handleSelectPosition(position)}
               className="px-3 py-2 cursor-pointer hover:bg-blue-50 hover:text-blue-700 border-b border-gray-100 last:border-b-0"
-              title={position.pos_name}
+              title={position.posName}
             >
-              <div className="font-medium">{position.pos_name}</div>
+              <div className="font-medium">{position.posName}</div>
             </div>
           ))}
         </div>
@@ -144,4 +145,4 @@ const PositionSelect: React.FC<PositionSelectProps> = ({
   );
 };
 
-export default PositionSelect;
+export default JobPositionSelect;

@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useDepartments } from '@/hooks/useDepartments';
-import { usePositions } from '@/hooks/usePositions';
-import { PositionResponse } from '@/types/api';
+import { useDepartments } from '@/features/departments/hooks/useDepartments';
+import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import {DepartmentResponse} from "@/features/departments/types";
+import {JobPositionResponse} from "@/features/job-positions/types";
 
 interface Faculty {
   key: string;
@@ -35,7 +35,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
     error: errorPositions, 
     deletePosition, 
     fetchPositions 
-  } = usePositions();
+  } = useJobPositions();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -77,17 +77,17 @@ const DepartmentsAndPositionsPage: React.FC = () => {
 
   const filteredDepartments = departments.filter((department: DepartmentResponse) => {
     const matchesSearch = 
-      department.dep_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (department.dep_code && department.dep_code.toLowerCase().includes(searchTerm.toLowerCase()));
+      department.depName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (department.depCode && department.depCode.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesFaculty = selectedFaculty === 'all' || department.fac_name === selectedFaculty;
+    const matchesFaculty = selectedFaculty === 'all' || department.facultyName === selectedFaculty;
     
     return matchesSearch && matchesFaculty;
   });
 
-  const filteredPositions = positions.filter((position: PositionResponse) => 
-    position.pos_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (position.pos_id && position.pos_id.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredPositions = positions.filter((position: JobPositionResponse) =>
+    position.posName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (position.posId && position.posId.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Check if filters are active
@@ -172,12 +172,12 @@ const DepartmentsAndPositionsPage: React.FC = () => {
           </div>
           <div className="flex space-x-3">
             {viewMode === 'departments' ? (
-              <Link href="/departments/departments-new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
+              <Link href="/departments/new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Departamento
               </Link>
             ) : (
-              <Link href="/positions/positions-new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
+              <Link href="/positions/new" className="px-5 py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 flex items-center shadow-sm hover:shadow transition-all">
                 <Plus className="h-4 w-4 mr-2" />
                 Nuevo Cargo
               </Link>
@@ -348,7 +348,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
         />
       ) : (
         <PositionsTable 
-          filteredPositions={paginatedData as PositionResponse[]}
+          filteredPositions={paginatedData as JobPositionResponse[]}
           searchTerm={searchTerm}
           setDeleteConfirm={setDeleteConfirm}
         />
@@ -490,28 +490,28 @@ const DepartmentsTable: React.FC<{
             </thead>
             <tbody className="bg-white divide-y divide-neutral-200">
               {filteredDepartments.map((department: DepartmentResponse) => (
-                <tr key={department.dep_id} className="hover:bg-neutral-50 transition-colors">
+                <tr key={department.depId} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-neutral-900">
-                      {department.dep_code || department.dep_id}
+                      {department.depCode || department.depId}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-neutral-900">
-                      {department.dep_name}
+                      {department.depName}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <Link 
-                        href={`/departments/${department.dep_id}`} 
+                        href={`/departments/${department.depId}`}
                         className="p-2 text-info-600 hover:bg-info-50 rounded-lg transition-colors" 
                         title="Editar"
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => setDeleteConfirm(department.dep_id)}
+                        onClick={() => setDeleteConfirm(department.depId)}
                         className="p-2 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
                         title="Eliminar"
                       >
@@ -531,7 +531,7 @@ const DepartmentsTable: React.FC<{
 
 // Positions Table Component
 const PositionsTable: React.FC<{
-  filteredPositions: PositionResponse[];
+  filteredPositions: JobPositionResponse[];
   searchTerm: string;
   setDeleteConfirm: (id: string) => void;
 }> = ({ filteredPositions, searchTerm, setDeleteConfirm }) => {
@@ -568,29 +568,29 @@ const PositionsTable: React.FC<{
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-neutral-200">
-              {filteredPositions.map((position: PositionResponse) => (
-                <tr key={position.pos_id} className="hover:bg-neutral-50 transition-colors">
+              {filteredPositions.map((position: JobPositionResponse) => (
+                <tr key={position.posId} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-neutral-900">
-                      {position.pos_id}
+                      {position.posId}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-neutral-900">
-                      {position.pos_name}
+                      {position.posName}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <Link 
-                        href={`/positions/${position.pos_id}`} 
+                        href={`/positions/${position.posId}`} 
                         className="p-2 text-info-600 hover:bg-info-50 rounded-lg transition-colors" 
                         title="Editar"
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => setDeleteConfirm(position.pos_id)}
+                        onClick={() => setDeleteConfirm(position.posId)}
                         className="p-2 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
                         title="Eliminar"
                       >

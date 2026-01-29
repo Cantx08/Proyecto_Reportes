@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useDepartments as useDepartments } from '@/hooks/useDepartments';
-
+import { useDepartments } from '@/features/departments/hooks/useDepartments';
 import {DepartmentResponse} from "@/features/departments/types";
 
 interface DepartmentSelectProps {
@@ -26,7 +25,7 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filtrar departamentos basado en el texto ingresado
+  // Filtrar departamentos de acuerdo con el texto ingresado
   useEffect(() => {
     if (!departments || !departments.length) return;
     
@@ -36,8 +35,8 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
     }
 
     const filtered = departments.filter((dept: DepartmentResponse) => 
-      dept.dep_name.toLowerCase().includes(value.toLowerCase()) ||
-      dept.fac_name.toLowerCase().includes(value.toLowerCase())
+      dept.depName.toLowerCase().includes(value.toLowerCase()) ||
+      dept.facultyName.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredDepartments(filtered);
   }, [value, departments]);
@@ -69,7 +68,7 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
   };
 
   const handleSelectDepartment = (department: DepartmentResponse) => {
-    onChange(department.dep_name);
+    onChange(department.depName);
     setIsOpen(false);
     inputRef.current?.blur();
   };
@@ -111,13 +110,13 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
         <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-md shadow-lg max-h-60 overflow-auto">
           {filteredDepartments.map((department: DepartmentResponse) => (
             <div
-              key={department.dep_id}
+              key={department.depId}
               onClick={() => handleSelectDepartment(department)}
               className="px-3 py-2 cursor-pointer hover:bg-primary-50 hover:text-primary-700 border-b border-neutral-100 last:border-b-0 transition-colors"
-              title={`${department.dep_name} - ${department.fac_name}`}
+              title={`${department.depName} - ${department.facultyName}`}
             >
-              <div className="font-medium text-neutral-900">{department.dep_name}</div>
-              <div className="text-xs text-neutral-500">{department.fac_name}</div>
+              <div className="font-medium text-neutral-900">{department.depName}</div>
+              <div className="text-xs text-neutral-500">{department.facultyName}</div>
             </div>
           ))}
         </div>
