@@ -1,18 +1,26 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import Link from 'next/link';
-import { useDepartments } from '@/features/departments/hooks/useDepartments';
-import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
-import { ErrorNotification } from '@/components/ErrorNotification';
-import { Plus, Edit, Trash2, Search, Building, Loader2, Filter, Briefcase, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import {useDepartments} from '@/features/departments/hooks/useDepartments';
+import {useJobPositions} from '@/features/job-positions/hooks/useJobPositions';
+import {ErrorNotification} from '@/components/ErrorNotification';
+import {
+  Briefcase,
+  Building,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Filter,
+  Loader2,
+  Plus,
+  Search,
+  Trash2,
+  X
+} from 'lucide-react';
 import {DepartmentResponse} from "@/features/departments/types";
 import {JobPositionResponse} from "@/features/job-positions/types";
-
-interface Faculty {
-  key: string;
-  value: string;
-}
+import {Faculty} from "@/features/faculties/types";
 
 type ViewMode = 'departments' | 'positions';
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useDepartments } from '@/features/departments/hooks/useDepartments';
-import { FacultySelect } from '@/components/FacultySelect';
+import { FacultySelect } from '@/features/faculties/components/FacultySelect';
 import { Building, ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import {DepartmentUpdateRequest} from "@/features/departments/types";

@@ -1,12 +1,7 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-
-interface Faculty {
-  key: string;
-  value: string;
-}
+import React, {useEffect, useState} from 'react';
+import {Loader2} from 'lucide-react';
+import {Faculty} from "@/features/faculties/types";
+import {facultyService} from "@/features/faculties/services/facultyService";
 
 interface FacultySelectProps {
   value: string;
@@ -29,12 +24,8 @@ export const FacultySelect: React.FC<FacultySelectProps> = ({
   useEffect(() => {
     const loadFaculties = async () => {
       try {
-        const response = await fetch('http://localhost:8000/faculties');
-        const data = await response.json();
-        
-        if (data.success) {
-          setFaculties(data.data);
-        }
+        const data = await facultyService.getFaculties()
+        setFaculties(data || []);
       } catch (error) {
         console.error('Error loading faculties:', error);
       } finally {
