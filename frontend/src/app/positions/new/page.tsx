@@ -13,18 +13,18 @@ const NewPositionPage: React.FC = () => {
     const {createPosition, creating, error} = useJobPositions();
 
     const [formData, setFormData] = useState<JobPositionCreateRequest>({
-        posName: '',
+        pos_name: '',
     });
 
     const [validationErrors, setValidationErrors] = useState<{
-        pos_name?: string;
+        posName?: string;
     }>({});
 
     const validateForm = (): boolean => {
         const errors: typeof validationErrors = {};
 
-        if (!formData.posName.trim()) {
-            errors.pos_name = 'El nombre del cargo es requerido';
+        if (!formData.pos_name.trim()) {
+            errors.posName = 'El nombre del cargo es requerido';
         }
 
         setValidationErrors(errors);
@@ -39,7 +39,7 @@ const NewPositionPage: React.FC = () => {
         }
 
         const result = await createPosition({
-            posName: formData.posName.trim(),
+            pos_name: formData.pos_name.trim(),
         });
 
         if (result) {
@@ -50,7 +50,7 @@ const NewPositionPage: React.FC = () => {
     const handleChange = (field: keyof JobPositionCreateRequest, value: string) => {
         setFormData(prev => ({...prev, [field]: value}));
         // Limpiar error de validación del campo cuando el usuario empieza a escribir
-        if (field === 'posName' && validationErrors.pos_name) {
+        if (field === 'pos_name' && validationErrors.posName) {
             setValidationErrors({});
         }
     };
@@ -88,21 +88,21 @@ const NewPositionPage: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Nombre del Cargo */}
                     <div>
-                        <label htmlFor="pos_name" className="block text-sm font-medium text-neutral-700 mb-2">
+                        <label htmlFor="posName" className="block text-sm font-medium text-neutral-700 mb-2">
                             Nombre del Cargo <span className="text-error-500">*</span>
                         </label>
                         <input
                             type="text"
-                            id="pos_name"
-                            value={formData.posName}
-                            onChange={(e) => handleChange('posName', e.target.value)}
+                            id="posName"
+                            value={formData.pos_name}
+                            onChange={(e) => handleChange('pos_name', e.target.value)}
                             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                                validationErrors.pos_name ? 'border-error-500' : 'border-neutral-300'
+                                validationErrors.posName ? 'border-error-500' : 'border-neutral-300'
                             }`}
                             placeholder="Ej: Profesor Principal"
                         />
-                        {validationErrors.pos_name && (
-                            <p className="mt-1 text-sm text-error-600">{validationErrors.pos_name}</p>
+                        {validationErrors.posName && (
+                            <p className="mt-1 text-sm text-error-600">{validationErrors.posName}</p>
                         )}
                         <p className="mt-1 text-sm text-neutral-500">
                             El código se generará automáticamente a partir del nombre

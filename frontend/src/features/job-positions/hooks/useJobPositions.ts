@@ -93,7 +93,7 @@ export function useJobPositions(): UseJobPositionsState & UseJobPositionsActions
       setState(prev => ({
         ...prev,
         positions: (prev.positions || []).map(pos => 
-          pos.posId === posId ? updatedPosition : pos
+          pos.pos_id === posId ? updatedPosition : pos
         ),
         updating: false,
       }));
@@ -115,7 +115,7 @@ export function useJobPositions(): UseJobPositionsState & UseJobPositionsActions
       await jobPositionService.delete(posId);
       setState(prev => ({
         ...prev,
-        positions: (prev.positions || []).filter(pos => pos.posId !== posId),
+        positions: (prev.positions || []).filter(pos => pos.pos_id !== posId),
         deleting: false,
       }));
       return true;

@@ -50,7 +50,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
     // Cargar facultades
     const loadFaculties = async () => {
       try {
-        const response = await fetch('http://localhost:8000/faculties');
+        const response = await fetch('http://localhost:8000/deparments/faculties');
         const data = await response.json();
         if (data.success) {
           setFaculties(data.data);
@@ -77,17 +77,17 @@ const DepartmentsAndPositionsPage: React.FC = () => {
 
   const filteredDepartments = departments.filter((department: DepartmentResponse) => {
     const matchesSearch = 
-      department.depName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (department.depCode && department.depCode.toLowerCase().includes(searchTerm.toLowerCase()));
+      department.dep_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (department.dep_code && department.dep_code.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesFaculty = selectedFaculty === 'all' || department.facultyName === selectedFaculty;
+    const matchesFaculty = selectedFaculty === 'all' || department.faculty_name === selectedFaculty;
     
     return matchesSearch && matchesFaculty;
   });
 
   const filteredPositions = positions.filter((position: JobPositionResponse) =>
-    position.posName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (position.posId && position.posId.toLowerCase().includes(searchTerm.toLowerCase()))
+    position.pos_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (position.pos_id && position.pos_id?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Check if filters are active
@@ -490,28 +490,28 @@ const DepartmentsTable: React.FC<{
             </thead>
             <tbody className="bg-white divide-y divide-neutral-200">
               {filteredDepartments.map((department: DepartmentResponse) => (
-                <tr key={department.depId} className="hover:bg-neutral-50 transition-colors">
+                <tr key={department.dep_id} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-neutral-900">
-                      {department.depCode || department.depId}
+                      {department.dep_code || department.dep_id}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-neutral-900">
-                      {department.depName}
+                      {department.dep_name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <Link 
-                        href={`/departments/${department.depId}`}
+                        href={`/departments/${department.dep_id}`}
                         className="p-2 text-info-600 hover:bg-info-50 rounded-lg transition-colors" 
                         title="Editar"
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => setDeleteConfirm(department.depId)}
+                        onClick={() => setDeleteConfirm(department.dep_id)}
                         className="p-2 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
                         title="Eliminar"
                       >
@@ -569,28 +569,28 @@ const PositionsTable: React.FC<{
             </thead>
             <tbody className="bg-white divide-y divide-neutral-200">
               {filteredPositions.map((position: JobPositionResponse) => (
-                <tr key={position.posId} className="hover:bg-neutral-50 transition-colors">
+                <tr key={position.pos_id} className="hover:bg-neutral-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-neutral-900">
-                      {position.posId}
+                      {position.pos_id}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-neutral-900">
-                      {position.posName}
+                      {position.pos_name}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <Link 
-                        href={`/positions/${position.posId}`} 
+                        href={`/positions/${position.pos_id}`}
                         className="p-2 text-info-600 hover:bg-info-50 rounded-lg transition-colors" 
                         title="Editar"
                       >
                         <Edit className="h-4 w-4" />
                       </Link>
                       <button
-                        onClick={() => setDeleteConfirm(position.posId)}
+                        onClick={() => setDeleteConfirm(position.pos_id)}
                         className="p-2 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
                         title="Eliminar"
                       >

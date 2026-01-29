@@ -75,9 +75,9 @@ export default function NewDepartmentPage() {
     
     try {
       const createData: DepartmentCreateRequest = {
-        depCode: formData.depCode,
-        depName: formData.depName,
-        facultyName: formData.facultyName
+        dep_code: formData.depCode,
+        dep_name: formData.depName,
+        faculty_name: formData.facultyName
       };
       
       const result = await createDepartment(createData);

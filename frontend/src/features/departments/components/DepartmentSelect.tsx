@@ -35,8 +35,8 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
     }
 
     const filtered = departments.filter((dept: DepartmentResponse) => 
-      dept.depName.toLowerCase().includes(value.toLowerCase()) ||
-      dept.facultyName.toLowerCase().includes(value.toLowerCase())
+      dept.dep_name.toLowerCase().includes(value.toLowerCase()) ||
+      dept.faculty_name.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredDepartments(filtered);
   }, [value, departments]);
@@ -68,7 +68,7 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
   };
 
   const handleSelectDepartment = (department: DepartmentResponse) => {
-    onChange(department.depName);
+    onChange(department.dep_name);
     setIsOpen(false);
     inputRef.current?.blur();
   };
@@ -110,13 +110,13 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
         <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-md shadow-lg max-h-60 overflow-auto">
           {filteredDepartments.map((department: DepartmentResponse) => (
             <div
-              key={department.depId}
+              key={department.dep_id}
               onClick={() => handleSelectDepartment(department)}
               className="px-3 py-2 cursor-pointer hover:bg-primary-50 hover:text-primary-700 border-b border-neutral-100 last:border-b-0 transition-colors"
-              title={`${department.depName} - ${department.facultyName}`}
+              title={`${department.dep_name} - ${department.faculty_name}`}
             >
-              <div className="font-medium text-neutral-900">{department.depName}</div>
-              <div className="text-xs text-neutral-500">{department.facultyName}</div>
+              <div className="font-medium text-neutral-900">{department.dep_name}</div>
+              <div className="text-xs text-neutral-500">{department.faculty_name}</div>
             </div>
           ))}
         </div>

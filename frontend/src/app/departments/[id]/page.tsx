@@ -30,9 +30,9 @@ export default function EditDepartmentPage() {
         const department = await getDepartment(depId);
         if (department) {
           setFormData({
-            depCode: department.depCode || department.depId,
-            depName: department.depName,
-            facultyName: department.facultyName
+            depCode: department.dep_code || department.dep_id,
+            depName: department.dep_name,
+            facultyName: department.faculty_name
           });
         }
       } catch (error) {
@@ -102,9 +102,9 @@ export default function EditDepartmentPage() {
     
     try {
       const updateData: DepartmentUpdateRequest = {
-        depCode: formData.depCode,
-        depName: formData.depName,
-        facultyName: formData.facultyName
+        dep_code: formData.depCode,
+        dep_name: formData.depName,
+        faculty_name: formData.facultyName
       };
       
       const result = await updateDepartment(depId, updateData);

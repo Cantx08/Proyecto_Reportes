@@ -1,19 +1,19 @@
 export interface DepartmentCreateRequest {
-    depName: string;
-    depCode: string;
-    facultyName: string;
+    dep_name: string;
+    dep_code: string;
+    faculty_name: string;
 }
 
 export interface DepartmentUpdateRequest {
-    depName?: string;
-    depCode?: string;
-    facultyName?: string;
+    dep_name?: string;
+    dep_code?: string;
+    faculty_name?: string;
 }
 
 export interface DepartmentResponse {
-    depId: string;
-    depName: string;
-    depCode: string;
-    facultyCode: string;
-    facultyName: string;
+    dep_id: string;
+    dep_name: string;
+    dep_code: string;
+    faculty_code: string;
+    faculty_name: string;
 }

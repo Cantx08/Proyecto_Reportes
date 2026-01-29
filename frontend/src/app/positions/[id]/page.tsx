@@ -19,7 +19,7 @@ const EditPositionPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [position, setPosition] = useState<JobPositionResponse | null>(null);
   const [formData, setFormData] = useState<JobPositionUpdateRequest>({
-    posName: '',
+    pos_name: '',
   });
 
   const [validationErrors, setValidationErrors] = useState<{
@@ -36,7 +36,7 @@ const EditPositionPage: React.FC = () => {
       if (positionData) {
         setPosition(positionData);
         setFormData({
-          posName: positionData.posName,
+          pos_name: positionData.pos_name,
         });
       }
       setLoading(false);
@@ -48,7 +48,7 @@ const EditPositionPage: React.FC = () => {
   const validateForm = (): boolean => {
     const errors: typeof validationErrors = {};
 
-    if (!formData.posName?.trim()) {
+    if (!formData.pos_name?.trim()) {
       errors.posName = 'El nombre del cargo es requerido';
     }
 
@@ -64,7 +64,7 @@ const EditPositionPage: React.FC = () => {
     }
 
     const result = await updatePosition(posId, {
-      posName: formData.posName?.trim(),
+      pos_name: formData.pos_name?.trim(),
     });
 
     if (result) {
@@ -141,8 +141,8 @@ const EditPositionPage: React.FC = () => {
             <input
               type="text"
               id="posName"
-              value={formData.posName}
-              onChange={(e) => handleChange('posName', e.target.value)}
+              value={formData.pos_name}
+              onChange={(e) => handleChange('pos_name', e.target.value)}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
                 validationErrors.posName ? 'border-error-500' : 'border-neutral-300'
               }`}

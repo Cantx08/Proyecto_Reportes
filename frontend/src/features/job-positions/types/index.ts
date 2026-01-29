@@ -1,12 +1,12 @@
 export interface JobPositionCreateRequest {
-    posName: string;
+    pos_name: string;
 }
 
 export interface JobPositionUpdateRequest {
-    posName?: string;
+    pos_name?: string;
 }
 
 export interface JobPositionResponse {
-    posId: string;
-    posName: string;
+    pos_id: string;
+    pos_name: string;
 }

@@ -104,7 +104,7 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
       setState(prev => ({
         ...prev,
         departments: (prev.departments || []).map(dept => 
-          dept.depId === depId ? updatedDepartment : dept
+          dept.dep_id === depId ? updatedDepartment : dept
         ),
         updating: false,
       }));
@@ -126,7 +126,7 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
       await departmentService.delete(depId);
       setState(prev => ({
         ...prev,
-        departments: (prev.departments || []).filter(dept => dept.depId !== depId),
+        departments: (prev.departments || []).filter(dept => dept.dep_id !== depId),
         deleting: false,
       }));
       return true;
