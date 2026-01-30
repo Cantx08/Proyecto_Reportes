@@ -1,9 +1,8 @@
 from typing import List, Optional
-from sqlalchemy.orm import Session
 
 from ...domain.entities.scopus_account import ScopusAccount
 from ...domain.repositories.scopus_account_repository import ScopusAccountRepository
-from ..database.models.author import ScopusAccountModel
+from backend.src.modules.authors.infrastructure.author import ScopusAccountModel
 from ..database.connection import DatabaseConfig
 
 

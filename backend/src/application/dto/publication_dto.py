@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import List, TYPE_CHECKING, Union, Any
 
 if TYPE_CHECKING:
-    from .author_dto import AuthorDTO
+    from backend.src.modules.authors.application.author_dto import AuthorDTO
 
 
 class PublicationDTO(BaseModel):

@@ -17,16 +17,6 @@ Estructura modular:
 # IMPORTACIONES DE CONFIGURACIÓN BASE
 # ============================================================================
 
-from .base import (
-    Base,
-    GenderEnum,
-    FacultyEnum,
-    DocumentTypeEnum,
-    SourceTypeEnum,
-    ReportTypeEnum,
-    ReportStatusEnum
-)
-
 # ============================================================================
 # IMPORTACIONES DE TABLAS DE ASOCIACIÓN
 # ============================================================================
@@ -41,16 +31,11 @@ from .associations import (
 # IMPORTACIONES DE MODELOS DE AUTORES Y DEPARTAMENTOS
 # ============================================================================
 
-from .author import (
+from backend.src.modules.authors.infrastructure.author import (
     AuthorModel,
     ScopusAccountModel,
     SubjectAreaModel,
     SubjectCategoryModel
-)
-from .department import DepartmentModel
-
-from .position import (
-    PositionModel
 )
 
 # ============================================================================
@@ -86,13 +71,6 @@ from .report import (
 
 __all__ = [
     # Base y enums
-    "Base",
-    "GenderEnum",
-    "FacultyEnum",
-    "DocumentTypeEnum",
-    "SourceTypeEnum",
-    "ReportTypeEnum",
-    "ReportStatusEnum",
     
     # Tablas de asociación
     "publication_authors",
@@ -100,12 +78,10 @@ __all__ = [
     "report_publications",
     
     # Modelos de autores y departamentos
-    "DepartmentModel",
     "AuthorModel",
     "ScopusAccountModel",
     "SubjectAreaModel",
     "SubjectCategoryModel",
-    "PositionModel",
     
     # Modelos de journals y SJR
     "JournalModel",

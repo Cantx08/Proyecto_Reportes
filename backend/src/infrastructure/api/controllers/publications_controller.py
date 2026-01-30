@@ -1,7 +1,7 @@
 from typing import List, Union
 from ....application.dto import AuthorDTO, DocumentsByYearResponseDTO, PublicationDTO, PublicationsResponseDTO
 from ....application.services.publication_service import PublicationService
-from ....domain.entities.author import Author
+from backend.src.modules.authors.domain.author import Author
 from ....domain.entities.author_publications import AuthorPublications
 
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
-    from .author import Author
+    from backend.src.modules.authors.domain.author import Author
     from .author_publications import AuthorPublications
 
 

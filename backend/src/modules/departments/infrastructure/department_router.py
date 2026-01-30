@@ -1,6 +1,5 @@
 from typing import List
 from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -42,7 +41,10 @@ async def get_departments_by_faculty(faculty_code: str, service: DepartmentServi
 
 @router.post("", response_model=DepartmentResponseDTO, status_code=201)
 async def create_department(dto: DepartmentCreateDTO, service: DepartmentService = Depends(get_service)):
-    return await service.create_department(dto)
+    try:
+        return await service.create_department(dto)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.put("/{dep_id}", response_model=DepartmentResponseDTO)
