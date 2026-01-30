@@ -2,6 +2,7 @@ import uuid
 
 from pydantic import EmailStr
 from sqlalchemy import Column, String, ForeignKey, UUID, Enum
+from sqlalchemy.orm import relationship
 
 from ..domain.author import Author
 from ..domain.gender import Gender
@@ -21,7 +22,7 @@ class AuthorModel(Base):
     job_position_id = Column(UUID(as_uuid=True), ForeignKey('positions.pos_id'), nullable=False)
     department_id = Column(UUID(as_uuid=True), ForeignKey('departments.dep_id'), nullable=False)
 
-    # scopus_accounts = relationship("ScopusAccountModel", back_populates="author", cascade="all, delete-orphan")
+    scopus_accounts = relationship("ScopusAccountModel", back_populates="author", cascade="all, delete-orphan")
 
     def to_entity(self) -> Author:
         return Author(
