@@ -16,7 +16,7 @@ class IAuthorRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_department(self, dep_id: UUID) -> List[Author]:
+    async def get_by_department(self, dep_code: str) -> List[Author]:
         """Obtiene autores por departamento."""
         pass
 

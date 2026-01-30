@@ -4,11 +4,28 @@ import React, { useState, useEffect } from 'react';
 import DepartmentSelectNew from '../../departments/components/DepartmentSelect';
 import PositionSelectNew from '../../job-positions/components/JobPositionSelect';
 import { Save, X } from 'lucide-react';
-import {Author} from "@/features/authors/types";
+import {AuthorResponse} from "@/features/authors/types";
 
 interface AuthorFormProps {
-  author?: Author | null;
-  onSave: (author: Omit<Author, 'author_id'> | Author) => void;
+  author?: AuthorResponse | null;
+  onSave: (author: {
+    name: string;
+    surname: string;
+    title: string;
+    institutional_email: string;
+    gender: string;
+    position: string;
+    department: string;
+    author_id: string
+  } | {
+    name: string;
+    surname: string;
+    title: string;
+    institutional_email: string;
+    gender: string;
+    position: string;
+    department: string
+  }) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -19,12 +36,10 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
   onCancel,
   isLoading = false
 }) => {
-  // Los datos se obtienen directamente de los componentes selectores
 
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
-    dni: '',
     title: '',
     institutional_email: '',
     gender: 'M',
@@ -40,19 +55,17 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
       setFormData({
         name: author.name || '',
         surname: author.surname || '',
-        dni: author.dni || '',
         title: author.title || '',
         institutional_email: author.institutional_email || '',
         gender: author.gender || 'M',
-        position: author.position || '',
-        department: author.department || ''
+        position: author.job_position_id || '',
+        department: author.department_id || ''
       });
     } else {
       // Reset form para nuevo autor
       setFormData({
         name: '',
         surname: '',
-        dni: '',
         title: '',
         institutional_email: '',
         gender: 'M',
@@ -92,12 +105,6 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
       newErrors.surname = 'El apellido es requerido';
     } else if (formData.surname.trim().length < 2) {
       newErrors.surname = 'El apellido debe tener al menos 2 caracteres';
-    }
-
-    if (!formData.dni.trim()) {
-      newErrors.dni = 'El DNI/Cédula es requerido';
-    } else if (formData.dni.trim().length < 5) {
-      newErrors.dni = 'El DNI/Cédula debe tener al menos 5 caracteres';
     }
 
     // Validar email institucional (opcional pero si se proporciona debe ser válido)
@@ -171,24 +178,6 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             placeholder="Ingrese el apellido"
           />
           {errors.surname && <p className="mt-1 text-sm text-red-600">{errors.surname}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">
-            DNI/Cédula *
-          </label>
-          <input
-            type="text"
-            id="dni"
-            name="dni"
-            value={formData.dni}
-            onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              errors.dni ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Ingrese el DNI o cédula"
-          />
-          {errors.dni && <p className="mt-1 text-sm text-red-600">{errors.dni}</p>}
         </div>
 
         <div>

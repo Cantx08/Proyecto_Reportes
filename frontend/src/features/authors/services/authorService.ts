@@ -21,8 +21,8 @@ export const authorService = {
     /**
      * Obtener autores por departamento
      */
-    getByDepartment: async (dep_id: string): Promise<AuthorResponse[]> => {
-        const {data} = await axiosInstance.get(`/authors/departments/${dep_id}`);
+    getByDepartment: async (dep_code: string): Promise<AuthorResponse[]> => {
+        const {data} = await axiosInstance.get(`/authors/departments/${dep_code}`);
         return Array.isArray(data) ? data : data.data || [];
     },
 

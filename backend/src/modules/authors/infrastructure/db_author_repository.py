@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from ..domain.author import Author
 from .author import AuthorModel
 from ..domain.author_repository import IAuthorRepository
+from ...departments.infrastructure.department import DepartmentModel
 
 
 class DBAuthorRepository(IAuthorRepository):
@@ -16,8 +17,8 @@ class DBAuthorRepository(IAuthorRepository):
         models = self.db.query(AuthorModel).all()
         return [model.to_entity() for model in models]
 
-    async def get_by_department(self, dep_id: UUID) -> List[Author]:
-        models = self.db.query(AuthorModel).filter(AuthorModel.department_id == dep_id).all()
+    async def get_by_department(self, dep_code: str) -> List[Author]:
+        models = self.db.query(AuthorModel).join(DepartmentModel).filter(DepartmentModel.dep_code == dep_code).all()
         return [model.to_entity() for model in models]
 
     async def get_by_id(self, author_id: UUID) -> Optional[Author]:

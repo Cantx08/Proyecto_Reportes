@@ -14,11 +14,11 @@ export interface UseDepartmentsState {
 
 export interface UseDepartmentsActions {
   fetchDepartments: () => Promise<void>;
-  getDepartment: (depId: string) => Promise<DepartmentResponse | null>;
-  getDepartmentsByFaculty: (facName: string) => Promise<DepartmentResponse[]>;
+  getDepartment: (dep_id: string) => Promise<DepartmentResponse | null>;
+  getDepartmentsByFaculty: (faculty_name: string) => Promise<DepartmentResponse[]>;
   createDepartment: (departmentData: DepartmentCreateRequest) => Promise<DepartmentResponse | null>;
-  updateDepartment: (depId: string, departmentData: DepartmentUpdateRequest) => Promise<DepartmentResponse | null>;
-  deleteDepartment: (depId: string) => Promise<boolean>;
+  updateDepartment: (dep_id: string, departmentData: DepartmentUpdateRequest) => Promise<DepartmentResponse | null>;
+  deleteDepartment: (dep_id: string) => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -56,9 +56,9 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
     }
   }, []);
 
-  const getDepartment = useCallback(async (depId: string): Promise<DepartmentResponse | null> => {
+  const getDepartment = useCallback(async (dep_id: string): Promise<DepartmentResponse | null> => {
     try {
-      return await departmentService.getById(depId);
+      return await departmentService.getById(dep_id);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -66,9 +66,9 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
     }
   }, []);
 
-  const getDepartmentsByFaculty = useCallback(async (facName: string): Promise<DepartmentResponse[]> => {
+  const getDepartmentsByFaculty = useCallback(async (faculty_name: string): Promise<DepartmentResponse[]> => {
     try {
-      return await departmentService.getByFaculty(facName);
+      return await departmentService.getByFaculty(faculty_name);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -97,14 +97,14 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
     }
   }, []);
 
-  const updateDepartment = useCallback(async (depId: string, departmentData: DepartmentUpdateRequest): Promise<DepartmentResponse | null> => {
+  const updateDepartment = useCallback(async (dep_id: string, departmentData: DepartmentUpdateRequest): Promise<DepartmentResponse | null> => {
     setState(prev => ({ ...prev, updating: true, error: null }));
     try {
-      const updatedDepartment = await departmentService.update(depId, departmentData);
+      const updatedDepartment = await departmentService.update(dep_id, departmentData);
       setState(prev => ({
         ...prev,
         departments: (prev.departments || []).map(dept => 
-          dept.dep_id === depId ? updatedDepartment : dept
+          dept.dep_id === dep_id ? updatedDepartment : dept
         ),
         updating: false,
       }));
@@ -120,13 +120,13 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
     }
   }, []);
 
-  const deleteDepartment = useCallback(async (depId: string): Promise<boolean> => {
+  const deleteDepartment = useCallback(async (dep_id: string): Promise<boolean> => {
     setState(prev => ({ ...prev, deleting: true, error: null }));
     try {
-      await departmentService.delete(depId);
+      await departmentService.delete(dep_id);
       setState(prev => ({
         ...prev,
-        departments: (prev.departments || []).filter(dept => dept.dep_id !== depId),
+        departments: (prev.departments || []).filter(dept => dept.dep_id !== dep_id),
         deleting: false,
       }));
       return true;

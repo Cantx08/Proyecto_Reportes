@@ -29,10 +29,10 @@ async def get_author_by_id(author_id: UUID, service: AuthorService = Depends(get
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/departments/{dep_id}", response_model=List[AuthorResponseDTO])
-async def get_authors_by_department(dep_id: UUID, service: AuthorService = Depends(get_service)):
+@router.get("/departments/{dep_code}", response_model=List[AuthorResponseDTO])
+async def get_authors_by_department(dep_code: str, service: AuthorService = Depends(get_service)):
     try:
-        return await service.get_authors_by_department(dep_id)
+        return await service.get_authors_by_department(dep_code)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

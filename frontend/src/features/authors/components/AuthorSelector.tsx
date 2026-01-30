@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { Search, User, Check, Loader2 } from 'lucide-react';
 import { useAuthors } from '@/features/authors/hooks/useAuthors';
@@ -28,7 +26,7 @@ export const AuthorSelector: React.FC<AuthorSelectorProps> = ({
       author.name.toLowerCase().includes(searchLower) ||
       author.surname.toLowerCase().includes(searchLower) ||
       author.author_id.toLowerCase().includes(searchLower) ||
-      author.department.toLowerCase().includes(searchLower)
+      author.department_id.toLowerCase().includes(searchLower)
     );
   });
 

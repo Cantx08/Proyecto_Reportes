@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useAuthors } from '@/features/authors/hooks/useAuthors';
 import AuthorForm from './AuthorForm';
 import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
-import {Author} from "@/features/authors/types";
+import {AuthorResponse} from "@/features/authors/types";
 
 const AuthorsManager: React.FC = () => {
   const { 
@@ -20,14 +20,14 @@ const AuthorsManager: React.FC = () => {
   } = useAuthors();
 
   const [showForm, setShowForm] = useState(false);
-  const [editingAuthor, setEditingAuthor] = useState<Author | null>(null);
+  const [editingAuthor, setEditingAuthor] = useState<AuthorResponse | null>(null);
 
   const handleCreate = () => {
     setEditingAuthor(null);
     setShowForm(true);
   };
 
-  const handleEdit = (author: Author) => {
+  const handleEdit = (author: AuthorResponse) => {
     setEditingAuthor(author);
     setShowForm(true);
   };
@@ -38,13 +38,11 @@ const AuthorsManager: React.FC = () => {
     }
   };
 
-  const handleSave = async (authorData: Omit<Author, 'author_id'> | Author) => {
+  const handleSave = async (authorData: Omit<AuthorResponse, 'author_id'> | AuthorResponse) => {
     try {
       if ('author_id' in authorData && authorData.author_id) {
-        // Modo edición
         await updateAuthor(authorData.author_id, authorData);
       } else {
-        // Modo creación - NO enviar author_id, la BD lo generará automáticamente
         const { author_id, ...createData } = authorData as any;
         await createAuthor(createData);
       }
@@ -52,7 +50,6 @@ const AuthorsManager: React.FC = () => {
       setEditingAuthor(null);
     } catch (error) {
       console.error('Error saving author:', error);
-      // El error ya se maneja en el hook, no necesitamos hacer nada más aquí
     }
   };
 
@@ -149,11 +146,8 @@ const AuthorsManager: React.FC = () => {
                   <div className="mt-2 text-sm text-gray-600 space-y-1">
                     <p><strong>DNI:</strong> {author.dni}</p>
                     <p><strong>Género:</strong> {author.gender === 'M' ? 'Masculino' : 'Femenino'}</p>
-                    <p><strong>Cargo:</strong> {author.position}</p>
-                    <p><strong>Departamento:</strong> {author.department}</p>
-                    {author.birth_date && (
-                      <p><strong>Fecha de nacimiento:</strong> {new Date(author.birth_date).toLocaleDateString('es-ES')}</p>
-                    )}
+                    <p><strong>Cargo:</strong> {author.job_position_id}</p>
+                    <p><strong>Departamento:</strong> {author.department_id}</p>
                   </div>
                 </div>
               </div>

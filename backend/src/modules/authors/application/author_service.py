@@ -16,11 +16,11 @@ class AuthorService:
         authors = await self.author_repo.get_all()
         return [AuthorResponseDTO.from_entity(author) for author in authors]
 
-    async def get_authors_by_department(self, dep_id: UUID) -> List[AuthorResponseDTO]:
-        if dep_id is None:
-            raise ValueError("Se requiere el id del departamento.")
+    async def get_authors_by_department(self, dep_code: str) -> List[AuthorResponseDTO]:
+        if dep_code is None:
+            raise ValueError("Se requiere las siglas del departamento.")
 
-        authors = await self.author_repo.get_by_department(dep_id)
+        authors = await self.author_repo.get_by_department(dep_code)
         return [AuthorResponseDTO.from_entity(author) for author in authors]
 
     async def get_author_by_id(self, author_id: UUID) -> AuthorResponseDTO:

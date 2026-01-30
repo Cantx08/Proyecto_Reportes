@@ -13,8 +13,8 @@ export const jobPositionService = {
     /**
      * Obtener una posición por ID
      */
-    getById: async (posId: string): Promise<JobPositionResponse> => {
-        const {data} = await axiosInstance.get(`/job-positions/${posId}`);
+    getById: async (pos_id: string): Promise<JobPositionResponse> => {
+        const {data} = await axiosInstance.get(`/job-positions/${pos_id}`);
         return data.data || data;
     },
 
@@ -29,15 +29,15 @@ export const jobPositionService = {
     /**
      * Actualizar una posición existente
      */
-    update: async (posId: string, payload: JobPositionUpdateRequest): Promise<JobPositionResponse> => {
-        const {data} = await axiosInstance.put(`/job-positions/${posId}`, payload);
+    update: async (pos_id: string, payload: JobPositionUpdateRequest): Promise<JobPositionResponse> => {
+        const {data} = await axiosInstance.put(`/job-positions/${pos_id}`, payload);
         return data.data || data;
     },
 
     /**
      * Eliminar una posición
      */
-    delete: async (posId: string): Promise<void> => {
-        await axiosInstance.delete(`/job-positions/${posId}`);
+    delete: async (pos_id: string): Promise<void> => {
+        await axiosInstance.delete(`/job-positions/${pos_id}`);
     },
 };

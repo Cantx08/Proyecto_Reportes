@@ -14,11 +14,11 @@ export interface UseAuthorsState {
 
 export interface UseAuthorsActions {
   fetchAuthors: () => Promise<void>;
-  getAuthor: (authorId: string) => Promise<AuthorResponse | null>;
-  getAuthorsByDepartment: (depId: string) => Promise<AuthorResponse[]>;
+  getAuthor: (author_id: string) => Promise<AuthorResponse | null>;
+  getAuthorsByDepartment: (dep_code: string) => Promise<AuthorResponse[]>;
   createAuthor: (authorData: AuthorCreateRequest) => Promise<AuthorResponse | null>;
-  updateAuthor: (authorId: string, authorData: AuthorUpdateRequest) => Promise<AuthorResponse | null>;
-  deleteAuthor: (authorId: string) => Promise<boolean>;
+  updateAuthor: (author_id: string, authorData: AuthorUpdateRequest) => Promise<AuthorResponse | null>;
+  deleteAuthor: (author_id: string) => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -56,9 +56,9 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
     }
   }, []);
 
-  const getAuthor = useCallback(async (authorId: string): Promise<AuthorResponse | null> => {
+  const getAuthor = useCallback(async (author_id: string): Promise<AuthorResponse | null> => {
     try {
-      return await authorService.getById(authorId);
+      return await authorService.getById(author_id);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -66,9 +66,9 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
     }
   }, []);
 
-  const getAuthorsByDepartment = useCallback(async (depId: string): Promise<AuthorResponse[]> => {
+  const getAuthorsByDepartment = useCallback(async (dep_code: string): Promise<AuthorResponse[]> => {
     try {
-      return await authorService.getByDepartment(depId);
+      return await authorService.getByDepartment(dep_code);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -97,14 +97,14 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
     }
   }, []);
 
-  const updateAuthor = useCallback(async (authorId: string, authorData: AuthorUpdateRequest): Promise<AuthorResponse | null> => {
+  const updateAuthor = useCallback(async (author_id: string, authorData: AuthorUpdateRequest): Promise<AuthorResponse | null> => {
     setState(prev => ({ ...prev, updating: true, error: null }));
     try {
-      const updatedAuthor = await authorService.update(authorId, authorData);
+      const updatedAuthor = await authorService.update(author_id, authorData);
       setState(prev => ({
         ...prev,
         authors: (prev.authors || []).map(author => 
-          author.author_id === authorId ? updatedAuthor : author
+          author.author_id === author_id ? updatedAuthor : author
         ),
         updating: false,
       }));
@@ -120,13 +120,13 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
     }
   }, []);
 
-  const deleteAuthor = useCallback(async (authorId: string): Promise<boolean> => {
+  const deleteAuthor = useCallback(async (author_id: string): Promise<boolean> => {
     setState(prev => ({ ...prev, deleting: true, error: null }));
     try {
-      await authorService.delete(authorId);
+      await authorService.delete(author_id);
       setState(prev => ({
         ...prev,
-        authors: (prev.authors || []).filter(author => author.author_id !== authorId),
+        authors: (prev.authors || []).filter(author => author.author_id !== author_id),
         deleting: false,
       }));
       return true;
