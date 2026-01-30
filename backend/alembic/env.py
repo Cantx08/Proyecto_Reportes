@@ -14,6 +14,7 @@ from src.shared.database import Base, db_config
 from src.modules.departments.infrastructure.department import DepartmentModel
 from src.modules.job_positions.infrastructure.job_position import JobPositionModel
 from src.modules.authors.infrastructure.author import AuthorModel
+from src.modules.scopus_accounts.infrastructure.scopus_account import ScopusAccountModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
