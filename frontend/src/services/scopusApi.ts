@@ -6,7 +6,6 @@ import type {
 
 
 } from '@/types/api';
-import {DepartmentsResponse} from "@/features/departments/types";
 
 export interface ReportRequest {
   author_ids: string[];
@@ -33,7 +32,7 @@ const api = axios.create({
 
 export const scopusApi = {
   /**
-   * Obtener publicaciones por IDs de Scopus
+   * Obtener publicaciones por ID de Scopus
    */
   async getPublications(authorIds: string[]): Promise<PublicationsResponse> {
     try {
@@ -103,27 +102,6 @@ export const scopusApi = {
       throw new Error('Error al obtener áreas temáticas.');
     }
   },
-
-  /**
-   * Obtener lista de departamentos
-   */
-  async getDepartments(): Promise<DepartmentsResponse> {
-    try {
-      const response = await api.get<DepartmentsResponse>('/departments');
-      return response.data;
-    } catch (error) {
-      console.error('Error al obtener departamentos:', error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.status === 500) {
-          throw new Error('Error interno del servidor al obtener departamentos.');
-        }
-      }
-      throw new Error('Error al conectar con el servidor para obtener departamentos.');
-    }
-  },
-
-
-
   /**
    * Generar reporte de certificación
    */

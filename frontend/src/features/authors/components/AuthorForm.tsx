@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import DepartmentSelectNew from '../features/departments/components/DepartmentSelect';
-import PositionSelectNew from '../features/job-positions/components/JobPositionSelect';
+import DepartmentSelectNew from '../../departments/components/DepartmentSelect';
+import PositionSelectNew from '../../job-positions/components/JobPositionSelect';
 import { Save, X } from 'lucide-react';
 import {Author} from "@/features/authors/types";
 

@@ -2,7 +2,7 @@
 
 import React, {useState, useEffect} from 'react';
 import Link from 'next/link';
-import {useAuthors} from '@/hooks/useAuthors';
+import {useAuthors} from '@/features/authors/hooks/useAuthors';
 import {
     Plus,
     Edit,

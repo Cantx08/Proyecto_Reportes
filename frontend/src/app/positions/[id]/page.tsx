@@ -12,7 +12,7 @@ import {JobPositionResponse, JobPositionUpdateRequest} from "@/features/job-posi
 const EditPositionPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
-  const posId = params?.id as string;
+  const pos_id = params?.id as string;
   
   const { getPosition, updatePosition, updating, error } = useJobPositions();
 
@@ -23,15 +23,15 @@ const EditPositionPage: React.FC = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState<{
-    posName?: string;
+    pos_name?: string;
   }>({});
 
   useEffect(() => {
     const loadPosition = async () => {
-      if (!posId) return;
+      if (!pos_id) return;
       
       setLoading(true);
-      const positionData = await getPosition(posId);
+      const positionData = await getPosition(pos_id);
       
       if (positionData) {
         setPosition(positionData);
@@ -43,13 +43,13 @@ const EditPositionPage: React.FC = () => {
     };
 
     loadPosition();
-  }, [posId, getPosition]);
+  }, [pos_id, getPosition]);
 
   const validateForm = (): boolean => {
     const errors: typeof validationErrors = {};
 
     if (!formData.pos_name?.trim()) {
-      errors.posName = 'El nombre del cargo es requerido';
+      errors.pos_name = 'El nombre del cargo es requerido';
     }
 
     setValidationErrors(errors);
@@ -59,11 +59,11 @@ const EditPositionPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm() || !posId) {
+    if (!validateForm() || !pos_id) {
       return;
     }
 
-    const result = await updatePosition(posId, {
+    const result = await updatePosition(pos_id, {
       pos_name: formData.pos_name?.trim(),
     });
 
@@ -135,21 +135,21 @@ const EditPositionPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Nombre del Cargo */}
           <div>
-            <label htmlFor="posName" className="block text-sm font-medium text-neutral-700 mb-2">
+            <label htmlFor="pos_name" className="block text-sm font-medium text-neutral-700 mb-2">
               Nombre del Cargo <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="posName"
+              id="pos_name"
               value={formData.pos_name}
               onChange={(e) => handleChange('pos_name', e.target.value)}
               className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                validationErrors.posName ? 'border-error-500' : 'border-neutral-300'
+                validationErrors.pos_name ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ej: Profesor Principal"
             />
-            {validationErrors.posName && (
-              <p className="mt-1 text-sm text-error-600">{validationErrors.posName}</p>
+            {validationErrors.pos_name && (
+              <p className="mt-1 text-sm text-error-600">{validationErrors.pos_name}</p>
             )}
           </div>
 

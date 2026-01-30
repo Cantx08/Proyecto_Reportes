@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuthors } from '@/hooks/useAuthors';
+import { useAuthors } from '@/features/authors/hooks/useAuthors';
 import AuthorForm from './AuthorForm';
 import { Plus, Edit, Trash2, Users, X } from 'lucide-react';
 import {Author} from "@/features/authors/types";

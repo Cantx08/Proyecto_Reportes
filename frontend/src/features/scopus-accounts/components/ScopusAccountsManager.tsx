@@ -2,24 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Loader2, XCircle } from 'lucide-react';
-import { scopusAccountsApi } from '@/services/servicesApi';
-import type { ScopusAccountResponse } from '@/types/api';
 
-interface ScopusAccountData {
-  id?: number;
-  scopus_id: string;
-  is_active: boolean;
-}
+
+import {ScopusAccountResponse} from "@/features/scopus-accounts/types";
+import {scopusAccountsService} from "@/features/scopus-accounts/services/scopusAccountService";
 
 interface ScopusAccountsManagerProps {
-  authorId?: number;
+  author_id?: number;
   initialAccounts?: ScopusAccountData[];
   onChange: (accounts: ScopusAccountData[]) => void;
   readOnly?: boolean;
 }
 
 export default function ScopusAccountsManager({
-  authorId,
+  author_id,
   initialAccounts = [],
   onChange,
   readOnly = false,
@@ -34,14 +30,14 @@ export default function ScopusAccountsManager({
   // Cargar cuentas existentes cuando tenemos authorId
   useEffect(() => {
     const loadAccounts = async () => {
-      if (authorId) {
+      if (author_id) {
         setLoadingAccounts(true);
         try {
-          const accountsData = await scopusAccountsApi.getByAuthor(authorId.toString());
-          const mappedAccounts = accountsData.map((acc: ScopusAccountResponse) => ({
-            id: acc.id,
-            scopus_id: acc.scopus_id,
-            is_active: acc.is_active !== false,
+          const accountsData = await scopusAccountsService.getByAuthor(author_id.toString());
+          const mappedAccounts = accountsData.map((account: ScopusAccountResponse) => ({
+            id: account.account_id,
+            scopus_id: account.scopus_id,
+            is_active: account.is_active !== false,
           }));
           setAccounts(mappedAccounts);
           onChange(mappedAccounts);
@@ -55,13 +51,13 @@ export default function ScopusAccountsManager({
     };
 
     loadAccounts();
-  }, [authorId]);
+  }, [author_id]);
 
   useEffect(() => {
-    if (!authorId) {
+    if (!author_id) {
       setAccounts(initialAccounts);
     }
-  }, [initialAccounts, authorId]);
+  }, [initialAccounts, author_id]);
 
   const handleAddAccount = async () => {
     if (!newScopusId.trim()) return;
@@ -80,17 +76,17 @@ export default function ScopusAccountsManager({
     };
 
     // Si tenemos authorId, guardar en el backend inmediatamente
-    if (authorId) {
+    if (author_id) {
       setLoading(true);
       try {
-        await scopusAccountsApi.create({
+        await scopusAccountsService.create({
           scopus_id: newAccount.scopus_id,
-          author_id: authorId.toString(),
+          author_id: author_id.toString(),
           is_active: newAccount.is_active,
         });
 
         // Recargar las cuentas del autor
-        const accountsData = await scopusAccountsApi.getByAuthor(authorId.toString());
+        const accountsData = await scopusAccountsService.getByAuthor(author_id.toString());
         const mappedAccounts = accountsData.map((acc: ScopusAccountResponse) => ({
           id: acc.id,
           scopus_id: acc.scopus_id,
@@ -119,13 +115,13 @@ export default function ScopusAccountsManager({
     const accountToRemove = accounts[index];
 
     // Si tiene ID, eliminarlo del backend
-    if (accountToRemove.id && authorId) {
+    if (accountToRemove.id && author_id) {
       setLoading(true);
       try {
-        await scopusAccountsApi.delete(accountToRemove.scopus_id);
+        await scopusAccountsService.delete(accountToRemove.scopus_id);
         
         // Recargar las cuentas
-        const accountsData = await scopusAccountsApi.getByAuthor(authorId.toString());
+        const accountsData = await scopusAccountsService.getByAuthor(author_id.toString());
         const mappedAccounts = accountsData.map((acc: ScopusAccountResponse) => ({
           id: acc.id,
           scopus_id: acc.scopus_id,
@@ -153,10 +149,10 @@ export default function ScopusAccountsManager({
     );
 
     // Si tenemos authorId y la cuenta tiene ID, actualizar en el backend
-    if (authorId && updatedAccounts[index].id) {
+    if (author_id && updatedAccounts[index].id) {
       setLoading(true);
       try {
-        await scopusAccountsApi.update(updatedAccounts[index].scopus_id, {
+        await scopusAccountsService.update(updatedAccounts[index].scopus_id, {
           is_active: updatedAccounts[index].is_active,
         });
       } catch (err) {

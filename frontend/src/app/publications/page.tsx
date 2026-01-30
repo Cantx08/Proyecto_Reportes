@@ -10,15 +10,15 @@ import {
   Users,
   Microscope
 } from 'lucide-react';
-import { ScopusIdInput } from '@/components/ScopusIdInput';
-import { AuthorSelector } from '@/components/AuthorSelector';
+import { ScopusIdInput } from '@/features/scopus-accounts/components/ScopusIdInput';
+import { AuthorSelector } from '@/features/authors/components/AuthorSelector';
 import { PublicationsList } from '@/components/PublicationsList';
 import { SubjectAreas } from '@/components/SubjectAreas';
 import { DocumentsByYear } from '@/components/DocumentsByYearChart';
 import { ErrorNotification } from '@/components/ErrorNotification';
 import ReportGenerator from '@/components/ReportGenerator';
-import { useScopusData } from '@/hooks/useScopusData';
-import { useAuthors } from '@/hooks/useAuthors';
+import { useScopusData } from '@/features/scopus-accounts/hooks/useScopusData';
+import { useAuthors } from '@/features/authors/hooks/useAuthors';
 
 import {AuthorResponse} from "@/features/authors/types";
 

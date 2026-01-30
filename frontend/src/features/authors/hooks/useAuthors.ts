@@ -1,12 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { authorsApi, apiUtils } from '@/services/servicesApi';
-import {
-  Author,
-  AuthorCreateRequest,
-  AuthorResponse,
-  AuthorsResponse,
-  AuthorUpdateRequest
-} from "@/features/authors/types";
+import {useCallback, useEffect, useState} from 'react';
+import {apiUtils} from '@/services/servicesApi';
+import {AuthorCreateRequest, AuthorResponse, AuthorUpdateRequest} from "@/features/authors/types";
+import {authorService} from "@/features/authors/services/authorService";
 
 export interface UseAuthorsState {
   authors: AuthorResponse[];
@@ -20,6 +15,7 @@ export interface UseAuthorsState {
 export interface UseAuthorsActions {
   fetchAuthors: () => Promise<void>;
   getAuthor: (authorId: string) => Promise<AuthorResponse | null>;
+  getAuthorsByDepartment: (depId: string) => Promise<AuthorResponse[]>;
   createAuthor: (authorData: AuthorCreateRequest) => Promise<AuthorResponse | null>;
   updateAuthor: (authorId: string, authorData: AuthorUpdateRequest) => Promise<AuthorResponse | null>;
   deleteAuthor: (authorId: string) => Promise<boolean>;
@@ -43,10 +39,10 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
   const fetchAuthors = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const response = await authorsApi.getAll();
+      const authors = await authorService.getAll();
       setState(prev => ({
         ...prev,
-        authors: response?.authors || [],
+        authors: authors || [],
         loading: false,
       }));
     } catch (error) {
@@ -55,15 +51,14 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
         ...prev,
         loading: false,
         error: errorMessage,
-        authors: [], // Asegurar que authors sea un array vacío en caso de error
+        authors: [],
       }));
     }
   }, []);
 
   const getAuthor = useCallback(async (authorId: string): Promise<AuthorResponse | null> => {
     try {
-      const author = await authorsApi.getById(authorId);
-      return author;
+      return await authorService.getById(authorId);
     } catch (error) {
       const errorMessage = apiUtils.handleError(error);
       setState(prev => ({ ...prev, error: errorMessage }));
@@ -71,10 +66,20 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
     }
   }, []);
 
+  const getAuthorsByDepartment = useCallback(async (depId: string): Promise<AuthorResponse[]> => {
+    try {
+      return await authorService.getByDepartment(depId);
+    } catch (error) {
+      const errorMessage = apiUtils.handleError(error);
+      setState(prev => ({ ...prev, error: errorMessage }));
+      return [];
+    }
+  }, []);
+
   const createAuthor = useCallback(async (authorData: AuthorCreateRequest): Promise<AuthorResponse | null> => {
     setState(prev => ({ ...prev, creating: true, error: null }));
     try {
-      const newAuthor = await authorsApi.create(authorData);
+      const newAuthor = await authorService.create(authorData);
       setState(prev => ({
         ...prev,
         authors: [...(prev.authors || []), newAuthor],
@@ -95,7 +100,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
   const updateAuthor = useCallback(async (authorId: string, authorData: AuthorUpdateRequest): Promise<AuthorResponse | null> => {
     setState(prev => ({ ...prev, updating: true, error: null }));
     try {
-      const updatedAuthor = await authorsApi.update(authorId, authorData);
+      const updatedAuthor = await authorService.update(authorId, authorData);
       setState(prev => ({
         ...prev,
         authors: (prev.authors || []).map(author => 
@@ -118,7 +123,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
   const deleteAuthor = useCallback(async (authorId: string): Promise<boolean> => {
     setState(prev => ({ ...prev, deleting: true, error: null }));
     try {
-      await authorsApi.delete(authorId);
+      await authorService.delete(authorId);
       setState(prev => ({
         ...prev,
         authors: (prev.authors || []).filter(author => author.author_id !== authorId),
@@ -145,6 +150,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
     ...state,
     fetchAuthors,
     getAuthor,
+    getAuthorsByDepartment,
     createAuthor,
     updateAuthor,
     deleteAuthor,

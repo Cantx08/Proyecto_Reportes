@@ -13,16 +13,16 @@ export const departmentService = {
     /**
      * Obtener un departamento por ID
      */
-    getById: async (depId: string): Promise<DepartmentResponse> => {
-        const {data} = await axiosInstance.get(`/departments/${depId}`);
+    getById: async (dep_id: string): Promise<DepartmentResponse> => {
+        const {data} = await axiosInstance.get(`/departments/${dep_id}`);
         return data.data || data;
     },
 
     /**
      * Obtener departamentos por facultad
      */
-    getByFaculty: async (facultyName: string): Promise<DepartmentResponse[]> => {
-        const {data} = await axiosInstance.get(`/departments/faculty/${facultyName}`);
+    getByFaculty: async (faculty_name: string): Promise<DepartmentResponse[]> => {
+        const {data} = await axiosInstance.get(`/departments/faculty/${faculty_name}`);
         return Array.isArray(data) ? data : data.data || [];
     },
 
@@ -37,15 +37,15 @@ export const departmentService = {
     /**
      * Actualizar un departamento existente
      */
-    update: async (depId: string, payload: DepartmentUpdateRequest): Promise<DepartmentResponse> => {
-        const {data} = await axiosInstance.put(`/departments/${depId}`, payload);
+    update: async (dep_id: string, payload: DepartmentUpdateRequest): Promise<DepartmentResponse> => {
+        const {data} = await axiosInstance.put(`/departments/${dep_id}`, payload);
         return data.data || data;
     },
 
     /**
      * Eliminar un departamento
      */
-    delete: async (depId: string): Promise<void> => {
-        await axiosInstance.delete(`/departments/${depId}`);
+    delete: async (dep_id: string): Promise<void> => {
+        await axiosInstance.delete(`/departments/${dep_id}`);
     },
 };

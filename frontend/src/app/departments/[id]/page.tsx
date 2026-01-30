@@ -11,14 +11,14 @@ import {DepartmentUpdateRequest} from "@/features/departments/types";
 export default function EditDepartmentPage() {
   const router = useRouter();
   const params = useParams();
-  const depId = params.id as string;
+  const dep_id = params.id as string;
   
   const { getDepartment, updateDepartment, updating } = useDepartments();
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     depCode: '',
-    depName: '',
+    dep_name: '',
     facultyName: ''
   });
 
@@ -27,11 +27,11 @@ export default function EditDepartmentPage() {
   useEffect(() => {
     const loadDepartment = async () => {
       try {
-        const department = await getDepartment(depId);
+        const department = await getDepartment(dep_id);
         if (department) {
           setFormData({
             depCode: department.dep_code || department.dep_id,
-            depName: department.dep_name,
+            dep_name: department.dep_name,
             facultyName: department.faculty_name
           });
         }
@@ -42,10 +42,10 @@ export default function EditDepartmentPage() {
       }
     };
 
-    if (depId) {
+    if (dep_id) {
       loadDepartment();
     }
-  }, [depId, getDepartment]);
+  }, [dep_id, getDepartment]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -54,8 +54,8 @@ export default function EditDepartmentPage() {
       newErrors.depCode = 'El código del departamento es requerido';
     }
 
-    if (!formData.depName.trim()) {
-      newErrors.depName = 'El nombre del departamento es requerido';
+    if (!formData.dep_name.trim()) {
+      newErrors.dep_name = 'El nombre del departamento es requerido';
     }
 
     if (!formData.facultyName.trim()) {
@@ -103,11 +103,11 @@ export default function EditDepartmentPage() {
     try {
       const updateData: DepartmentUpdateRequest = {
         dep_code: formData.depCode,
-        dep_name: formData.depName,
+        dep_name: formData.dep_name,
         faculty: formData.facultyName
       };
       
-      const result = await updateDepartment(depId, updateData);
+      const result = await updateDepartment(dep_id, updateData);
       
       if (result) {
         router.push('/departments-and-positions');
@@ -177,22 +177,22 @@ export default function EditDepartmentPage() {
           </div>
 
           <div>
-            <label htmlFor="depName" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="dep_name" className="block text-sm font-medium text-neutral-700 mb-1">
               Nombre del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="depName"
-              name="depName"
-              value={formData.depName}
+              id="dep_name"
+              name="dep_name"
+              value={formData.dep_name}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
-                errors.depName ? 'border-error-500' : 'border-neutral-300'
+                errors.dep_name ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ejemplo: Departamento de Ciencias de la Computación"
             />
-            {errors.depName && (
-              <p className="mt-1 text-sm text-error-600">{errors.depName}</p>
+            {errors.dep_name && (
+              <p className="mt-1 text-sm text-error-600">{errors.dep_name}</p>
             )}
           </div>
 

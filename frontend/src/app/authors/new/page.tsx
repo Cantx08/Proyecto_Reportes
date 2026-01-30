@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuthors } from '@/hooks/useAuthors';
+import { useAuthors } from '@/features/authors/hooks/useAuthors';
 import { useDepartments } from '@/features/departments/hooks/useDepartments';
 import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
 import { ArrowLeft, Save, Loader2, UserPlus, User, AlertCircle, GraduationCap, BookOpen } from 'lucide-react';
 import Link from 'next/link';
-import ScopusAccountsManager from '@/components/ScopusAccountsManager';
+import ScopusAccountsManager from '@/features/scopus-accounts/components/ScopusAccountsManager';
 
 export default function NewAuthorPage() {
   const router = useRouter();

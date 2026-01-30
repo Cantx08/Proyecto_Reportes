@@ -17,14 +17,14 @@ const NewPositionPage: React.FC = () => {
     });
 
     const [validationErrors, setValidationErrors] = useState<{
-        posName?: string;
+        pos_name?: string;
     }>({});
 
     const validateForm = (): boolean => {
         const errors: typeof validationErrors = {};
 
         if (!formData.pos_name.trim()) {
-            errors.posName = 'El nombre del cargo es requerido';
+            errors.pos_name = 'El nombre del cargo es requerido';
         }
 
         setValidationErrors(errors);
@@ -50,7 +50,7 @@ const NewPositionPage: React.FC = () => {
     const handleChange = (field: keyof JobPositionCreateRequest, value: string) => {
         setFormData(prev => ({...prev, [field]: value}));
         // Limpiar error de validación del campo cuando el usuario empieza a escribir
-        if (field === 'pos_name' && validationErrors.posName) {
+        if (field === 'pos_name' && validationErrors.pos_name) {
             setValidationErrors({});
         }
     };
@@ -88,21 +88,21 @@ const NewPositionPage: React.FC = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Nombre del Cargo */}
                     <div>
-                        <label htmlFor="posName" className="block text-sm font-medium text-neutral-700 mb-2">
+                        <label htmlFor="pos_name" className="block text-sm font-medium text-neutral-700 mb-2">
                             Nombre del Cargo <span className="text-error-500">*</span>
                         </label>
                         <input
                             type="text"
-                            id="posName"
+                            id="pos_name"
                             value={formData.pos_name}
                             onChange={(e) => handleChange('pos_name', e.target.value)}
                             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors ${
-                                validationErrors.posName ? 'border-error-500' : 'border-neutral-300'
+                                validationErrors.pos_name ? 'border-error-500' : 'border-neutral-300'
                             }`}
                             placeholder="Ej: Profesor Principal"
                         />
-                        {validationErrors.posName && (
-                            <p className="mt-1 text-sm text-error-600">{validationErrors.posName}</p>
+                        {validationErrors.pos_name && (
+                            <p className="mt-1 text-sm text-error-600">{validationErrors.pos_name}</p>
                         )}
                         <p className="mt-1 text-sm text-neutral-500">
                             El código se generará automáticamente a partir del nombre

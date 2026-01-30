@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useAuthors } from '@/hooks/useAuthors';
+import { useAuthors } from '@/features/authors/hooks/useAuthors';
 import { useDepartments } from '@/features/departments/hooks/useDepartments';
 import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
 import { ArrowLeft, Save, Loader2, User } from 'lucide-react';
 import Link from 'next/link';
-import ScopusAccountsManager from '@/components/ScopusAccountsManager';
+import ScopusAccountsManager from '@/features/scopus-accounts/components/ScopusAccountsManager';
 
 export default function EditAuthorPage() {
   const router = useRouter();
@@ -451,7 +451,7 @@ export default function EditAuthorPage() {
             
             {/* Cuentas Scopus */}
             <ScopusAccountsManager
-              authorId={authorId ? parseInt(authorId) : undefined}
+              author_id={authorId ? parseInt(authorId) : undefined}
               initialAccounts={scopusAccounts}
               onChange={setScopusAccounts}
             />
