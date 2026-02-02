@@ -26,3 +26,12 @@ export interface AuthorResponse {
     job_position_id: string;
     department_id: string;
 }
+
+export interface ImportAuthorsResponse {
+    message: string;
+    details: {
+        created: number;
+        updated: number;
+        errors?: string[];
+    };
+}

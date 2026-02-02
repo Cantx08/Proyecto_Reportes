@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect} from 'react';
 import Link from 'next/link';
 import {useAuthors} from '@/features/authors/hooks/useAuthors';
 import {
@@ -25,7 +25,7 @@ import {jobPositionService} from "@/features/job-positions/services/jobPositionS
 
 
 export default function AuthorsPage() {
-    const {authors, loading, error, fetchAuthors, deleteAuthor} = useAuthors();
+    const {authors, loading, error, fetchAuthors, deleteAuthor, importAuthors} = useAuthors();
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [faculties, setFaculties] = useState<Faculty[]>([]);
@@ -35,7 +35,6 @@ export default function AuthorsPage() {
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [importing, setImporting] = useState(false);
     const [importResult, setImportResult] = useState<{ success: boolean; errors: string } | null>(null);
     const itemsPerPage = 10;
@@ -136,15 +135,10 @@ export default function AuthorsPage() {
     const hasActiveFilters = searchTerm !== '' || selectedFaculty !== 'all' || selectedDepartment !== 'all';
 
 // Función para importar autores desde CSV
-    const handleImportClick = () => {
-        fileInputRef.current?.click()
-    }
-
     const handleImportAuthors = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        // Validar que sea un archivo CSV
         if (!file.name.endsWith('.csv')) {
             setImportResult({success: false, errors: 'El archivo debe ser un CSV'});
             return;
@@ -153,44 +147,16 @@ export default function AuthorsPage() {
         setImporting(true);
         setImportResult(null);
 
-        try {
-            const token = localStorage.getItem('auth_token');
-            const formData = new FormData();
-            formData.append('file', file);
+        // Mijo, mira qué limpio queda esto llamando al hook
+        const result = await importAuthors(file);
 
-            const response = await fetch('http://localhost:8000/authors/import', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: formData,
-            });
+        setImportResult({
+            success: result.success,
+            errors: result.message
+        });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.detail || 'Error al importar autores');
-            }
-
-            setImportResult({
-                success: true,
-                errors: result.message || `Importación completada. Creados: ${result.data?.created || 0}, Actualizados: ${result.data?.updated || 0}`
-            });
-
-            // Recargar la lista de autores
-            await fetchAuthors();
-
-        } catch (error) {
-            console.error('Error importing authors:', error);
-            setImportResult({
-                success: false,
-                errors: error instanceof Error ? error.message : 'Error al importar autores'
-            });
-        } finally {
-            setImporting(false);
-            // Limpiar el input para permitir subir el mismo archivo de nuevo
-            event.target.value = '';
-        }
+        setImporting(false);
+        event.target.value = ''; // Limpiar input
     };
 
 // Paginación

@@ -1,4 +1,9 @@
-import {AuthorCreateRequest, AuthorResponse, AuthorUpdateRequest} from "@/features/authors/types";
+import {
+    AuthorCreateRequest,
+    AuthorResponse,
+    AuthorUpdateRequest,
+    ImportAuthorsResponse
+} from "@/features/authors/types";
 import {axiosInstance} from "@/lib/axios";
 
 export const authorService = {
@@ -45,14 +50,14 @@ export const authorService = {
     /**
      * Eliminar un autor
      */
-    async delete(author_id: string): Promise<void> {
+    delete: async (author_id: string): Promise<void> => {
         await axiosInstance.delete(`/authors/${author_id}`);
     },
 
     /**
      * Importar autores desde un CSV
      */
-    importAuthors: async (file: File): Promise<{ success: number; errors: string[] }> => {
+    importAuthors: async (file: File): Promise<ImportAuthorsResponse> => {
         const formData = new FormData();
         formData.append('file', file);
 
@@ -61,6 +66,6 @@ export const authorService = {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        return data; // O data.data si tu backend envuelve la respuesta
+        return data;
     },
 };

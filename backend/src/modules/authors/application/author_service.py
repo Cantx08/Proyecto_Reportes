@@ -120,7 +120,7 @@ class AuthorService:
         for row in csv_reader:
             try:
                 # Normalizar claves del CSV (quitar espacios extra en headers)
-                row = {k.strip(): v.strip() for k, v in row.items() if k}
+                row = {k.strip().lower().lstrip('\ufeff'): v.strip() for k, v in row.items() if k}
 
                 # Extracción de datos básicos
                 email = row.get('email') or row.get('institutional_email')
@@ -159,7 +159,7 @@ class AuthorService:
                     last_name=row.get('last_name', 'Unknown'),
                     institutional_email=email,
                     title=row.get('title', ''),
-                    gender=row.get('gender', None),  # Asegúrate de que el enum coincida o haz un mapeo extra
+                    gender=row.get('gender', 'Sin especificar'),
                     department_id=dept_id,
                     job_position_id=pos_id
                 )
