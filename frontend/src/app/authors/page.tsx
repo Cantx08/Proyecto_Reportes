@@ -21,6 +21,8 @@ import {facultyService} from "@/features/faculties/services/facultyService";
 import {departmentService} from "@/features/departments/services/departmentService";
 import {Faculty} from "@/features/faculties/types";
 import {DepartmentResponse} from "@/features/departments/types";
+import {JobPositionResponse} from "@/features/job-positions/types";
+import {jobPositionService} from "@/features/job-positions/services/jobPositionService";
 
 
 export default function AuthorsPage() {
@@ -29,6 +31,7 @@ export default function AuthorsPage() {
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [faculties, setFaculties] = useState<Faculty[]>([]);
     const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
+    const [jobPositions, setJobPositions] = useState<JobPositionResponse[]>([]);
     const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
@@ -62,8 +65,19 @@ export default function AuthorsPage() {
                 }
             };
 
+            // Cargar puestos
+            const loadJobPositions = async () => {
+                try {
+                    const data = await jobPositionService.getAll()
+                    setJobPositions(Array.isArray(data) ? data : []);
+                } catch (error) {
+                    console.error('Error loading job positions:', error);
+                }
+            };
+
             loadFaculties();
             loadDepartments();
+            loadJobPositions();
         }
         ,
         [fetchAuthors]
@@ -87,8 +101,7 @@ export default function AuthorsPage() {
 // Filtrar autores según los filtros aplicados
     const filteredAuthors = authors.filter(author => {
         const matchesSearch =
-            author.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             author.department_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             author.job_position_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -547,47 +560,56 @@ export default function AuthorsPage() {
                         </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-neutral-200">
-                        {paginatedAuthors.map((author) => (
-                            <tr
-                                key={author.author_id}
-                                className="hover:bg-primary-50 transition-colors"
-                                onMouseEnter={() => setHoveredRow(author.author_id)}
-                                onMouseLeave={() => setHoveredRow(null)}
-                            >
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-neutral-900">
-                                        {author.title} {author.first_name} {author.last_name}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
-                                    {author.department_id}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
-                                    {author.job_position_id}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div className={`flex space-x-3 transition-opacity duration-200 ${
-                                        hoveredRow === author.author_id ? 'opacity-100' : 'opacity-0'
-                                    }`}>
-                                        <Link href={`/authors/${author.author_id}`}>
+                        {paginatedAuthors.map((author) => {
+                            const departmentName = departments.find(
+                                (dept) => dept.dep_id === author.department_id
+                            )?.dep_name || author.department_id;
+
+                            const jobPositionName = jobPositions.find(
+                                (position) => position.pos_id = author.job_position_id
+                            )?.pos_name || author.job_position_id;
+                            return (
+                                <tr
+                                    key={author.author_id}
+                                    className="hover:bg-primary-50 transition-colors"
+                                    onMouseEnter={() => setHoveredRow(author.author_id)}
+                                    onMouseLeave={() => setHoveredRow(null)}
+                                >
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-medium text-neutral-900">
+                                            {author.title} {author.full_name}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
+                                        {departmentName}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
+                                        {jobPositionName}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className={`flex space-x-3 transition-opacity duration-200 ${
+                                            hoveredRow === author.author_id ? 'opacity-100' : 'opacity-0'
+                                        }`}>
+                                            <Link href={`/authors/${author.author_id}`}>
+                                                <button
+                                                    className="p-2 text-success-600 hover:text-success-900 hover:bg-success-50 rounded-lg transition-colors"
+                                                    title="Editar autor"
+                                                >
+                                                    <Edit className="h-4 w-4"/>
+                                                </button>
+                                            </Link>
                                             <button
-                                                className="p-2 text-success-600 hover:text-success-900 hover:bg-success-50 rounded-lg transition-colors"
-                                                title="Editar autor"
+                                                onClick={() => setDeleteConfirm(author.author_id)}
+                                                className="p-2 text-error-600 hover:text-error-900 hover:bg-error-50 rounded-lg transition-colors"
+                                                title="Eliminar autor"
                                             >
-                                                <Edit className="h-4 w-4"/>
+                                                <Trash2 className="h-4 w-4"/>
                                             </button>
-                                        </Link>
-                                        <button
-                                            onClick={() => setDeleteConfirm(author.author_id)}
-                                            className="p-2 text-error-600 hover:text-error-900 hover:bg-error-50 rounded-lg transition-colors"
-                                            title="Eliminar autor"
-                                        >
-                                            <Trash2 className="h-4 w-4"/>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
