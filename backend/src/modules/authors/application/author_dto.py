@@ -26,7 +26,8 @@ class AuthorUpdateDTO(BaseModel):
 
 class AuthorResponseDTO(BaseModel):
     author_id: UUID
-    full_name: str
+    first_name: str
+    last_name: str
     institutional_email: EmailStr
     title: Optional[str]
     gender: Optional[Gender]
@@ -37,7 +38,8 @@ class AuthorResponseDTO(BaseModel):
     def from_entity(author: Author) -> 'AuthorResponseDTO':
         return AuthorResponseDTO(
             author_id=author.author_id,
-            full_name=f"{author.first_name} {author.last_name}",
+            first_name=author.first_name,
+            last_name=author.last_name,
             institutional_email=author.institutional_email,
             title=author.title,
             gender=author.gender,

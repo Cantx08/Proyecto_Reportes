@@ -116,8 +116,7 @@ export default function NewAuthorPage() {
                     <div className="flex items-center">
                         <UserPlus className="h-8 w-8 mr-3 text-primary-500"/>
                         <div>
-                            <h1 className="text-2xl font-bold text-neutral-900">Nuevo Autor</h1>
-                            <p className="text-neutral-600 mt-1">Registra un nuevo autor en el sistema</p>
+                            <h1 className="text-2xl font-bold text-neutral-900">Agregar Autor</h1>
                         </div>
                     </div>
                     <Link href="/authors">
@@ -181,7 +180,6 @@ export default function NewAuthorPage() {
                             </div>
                             <div>
                                 <h2 className="text-lg font-semibold text-neutral-900">Información Personal</h2>
-                                <p className="text-sm text-neutral-500">Datos básicos del autor</p>
                             </div>
                         </div>
 
@@ -279,8 +277,6 @@ export default function NewAuthorPage() {
                             </div>
                             <div>
                                 <h2 className="text-lg font-semibold text-neutral-900">Información Académica</h2>
-                                <p className="text-sm text-neutral-500">Departamento al que pertenece y cargo que
-                                    ocupa.</p>
                             </div>
                         </div>
                         <div className="space-y-6">
@@ -369,7 +365,6 @@ export default function NewAuthorPage() {
                             </div>
                             <div>
                                 <h2 className="text-lg font-semibold text-neutral-900">Cuentas Scopus</h2>
-                                <p className="text-sm text-neutral-500">IDs de cuentas asociadas</p>
                             </div>
                         </div>
 

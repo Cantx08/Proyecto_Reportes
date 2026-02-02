@@ -96,17 +96,18 @@ export default function AuthorsPage() {
 // Filtrar departamentos por facultad seleccionada
     const filteredDepartmentsByFaculty = selectedFaculty === 'all'
         ? departments
-        : departments.filter(dept => dept.faculty_name === selectedFaculty);
+        : departments.filter(dept => dept.faculty_code === selectedFaculty);
 
 // Filtrar autores según los filtros aplicados
     const filteredAuthors = authors.filter(author => {
         const matchesSearch =
-            author.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             author.department_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             author.job_position_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesFaculty = selectedFaculty === 'all' ||
-            departments.find(d => d.dep_name === author.department_id)?.faculty_name === selectedFaculty;
+        const authorDept = departments.find(dept => dept.dep_id === author.department_id);
+        const matchesFaculty = selectedFaculty === 'all' || authorDept?.faculty_code === selectedFaculty;
 
         const matchesDepartment = selectedDepartment === 'all' ||
             author.department_id === selectedDepartment;
@@ -477,7 +478,7 @@ export default function AuthorsPage() {
                         >
                             <option value="all">Todos los Departamentos</option>
                             {filteredDepartmentsByFaculty.map((department) => (
-                                <option key={department.dep_id} value={department.dep_name}>
+                                <option key={department.dep_id} value={department.dep_id}>
                                     {department.dep_name}
                                 </option>
                             ))}
@@ -577,7 +578,7 @@ export default function AuthorsPage() {
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm font-medium text-neutral-900">
-                                            {author.title} {author.full_name}
+                                            {author.title} {author.first_name} {author.last_name}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">

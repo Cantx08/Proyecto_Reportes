@@ -18,7 +18,8 @@ export interface AuthorUpdateRequest {
 
 export interface AuthorResponse {
     author_id: string;
-    full_name: string;
+    first_name: string;
+    last_name: string;
     title: string;
     institutional_email?: string;
     gender: string;

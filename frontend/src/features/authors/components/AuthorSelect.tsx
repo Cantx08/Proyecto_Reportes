@@ -23,7 +23,8 @@ export const AuthorSelect: React.FC<AuthorSelectorProps> = ({
   const filteredAuthors = authors.filter(author => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      author.full_name.toLowerCase().includes(searchLower) ||
+      author.first_name.toLowerCase().includes(searchLower) ||
+      author.last_name.toLowerCase().includes(searchLower) ||
       author.author_id.toLowerCase().includes(searchLower) ||
       author.department_id.toLowerCase().includes(searchLower)
     );
@@ -86,7 +87,7 @@ export const AuthorSelect: React.FC<AuthorSelectorProps> = ({
             ) : (
               filteredAuthors.map(author => {
                 const isSelected = selectedAuthors.includes(author.author_id);
-                const fullName = `${author.title ? `${author.title} ` : ''}${author.full_name}`;
+                const fullName = `${author.title ? `${author.title} ` : ''}${author.first_name} ${author.last_name}`;
                 
                 return (
                   <div
