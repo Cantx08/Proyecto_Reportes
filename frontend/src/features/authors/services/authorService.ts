@@ -48,4 +48,19 @@ export const authorService = {
     async delete(author_id: string): Promise<void> {
         await axiosInstance.delete(`/authors/${author_id}`);
     },
+
+    /**
+     * Importar autores desde un CSV
+     */
+    importAuthors: async (file: File): Promise<{ success: number; errors: string[] }> => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const { data } = await axiosInstance.post('/authors/import', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return data; // O data.data si tu backend envuelve la respuesta
+    },
 };

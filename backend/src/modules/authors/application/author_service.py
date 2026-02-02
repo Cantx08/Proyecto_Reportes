@@ -138,7 +138,7 @@ class AuthorService:
                     continue
 
                 # Resolución de Cargo
-                pos_name_input = (row.get('position') or row.get('job_position') or "").strip().lower()
+                pos_name_input = (row.get('position_name') or row.get('job_position_name') or "").strip().lower()
                 pos_id = pos_map.get(pos_name_input)
 
                 if not pos_id:

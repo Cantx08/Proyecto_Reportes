@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import Link from 'next/link';
 import {useAuthors} from '@/features/authors/hooks/useAuthors';
 import {
@@ -14,7 +14,6 @@ import {
     X,
     ChevronLeft,
     ChevronRight,
-    Download,
     Upload
 } from 'lucide-react';
 import {facultyService} from "@/features/faculties/services/facultyService";
@@ -36,9 +35,9 @@ export default function AuthorsPage() {
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-    const [exporting, setExporting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [importing, setImporting] = useState(false);
-    const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
+    const [importResult, setImportResult] = useState<{ success: boolean; errors: string } | null>(null);
     const itemsPerPage = 10;
 
 
@@ -136,48 +135,18 @@ export default function AuthorsPage() {
 // Verificar si hay filtros activos
     const hasActiveFilters = searchTerm !== '' || selectedFaculty !== 'all' || selectedDepartment !== 'all';
 
-// Función para exportar autores a CSV
-    const handleExportAuthors = async () => {
-
-        setExporting(true);
-        try {
-            const token = localStorage.getItem('auth_token');
-            const response = await fetch('http://localhost:8000/authors/export', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al exportar autores');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'autores_export.csv';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Error exporting authors:', error);
-            alert('Error al exportar autores. Por favor intente de nuevo.');
-        } finally {
-            setExporting(false);
-        }
-    };
-
 // Función para importar autores desde CSV
+    const handleImportClick = () => {
+        fileInputRef.current?.click()
+    }
+
     const handleImportAuthors = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
         // Validar que sea un archivo CSV
         if (!file.name.endsWith('.csv')) {
-            setImportResult({success: false, message: 'El archivo debe ser un CSV'});
+            setImportResult({success: false, errors: 'El archivo debe ser un CSV'});
             return;
         }
 
@@ -205,7 +174,7 @@ export default function AuthorsPage() {
 
             setImportResult({
                 success: true,
-                message: result.message || `Importación completada. Creados: ${result.data?.created || 0}, Actualizados: ${result.data?.updated || 0}`
+                errors: result.message || `Importación completada. Creados: ${result.data?.created || 0}, Actualizados: ${result.data?.updated || 0}`
             });
 
             // Recargar la lista de autores
@@ -215,7 +184,7 @@ export default function AuthorsPage() {
             console.error('Error importing authors:', error);
             setImportResult({
                 success: false,
-                message: error instanceof Error ? error.message : 'Error al importar autores'
+                errors: error instanceof Error ? error.message : 'Error al importar autores'
             });
         } finally {
             setImporting(false);
@@ -331,24 +300,6 @@ export default function AuthorsPage() {
                                 </>
                             )}
                         </label>
-                        <button
-                            onClick={handleExportAuthors}
-                            disabled={exporting}
-                            className="px-4 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Exportar autores a CSV"
-                        >
-                            {exporting ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
-                                    Exportando...
-                                </>
-                            ) : (
-                                <>
-                                    <Download className="h-4 w-4 mr-2"/>
-                                    Exportar CSV
-                                </>
-                            )}
-                        </button>
                         <Link href="/authors/new">
                             <button
                                 className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm">
@@ -411,7 +362,7 @@ export default function AuthorsPage() {
                                     </h3>
                                     <div
                                         className={`mt-2 text-sm ${importResult.success ? 'text-success-700' : 'text-error-700'}`}>
-                                        <p>{importResult.message}</p>
+                                        <p>{importResult.errors}</p>
                                     </div>
                                 </div>
                             </div>
