@@ -33,7 +33,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
   // Pre-llenar los campos cuando hay un autor seleccionado
   useEffect(() => {
     if (selectedAuthor) {
-      const fullName = `${selectedAuthor.title} ${selectedAuthor.name} ${selectedAuthor.surname}`.trim();
+      const fullName = `${selectedAuthor.title} ${selectedAuthor.first_name} ${selectedAuthor.last_name}`.trim();
       setFormData(prev => ({
         ...prev,
         docente_nombre: fullName,
@@ -115,7 +115,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
                 Datos autocompletados
               </h3>
               <p className="mt-1 text-sm text-info-700">
-                Los campos se han completado con la información del autor seleccionado: <strong>{selectedAuthor.title} {selectedAuthor.name} {selectedAuthor.surname}</strong>. 
+                Los campos se han completado con la información del autor seleccionado: <strong>{selectedAuthor.title} {selectedAuthor.first_name} {selectedAuthor.last_name}</strong>.
                 Puedes modificarlos según sea necesario.
               </p>
             </div>

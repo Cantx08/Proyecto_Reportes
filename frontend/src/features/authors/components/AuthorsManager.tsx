@@ -126,7 +126,7 @@ const AuthorsManager: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium text-gray-900">
-                      {author.title} {author.name} {author.surname}
+                      {author.title} {author.first_name} {author.last_name}
                     </h3>
                     <div className="flex space-x-2">
                       <button
@@ -144,7 +144,6 @@ const AuthorsManager: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-2 text-sm text-gray-600 space-y-1">
-                    <p><strong>DNI:</strong> {author.dni}</p>
                     <p><strong>Género:</strong> {author.gender === 'M' ? 'Masculino' : 'Femenino'}</p>
                     <p><strong>Cargo:</strong> {author.job_position_id}</p>
                     <p><strong>Departamento:</strong> {author.department_id}</p>

@@ -9,22 +9,22 @@ import {AuthorResponse} from "@/features/authors/types";
 interface AuthorFormProps {
   author?: AuthorResponse | null;
   onSave: (author: {
-    name: string;
-    surname: string;
-    title: string;
+    first_name: string;
+    last_name: string;
     institutional_email: string;
+    title: string;
     gender: string;
-    position: string;
-    department: string;
+    job_position_id: string;
+    department_id: string;
     author_id: string
   } | {
-    name: string;
-    surname: string;
-    title: string;
+    first_name: string;
+    last_name: string;
     institutional_email: string;
+    title: string;
     gender: string;
-    position: string;
-    department: string
+    job_position_id: string;
+    department_id: string
   }) => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -38,13 +38,13 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
 }) => {
 
   const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
+    first_name: '',
+    last_name: '',
     title: '',
     institutional_email: '',
     gender: 'M',
-    position: '',
-    department: ''
+    job_position_id: '',
+    department_id: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -53,24 +53,24 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
   useEffect(() => {
     if (author) {
       setFormData({
-        name: author.name || '',
-        surname: author.surname || '',
+        first_name: author.first_name || '',
+        last_name: author.last_name || '',
         title: author.title || '',
         institutional_email: author.institutional_email || '',
         gender: author.gender || 'M',
-        position: author.job_position_id || '',
-        department: author.department_id || ''
+        job_position_id: author.job_position_id || '',
+        department_id: author.department_id || ''
       });
     } else {
       // Reset form para nuevo autor
       setFormData({
-        name: '',
-        surname: '',
+        first_name: '',
+        last_name: '',
         title: '',
         institutional_email: '',
         gender: 'M',
-        position: '',
-        department: ''
+        job_position_id: '',
+        department_id: ''
       });
     }
     setErrors({});
@@ -95,16 +95,16 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'El nombre debe tener al menos 2 caracteres';
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'El nombre es requerido';
+    } else if (formData.first_name.trim().length < 2) {
+      newErrors.first_name = 'El nombre debe tener al menos 2 caracteres';
     }
 
-    if (!formData.surname.trim()) {
-      newErrors.surname = 'El apellido es requerido';
-    } else if (formData.surname.trim().length < 2) {
-      newErrors.surname = 'El apellido debe tener al menos 2 caracteres';
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = 'El apellido es requerido';
+    } else if (formData.last_name.trim().length < 2) {
+      newErrors.last_name = 'El apellido debe tener al menos 2 caracteres';
     }
 
     // Validar email institucional (opcional pero si se proporciona debe ser válido)
@@ -115,12 +115,12 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
       }
     }
 
-    if (!formData.position.trim()) {
-      newErrors.position = 'El cargo es requerido';
+    if (!formData.job_position_id.trim()) {
+      newErrors.job_position_id = 'El cargo es requerido';
     }
 
-    if (!formData.department.trim()) {
-      newErrors.department = 'El departamento es requerido';
+    if (!formData.department_id.trim()) {
+      newErrors.department_id = 'El departamento es requerido';
     }
 
     setErrors(newErrors);
@@ -145,39 +145,39 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-1">
             Nombre *
           </label>
           <input
             type="text"
-            id="name"
-            name="name"
-            value={formData.name}
+            id="first_name"
+            name="first_name"
+            value={formData.first_name}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
+              errors.first_name ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Ingrese el nombre"
           />
-          {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+          {errors.first_name && <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>}
         </div>
 
         <div>
-          <label htmlFor="surname" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
             Apellido *
           </label>
           <input
             type="text"
-            id="surname"
-            name="surname"
-            value={formData.surname}
+            id="last_name"
+            name="last_name"
+            value={formData.last_name}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              errors.surname ? 'border-red-500' : 'border-gray-300'
+              errors.last_name ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Ingrese el apellido"
           />
-          {errors.surname && <p className="mt-1 text-sm text-red-600">{errors.surname}</p>}
+          {errors.last_name && <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>}
         </div>
 
         <div>
@@ -191,7 +191,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             value={formData.title}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Dr., Mg., Ing., etc."
+            placeholder="PhD., MsC., Ing., etc."
           />
         </div>
 
@@ -208,7 +208,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 ${
               errors.institutional_email ? 'border-red-500' : 'border-gray-300'
             }`}
-            placeholder="correo@epn.edu.ec"
+            placeholder="user@example.edu.ec"
           />
           {errors.institutional_email && <p className="mt-1 text-sm text-red-600">{errors.institutional_email}</p>}
         </div>
@@ -234,7 +234,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             Cargo *
           </label>
           <PositionSelectNew
-            value={formData.position}
+            value={formData.job_position_id}
             onChange={(value) => setFormData(prev => ({ ...prev, position: value }))}
             error={errors.position}
             placeholder="Seleccione un cargo"
@@ -247,7 +247,7 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             Departamento *
           </label>
           <DepartmentSelectNew
-            value={formData.department}
+            value={formData.department_id}
             onChange={(value) => setFormData(prev => ({ ...prev, department: value }))}
             error={errors.department}
             placeholder="Seleccione un departamento"

@@ -8,7 +8,7 @@ interface AuthorSelectorProps {
   className?: string;
 }
 
-export const AuthorSelector: React.FC<AuthorSelectorProps> = ({
+export const AuthorSelect: React.FC<AuthorSelectorProps> = ({
   onAuthorSelect,
   selectedAuthors,
   className = ''
@@ -23,8 +23,8 @@ export const AuthorSelector: React.FC<AuthorSelectorProps> = ({
   const filteredAuthors = authors.filter(author => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      author.name.toLowerCase().includes(searchLower) ||
-      author.surname.toLowerCase().includes(searchLower) ||
+      author.first_name.toLowerCase().includes(searchLower) ||
+      author.last_name.toLowerCase().includes(searchLower) ||
       author.author_id.toLowerCase().includes(searchLower) ||
       author.department_id.toLowerCase().includes(searchLower)
     );
@@ -87,7 +87,7 @@ export const AuthorSelector: React.FC<AuthorSelectorProps> = ({
             ) : (
               filteredAuthors.map(author => {
                 const isSelected = selectedAuthors.includes(author.author_id);
-                const fullName = `${author.title ? `${author.title} ` : ''}${author.name} ${author.surname}`;
+                const fullName = `${author.title ? `${author.title} ` : ''}${author.first_name} ${author.last_name}`;
                 
                 return (
                   <div

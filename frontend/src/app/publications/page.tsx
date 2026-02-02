@@ -11,7 +11,7 @@ import {
   Microscope
 } from 'lucide-react';
 import { ScopusIdInput } from '@/features/scopus-accounts/components/ScopusIdInput';
-import { AuthorSelector } from '@/features/authors/components/AuthorSelector';
+import { AuthorSelect } from '@/features/authors/components/AuthorSelect';
 import { PublicationsList } from '@/components/PublicationsList';
 import { SubjectAreas } from '@/components/SubjectAreas';
 import { DocumentsByYear } from '@/components/DocumentsByYearChart';
@@ -202,7 +202,7 @@ export default function PublicationsPage() {
               {/* Author Selector */}
               {searchMode === 'database' && (
                 <div>
-                  <AuthorSelector
+                  <AuthorSelect
                     onAuthorSelect={handleAuthorSelect}
                     selectedAuthors={selectedAuthorIds}
                   />

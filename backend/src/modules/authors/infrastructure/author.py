@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import EmailStr
+from pydantic import TypeAdapter, EmailStr
 from sqlalchemy import Column, String, ForeignKey, UUID, Enum
 from sqlalchemy.orm import relationship
 
@@ -25,11 +25,13 @@ class AuthorModel(Base):
     scopus_accounts = relationship("ScopusAccountModel", back_populates="author", cascade="all, delete-orphan")
 
     def to_entity(self) -> Author:
+        email_validated = TypeAdapter(EmailStr)
+        validated = email_validated.validate_python(self.institutional_email)
         return Author(
             author_id=self.author_id,
             first_name=self.first_name,
             last_name=self.last_name,
-            institutional_email=EmailStr(self.institutional_email),
+            institutional_email=validated,
             title=self.title,
             gender=self.gender,
             job_position_id=self.job_position_id,

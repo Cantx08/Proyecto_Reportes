@@ -12,7 +12,7 @@ import ScopusAccountsManager from '@/features/scopus-accounts/components/ScopusA
 export default function EditAuthorPage() {
   const router = useRouter();
   const params = useParams();
-  const authorId = params?.id as string;
+  const author_id = params?.id as string;
 
   const { getAuthor, updateAuthor, updating, error } = useAuthors();
   const { departments, loading: loadingDepartments } = useDepartments();
@@ -20,24 +20,21 @@ export default function EditAuthorPage() {
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
-    dni: '',
+    first_name: '',
+    last_name: '',
     title: '',
-    birth_date: '',
     gender: 'M',
-    position: '',
-    department: ''
+    job_position_id: '',
+    department_id: ''
   });
 
   const [scopusAccounts, setScopusAccounts] = useState<any[]>([]);
 
   const [validationErrors, setValidationErrors] = useState<{
-    name?: string;
-    surname?: string;
-    dni?: string;
-    position?: string;
-    department?: string;
+    first_name?: string;
+    last_name?: string;
+    job_position_id?: string;
+    department_id?: string;
   }>({});
 
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -46,24 +43,22 @@ export default function EditAuthorPage() {
   // Cargar datos del autor
   useEffect(() => {
     const loadAuthor = async () => {
-      if (!authorId) {
+      if (!author_id) {
         router.push('/authors');
         return;
       }
 
       setLoading(true);
-      const author = await getAuthor(authorId);
+      const author = await getAuthor(author_id);
       
       if (author) {
         setFormData({
-          name: author.name || '',
-          surname: author.surname || '',
-          dni: author.dni || '',
+          first_name: author.first_name || '',
+          last_name: author.last_name || '',
           title: author.title || '',
-          birth_date: author.birth_date ? author.birth_date.split('T')[0] : '',
           gender: author.gender || 'M',
-          position: author.position || '',
-          department: author.department || ''
+          job_position_id: author.job_position_id || '',
+          department_id: author.department_id || ''
         });
       } else {
         setSubmitError('No se pudo cargar el autor');
@@ -73,7 +68,7 @@ export default function EditAuthorPage() {
     };
 
     loadAuthor();
-  }, [authorId, getAuthor, router]);
+  }, [author_id, getAuthor, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -94,24 +89,20 @@ export default function EditAuthorPage() {
   const validateForm = (): boolean => {
     const errors: typeof validationErrors = {};
     
-    if (!formData.name.trim()) {
-      errors.name = 'El nombre es obligatorio';
+    if (!formData.first_name.trim()) {
+      errors.first_name = 'El nombre es obligatorio';
     }
     
-    if (!formData.surname.trim()) {
-      errors.surname = 'El apellido es obligatorio';
+    if (!formData.last_name.trim()) {
+      errors.last_name = 'El apellido es obligatorio';
+    }
+
+    if (!formData.job_position_id.trim()) {
+      errors.job_position_id = 'El cargo es obligatorio';
     }
     
-    if (!formData.dni.trim()) {
-      errors.dni = 'La cédula es obligatoria';
-    }
-    
-    if (!formData.position.trim()) {
-      errors.position = 'El cargo es obligatorio';
-    }
-    
-    if (!formData.department.trim()) {
-      errors.department = 'El departamento es obligatorio';
+    if (!formData.department_id.trim()) {
+      errors.department_id = 'El departamento es obligatorio';
     }
     
     setValidationErrors(errors);
@@ -127,7 +118,7 @@ export default function EditAuthorPage() {
       return;
     }
 
-    const updatedAuthor = await updateAuthor(authorId, formData);
+    const updatedAuthor = await updateAuthor(author_id, formData);
 
     if (updatedAuthor) {
       setSubmitSuccess(true);
@@ -219,52 +210,6 @@ export default function EditAuthorPage() {
               </div>
             </div>
 
-            {/* Cédula y Título */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="dni" className="block text-sm font-medium text-neutral-700 mb-2">
-                  Cédula de Identidad <span className="text-error-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="dni"
-                  name="dni"
-                  value={formData.dni}
-                  onChange={handleInputChange}
-                  placeholder="1234567890"
-                  maxLength={10}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 transition-colors ${
-                    validationErrors.dni 
-                      ? 'border-error-400 focus:ring-error-500 focus:border-error-500 bg-error-50' 
-                      : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
-                  }`}
-                />
-                {validationErrors.dni && (
-                  <p className="mt-1 text-sm text-error-600 flex items-center">
-                    <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {validationErrors.dni}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-2">
-                  Título Académico
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="Ej: Dr., Mg., Ing."
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                />
-              </div>
-            </div>
-
             {/* Nombres y Apellidos */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -275,21 +220,21 @@ export default function EditAuthorPage() {
                   type="text"
                   id="name"
                   name="name"
-                  value={formData.name}
+                  value={formData.first_name}
                   onChange={handleInputChange}
                   placeholder="Juan Carlos"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 transition-colors ${
-                    validationErrors.name 
+                    validationErrors.first_name 
                       ? 'border-error-400 focus:ring-error-500 focus:border-error-500 bg-error-50' 
                       : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
                   }`}
                 />
-                {validationErrors.name && (
+                {validationErrors.first_name && (
                   <p className="mt-1 text-sm text-error-600 flex items-center">
                     <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    {validationErrors.name}
+                    {validationErrors.first_name}
                   </p>
                 )}
               </div>
@@ -302,42 +247,42 @@ export default function EditAuthorPage() {
                   type="text"
                   id="surname"
                   name="surname"
-                  value={formData.surname}
+                  value={formData.last_name}
                   onChange={handleInputChange}
                   placeholder="Pérez García"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 transition-colors ${
-                    validationErrors.surname 
+                    validationErrors.last_name 
                       ? 'border-error-400 focus:ring-error-500 focus:border-error-500 bg-error-50' 
                       : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
                   }`}
                 />
-                {validationErrors.surname && (
+                {validationErrors.last_name && (
                   <p className="mt-1 text-sm text-error-600 flex items-center">
                     <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
-                    {validationErrors.surname}
+                    {validationErrors.last_name}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Fecha de Nacimiento y Género */}
+            {/* Título y Género */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="birth_date" className="block text-sm font-medium text-neutral-700 mb-2">
-                  Fecha de Nacimiento
+                <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-2">
+                  Título Académico
                 </label>
                 <input
-                  type="date"
-                  id="birth_date"
-                  name="birth_date"
-                  value={formData.birth_date}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Ej: Dr., Mg., Ing."
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                 />
               </div>
-
               <div>
                 <label htmlFor="gender" className="block text-sm font-medium text-neutral-700 mb-2">
                   Género <span className="text-error-500">*</span>
@@ -377,10 +322,10 @@ export default function EditAuthorPage() {
               <select
                 id="department"
                 name="department"
-                value={formData.department}
+                value={formData.department_id}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 transition-colors ${
-                  validationErrors.department 
+                  validationErrors.department_id 
                     ? 'border-error-400 focus:ring-error-500 focus:border-error-500 bg-error-50' 
                     : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
                 }`}
@@ -388,16 +333,16 @@ export default function EditAuthorPage() {
                 <option value="">Seleccione un departamento</option>
                 {departments.map((dept) => (
                   <option key={dept.dep_id} value={dept.dep_name}>
-                    {dept.dep_name} - {dept.fac_name}
+                    {dept.dep_name}
                   </option>
                 ))}
               </select>
-              {validationErrors.department && (
+              {validationErrors.department_id && (
                 <p className="mt-1 text-sm text-error-600 flex items-center">
                   <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  {validationErrors.department}
+                  {validationErrors.department_id}
                 </p>
               )}
             </div>
@@ -410,10 +355,10 @@ export default function EditAuthorPage() {
               <select
                 id="position"
                 name="position"
-                value={formData.position}
+                value={formData.job_position_id}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-2 border rounded-lg focus:ring-2 transition-colors ${
-                  validationErrors.position 
+                  validationErrors.job_position_id 
                     ? 'border-error-400 focus:ring-error-500 focus:border-error-500 bg-error-50' 
                     : 'border-neutral-300 focus:ring-primary-500 focus:border-primary-500'
                 }`}
@@ -425,12 +370,12 @@ export default function EditAuthorPage() {
                   </option>
                 ))}
               </select>
-              {validationErrors.position && (
+              {validationErrors.job_position_id && (
                 <p className="mt-1 text-sm text-error-600 flex items-center">
                   <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
-                  {validationErrors.position}
+                  {validationErrors.job_position_id}
                 </p>
               )}
             </div>
@@ -451,7 +396,7 @@ export default function EditAuthorPage() {
             
             {/* Cuentas Scopus */}
             <ScopusAccountsManager
-              author_id={authorId ? parseInt(authorId) : undefined}
+              author_id={author_id ? parseInt(author_id) : undefined}
               initialAccounts={scopusAccounts}
               onChange={setScopusAccounts}
             />

@@ -17,24 +17,18 @@ import {
     Download,
     Upload
 } from 'lucide-react';
+import {facultyService} from "@/features/faculties/services/facultyService";
+import {departmentService} from "@/features/departments/services/departmentService";
+import {Faculty} from "@/features/faculties/types";
+import {DepartmentResponse} from "@/features/departments/types";
 
-interface Faculty {
-    key: string;
-    value: string;
-}
-
-interface Department {
-    dep_id: string;
-    dep_name: string;
-    fac_name: string;
-}
 
 export default function AuthorsPage() {
     const {authors, loading, error, fetchAuthors, deleteAuthor} = useAuthors();
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [faculties, setFaculties] = useState<Faculty[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
     const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
@@ -46,43 +40,37 @@ export default function AuthorsPage() {
 
 
     useEffect(() => {
-        fetchAuthors();
+            fetchAuthors();
 
-        // Cargar facultades
-        const loadFaculties = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/faculties');
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    setFaculties(data);
-                } else if (data.data && Array.isArray(data.data)) {
-                    // Por si acaso tu backend usa un wrapper de respuesta
-                    setFaculties(data.data);
+            // Cargar facultades
+            const loadFaculties = async () => {
+                try {
+                    const data = await facultyService.getFaculties()
+                    setFaculties(Array.isArray(data) ? data : []);
+                } catch (error) {
+                    console.error('Error loading faculties:', error);
                 }
+            };
 
-            } catch (error) {
-                console.error('Error loading faculties:', error);
-            }
-        };
-
-        // Cargar departamentos
-        const loadDepartments = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/departments');
-                const data = await response.json();
-                if (data.success) {
-                    setDepartments(data.data);
+            // Cargar departamentos
+            const loadDepartments = async () => {
+                try {
+                    const data = await departmentService.getAll()
+                    setDepartments(Array.isArray(data) ? data : []);
+                } catch (error) {
+                    console.error('Error loading departments:', error);
                 }
-            } catch (error) {
-                console.error('Error loading departments:', error);
-            }
-        };
+            };
 
-        loadFaculties();
-        loadDepartments();
-    }, [fetchAuthors]);
+            loadFaculties();
+            loadDepartments();
+        }
+        ,
+        [fetchAuthors]
+    )
+    ;
 
-    // Manejar eliminación de autor
+// Manejar eliminación de autor
     const handleDelete = async (authorId: string) => {
         const success = await deleteAuthor(authorId);
         if (success) {
@@ -91,39 +79,39 @@ export default function AuthorsPage() {
         }
     };
 
-    // Filtrar departamentos por facultad seleccionada
+// Filtrar departamentos por facultad seleccionada
     const filteredDepartmentsByFaculty = selectedFaculty === 'all'
         ? departments
-        : departments.filter(dept => dept.fac_name === selectedFaculty);
+        : departments.filter(dept => dept.faculty_name === selectedFaculty);
 
-    // Filtrar autores según los filtros aplicados
+// Filtrar autores según los filtros aplicados
     const filteredAuthors = authors.filter(author => {
         const matchesSearch =
-            author.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.position.toLowerCase().includes(searchTerm.toLowerCase());
+            author.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.department_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.job_position_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesFaculty = selectedFaculty === 'all' ||
-            departments.find(d => d.dep_name === author.department)?.fac_name === selectedFaculty;
+            departments.find(d => d.dep_name === author.department_id)?.faculty_name === selectedFaculty;
 
         const matchesDepartment = selectedDepartment === 'all' ||
-            author.department === selectedDepartment;
+            author.department_id === selectedDepartment;
 
         return matchesSearch && matchesFaculty && matchesDepartment;
     });
 
-    // Reset department filter when faculty changes
+// Reset department filter when faculty changes
     useEffect(() => {
         setSelectedDepartment('all');
     }, [selectedFaculty]);
 
-    // Reset department filter when faculty changes
+// Reset department filter when faculty changes
     useEffect(() => {
         setSelectedDepartment('all');
     }, [selectedFaculty]);
 
-    // Función para limpiar todos los filtros
+// Función para limpiar todos los filtros
     const clearFilters = () => {
         setSearchTerm('');
         setSelectedFaculty('all');
@@ -131,10 +119,10 @@ export default function AuthorsPage() {
         setCurrentPage(1);
     };
 
-    // Verificar si hay filtros activos
+// Verificar si hay filtros activos
     const hasActiveFilters = searchTerm !== '' || selectedFaculty !== 'all' || selectedDepartment !== 'all';
 
-    // Función para exportar autores a CSV
+// Función para exportar autores a CSV
     const handleExportAuthors = async () => {
 
         setExporting(true);
@@ -168,7 +156,7 @@ export default function AuthorsPage() {
         }
     };
 
-    // Función para importar autores desde CSV
+// Función para importar autores desde CSV
     const handleImportAuthors = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
@@ -222,13 +210,13 @@ export default function AuthorsPage() {
         }
     };
 
-    // Paginación
+// Paginación
     const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedAuthors = filteredAuthors.slice(startIndex, endIndex);
 
-    // Reset page when filters change
+// Reset page when filters change
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, selectedFaculty, selectedDepartment]);
@@ -347,7 +335,7 @@ export default function AuthorsPage() {
                                 </>
                             )}
                         </button>
-                        <Link href="/authors/authors-new">
+                        <Link href="/authors/new">
                             <button
                                 className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm">
                                 <Plus className="h-4 w-4 mr-2"/>
@@ -568,14 +556,14 @@ export default function AuthorsPage() {
                             >
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm font-medium text-neutral-900">
-                                        {author.title} {author.name} {author.surname}
+                                        {author.title} {author.first_name} {author.last_name}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
-                                    {author.department}
+                                    {author.department_id}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
-                                    {author.position}
+                                    {author.job_position_id}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div className={`flex space-x-3 transition-opacity duration-200 ${
