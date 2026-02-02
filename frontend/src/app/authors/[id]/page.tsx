@@ -395,7 +395,7 @@ export default function EditAuthorPage() {
 
                         {/* Cuentas Scopus */}
                         <ScopusAccountsManager
-                            author_id={author_id ? parseInt(author_id) : undefined}
+                            author_id={author_id}
                             initialAccounts={scopusAccounts}
                             onChange={setScopusAccounts}
                         />

@@ -5,6 +5,7 @@ import {useRouter} from 'next/navigation';
 import {useAuthors} from '@/features/authors/hooks/useAuthors';
 import {useDepartments} from '@/features/departments/hooks/useDepartments';
 import {useJobPositions} from '@/features/job-positions/hooks/useJobPositions';
+import {scopusAccountsService} from "@/features/scopus-accounts/services/scopusAccountService";
 import {ArrowLeft, Save, Loader2, UserPlus, User, AlertCircle, GraduationCap, BookOpen} from 'lucide-react';
 import Link from 'next/link';
 import ScopusAccountsManager from '@/features/scopus-accounts/components/ScopusAccountsManager';
@@ -36,6 +37,7 @@ export default function NewAuthorPage() {
 
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [savingAccounts, setSavingAccounts] = useState(false);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const {name, value} = e.target;
@@ -88,6 +90,21 @@ export default function NewAuthorPage() {
         const newAuthor = await createAuthor(formData);
 
         if (newAuthor) {
+            if (scopusAccounts.length > 0) {
+                setSavingAccounts(true);
+                try {
+                    const accountPromises = scopusAccounts.map(account =>
+                    scopusAccountsService.create({
+                        scopus_id: account.scopus_id,
+                        author_id: newAuthor.author_id,
+                    }));
+                    await Promise.all(accountPromises);
+                } catch (error) {
+                    console.error("Error al guardar cuentas Scopus:", error);
+                } finally {
+                    setSavingAccounts(false);
+                }
+            }
             setSubmitSuccess(true);
             setTimeout(() => {
                 router.push('/authors');
@@ -387,18 +404,18 @@ export default function NewAuthorPage() {
                         </Link>
                         <button
                             type="submit"
-                            disabled={creating}
+                            disabled={creating || savingAccounts}
                             className="px-6 py-2.5 bg-success-600 text-white rounded-lg font-medium hover:bg-success-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center shadow-sm hover:shadow transition-all"
                         >
-                            {creating ? (
+                            {(creating || savingAccounts) ? (
                                 <>
                                     <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
-                                    Creando...
+                                    {creating ? 'Creando Autor...' : 'Vinculando Scopus...'}
                                 </>
                             ) : (
                                 <>
                                     <Save className="h-4 w-4 mr-2"/>
-                                    Crear Autor
+                                    Guardar Autor
                                 </>
                             )}
                         </button>
