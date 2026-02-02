@@ -24,6 +24,7 @@ export default function EditAuthorPage() {
         last_name: '',
         title: '',
         gender: 'M',
+        institutional_email: ' ',
         job_position_id: '',
         department_id: ''
     });
@@ -57,6 +58,7 @@ export default function EditAuthorPage() {
                     last_name: author.last_name || '',
                     title: author.title || '',
                     gender: author.gender || 'M',
+                    institutional_email: author.institutional_email || ' ',
                     job_position_id: author.job_position_id || '',
                     department_id: author.department_id || ''
                 });
@@ -279,7 +281,7 @@ export default function EditAuthorPage() {
                                 </div>
                             </div>
                             {/* Título y Género */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                                 <div>
                                     <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-2">
                                         Título Académico
@@ -293,6 +295,22 @@ export default function EditAuthorPage() {
                                         placeholder="Ej: Dr., Mg., Ing."
                                         className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                                     />
+                                </div>
+                                <div>
+                                    <label htmlFor="gender" className="block text-sm font-medium text-neutral-700 mb-2">
+                                        Género <span className="text-error-500">*</span>
+                                    </label>
+                                    <select
+                                        id="gender"
+                                        name="gender"
+                                        value={formData.gender}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white hover:border-neutral-400 transition-colors"
+                                        disabled={true}
+                                    >
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Femenino</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -309,6 +327,23 @@ export default function EditAuthorPage() {
                             </div>
                         </div>
                         <div className="space-y-6">
+                            {/* Correo Institucional */}
+                            <div>
+                                <label htmlFor="institutional_email"
+                                       className="block text-sm font-medium text-neutral-700 mb-2">
+                                    Correo Institucional
+                                </label>
+                                <input
+                                    type="text"
+                                    id="institutional_email"
+                                    name="institutional_email"
+                                    value={formData.institutional_email}
+                                    onChange={handleInputChange}
+                                    placeholder="user@example.edu.ec"
+                                    className="w-full px-4 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white hover:border-neutral-400 transition-colors"
+                                    disabled={true}
+                                />
+                            </div>
                             {/* Departamento */}
                             <div>
                                 <label htmlFor="department" className="block text-sm font-medium text-neutral-700 mb-2">

@@ -1,11 +1,13 @@
 from typing import List
 from uuid import UUID
-from fastapi import HTTPException, APIRouter, Depends
+from fastapi import HTTPException, APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 
 from .db_author_repository import DBAuthorRepository
 from ..application.author_dto import AuthorUpdateDTO, AuthorCreateDTO, AuthorResponseDTO
 from ..application.author_service import AuthorService
+from ...departments.infrastructure.db_department_repository import DBDepartmentRepository
+from ...job_positions.infrastructure.db_job_position_repository import DBJobPositionRepository
 from ....shared.database import get_db
 
 router = APIRouter(prefix="/authors", tags=["Autores"])
@@ -13,7 +15,9 @@ router = APIRouter(prefix="/authors", tags=["Autores"])
 
 def get_service(db: Session = Depends(get_db)) -> AuthorService:
     author_repo = DBAuthorRepository(db)
-    return AuthorService(author_repo)
+    department_repo = DBDepartmentRepository(db)
+    position_repo = DBJobPositionRepository(db)
+    return AuthorService(author_repo, department_repo, position_repo)
 
 
 @router.get("", response_model=List[AuthorResponseDTO])
@@ -65,3 +69,23 @@ async def delete_author(author_id: UUID, service: AuthorService = Depends(get_se
     if not deleted:
         raise HTTPException(status_code=404, detail="Autor no encontrado")
     return {"message": "Autor y cuentas Scopus eliminadas."}
+
+
+@router.post("/import", status_code=200)
+async def import_authors(
+        file: UploadFile = File(...),
+        service: AuthorService = Depends(get_service)
+):
+    """
+    Importa autores masivamente desde un CSV.
+    Columnas requeridas: first_name, last_name, email, department, position
+    """
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=400, detail="El archivo debe ser un CSV.")
+
+    result = await service.import_authors_from_csv(file)
+
+    return {
+        "message": "Proceso de importación finalizado",
+        "detalles": result
+    }
