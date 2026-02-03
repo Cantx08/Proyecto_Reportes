@@ -1,24 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel
 
-from ..domain.publication import Publication, SJRMetric
-
-
-class SJRMetricDTO(BaseModel):
-    """DTO para métricas SJR de una categoría."""
-    category: str
-    quartile: str
-    percentile: float
-    sjr_year: int
-
-    @staticmethod
-    def from_entity(metric: SJRMetric) -> 'SJRMetricDTO':
-        return SJRMetricDTO(
-            category=metric.category,
-            quartile=metric.quartile,
-            percentile=metric.percentile,
-            sjr_year=metric.sjr_year
-        )
+from ..domain.publication import Publication
 
 
 class PublicationResponseDTO(BaseModel):
@@ -34,8 +17,8 @@ class PublicationResponseDTO(BaseModel):
     affiliation_name: str
     affiliation_id: Optional[str]
     subject_areas: List[str]
-    sjr_metrics: List[SJRMetricDTO]
-    best_quartile: Optional[str]
+    categories_with_quartiles: List[str]
+    sjr_year_used: Optional[int]
 
     @staticmethod
     def from_entity(publication: Publication) -> 'PublicationResponseDTO':
@@ -51,8 +34,8 @@ class PublicationResponseDTO(BaseModel):
             affiliation_name=publication.affiliation_name,
             affiliation_id=publication.affiliation_id,
             subject_areas=publication.subject_areas,
-            sjr_metrics=[SJRMetricDTO.from_entity(m) for m in publication.sjr_metrics],
-            best_quartile=publication.best_quartile()
+            categories_with_quartiles=publication.categories_with_quartiles,
+            sjr_year_used=publication.sjr_year_used
         )
 
 

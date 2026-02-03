@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import List
-
-from .publication import SJRMetric
+from typing import List, Tuple
 
 
 class ISJRRepository(ABC):
     """
     Interfaz del repositorio de datos SJR (Scimago Journal Rank).
     
-    Define el contrato para obtener métricas SJR de revistas científicas,
-    incluyendo categorías, cuartiles y percentiles.
+    Define el contrato para obtener datos SJR de revistas científicas,
+    incluyendo áreas temáticas y categorías con cuartiles.
     """
 
     @abstractmethod
@@ -23,13 +21,13 @@ class ISJRRepository(ABC):
         pass
 
     @abstractmethod
-    def get_journal_metrics(
+    def get_journal_data(
         self, 
         journal_name: str, 
         publication_year: int
-    ) -> List[SJRMetric]:
+    ) -> Tuple[List[str], List[str], int]:
         """
-        Obtiene las métricas SJR de una revista para un año específico.
+        Obtiene los datos SJR de una revista para un año específico.
         
         Si el año solicitado es mayor al disponible, utiliza el último año
         disponible (mapeo dinámico).
@@ -39,25 +37,10 @@ class ISJRRepository(ABC):
             publication_year: Año de publicación del artículo
             
         Returns:
-            Lista de métricas SJR por categoría
-        """
-        pass
-
-    @abstractmethod
-    def get_subject_areas(
-        self, 
-        journal_name: str, 
-        publication_year: int
-    ) -> List[str]:
-        """
-        Obtiene las áreas temáticas de una revista.
-        
-        Args:
-            journal_name: Nombre de la revista/fuente
-            publication_year: Año de publicación
-            
-        Returns:
-            Lista de áreas temáticas (ej: ["Computer Science", "Engineering"])
+            Tupla con:
+            - Lista de áreas temáticas (ej: ["Computer Science", "Engineering"])
+            - Lista de categorías con cuartiles (ej: ["Software (Q1)", "AI (Q2)"])
+            - Año del SJR utilizado (para mostrar el mapeo dinámico)
         """
         pass
 

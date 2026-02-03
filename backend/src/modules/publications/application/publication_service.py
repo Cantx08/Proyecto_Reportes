@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 from uuid import UUID
 
 from .publication_dto import PublicationResponseDTO, AuthorPublicationsResponseDTO
-from ..domain.publication import Publication, SJRMetric
+from ..domain.publication import Publication
 from ..domain.publication_repository import IPublicationRepository
 from ..domain.publication_cache_repository import IPublicationCacheRepository
 from ..domain.sjr_repository import ISJRRepository
@@ -128,7 +128,7 @@ class PublicationService:
         
         publications = []
         for raw_pub in raw_publications:
-            pub = self._transform_raw_publication(raw_pub)
+            pub = self._transform_raw_publication(raw_pub, scopus_id)
             pub = self._enrich_with_sjr(pub)
             publications.append(pub)
         
@@ -171,12 +171,13 @@ class PublicationService:
         """
         return await self.get_publications_by_author(author_id, force_refresh=True)
 
-    def _transform_raw_publication(self, raw: Dict) -> Publication:
+    def _transform_raw_publication(self, raw: Dict, scopus_author_id: str) -> Publication:
         """
         Transforma los datos crudos de Scopus a una entidad Publication.
         
         Args:
             raw: Diccionario con datos de la API de Scopus
+            scopus_author_id: ID de Scopus del autor específico cuya afiliación buscamos
             
         Returns:
             Entidad Publication
@@ -185,17 +186,8 @@ class PublicationService:
         cover_date = raw.get("prism:coverDate", "")
         year = int(cover_date[:4]) if cover_date and len(cover_date) >= 4 else 0
         
-        # Extraer filiación (buscar la primera disponible)
-        affiliations = raw.get("affiliation", [])
-        if isinstance(affiliations, dict):
-            affiliations = [affiliations]
-        
-        affiliation_name = "Sin filiación"
-        affiliation_id = None
-        if affiliations:
-            first_aff = affiliations[0]
-            affiliation_name = first_aff.get("affilname", "Sin filiación")
-            affiliation_id = first_aff.get("afid")
+        # Extraer filiación del autor específico (dueño del Scopus ID)
+        affiliation_name, affiliation_id = self._get_author_affiliation(raw, scopus_author_id)
         
         return Publication(
             scopus_id=raw.get("dc:identifier", "").replace("SCOPUS_ID:", ""),
@@ -208,13 +200,64 @@ class PublicationService:
             document_type=raw.get("subtypeDescription", raw.get("prism:aggregationType", "")),
             affiliation_name=affiliation_name,
             affiliation_id=affiliation_id,
-            subject_areas=[],  # Se llenan en el enriquecimiento SJR
-            sjr_metrics=[]     # Se llenan en el enriquecimiento SJR
+            subject_areas=[],              # Se llenan en el enriquecimiento SJR
+            categories_with_quartiles=[],  # Se llenan en el enriquecimiento SJR
+            sjr_year_used=None
         )
+
+    def _get_author_affiliation(self, raw: Dict, scopus_author_id: str) -> tuple[str, Optional[str]]:
+        """
+        Obtiene la afiliación específica del autor dueño del Scopus ID.
+        
+        La API de Scopus puede incluir información del autor en diferentes campos:
+        - 'author': Lista de autores con sus afiliaciones
+        - 'affiliation': Lista de todas las afiliaciones de la publicación
+        
+        Args:
+            raw: Diccionario con datos de la API de Scopus
+            scopus_author_id: ID de Scopus del autor específico
+            
+        Returns:
+            Tupla con (nombre_afiliación, id_afiliación)
+        """
+        # Intentar encontrar al autor específico en la lista de autores
+        authors = raw.get("author", [])
+        if isinstance(authors, dict):
+            authors = [authors]
+        
+        # Buscar el autor por su AU-ID (Scopus Author ID)
+        for author in authors:
+            authid = author.get("authid", "")
+            if authid == scopus_author_id:
+                # Encontramos al autor, obtener su afiliación
+                afid = author.get("afid")
+                if afid:
+                    # Buscar el nombre de la afiliación en la lista de afiliaciones
+                    affiliations = raw.get("affiliation", [])
+                    if isinstance(affiliations, dict):
+                        affiliations = [affiliations]
+                    
+                    for aff in affiliations:
+                        if aff.get("afid") == afid:
+                            return aff.get("affilname", "Sin filiación"), afid
+                    
+                    # Si no encontramos el nombre, retornamos solo el ID
+                    return "Afiliación ID: " + afid, afid
+        
+        # Fallback: usar la primera afiliación disponible si no encontramos al autor
+        affiliations = raw.get("affiliation", [])
+        if isinstance(affiliations, dict):
+            affiliations = [affiliations]
+        
+        if affiliations:
+            first_aff = affiliations[0]
+            return first_aff.get("affilname", "Sin filiación"), first_aff.get("afid")
+        
+        return "Sin filiación", None
 
     def _enrich_with_sjr(self, publication: Publication) -> Publication:
         """
-        Enriquece una publicación con métricas SJR.
+        Enriquece una publicación con datos SJR.
         
         Mapea dinámicamente años futuros al último año disponible.
         
@@ -222,22 +265,17 @@ class PublicationService:
             publication: Publicación a enriquecer
             
         Returns:
-            Publicación con métricas SJR
+            Publicación con datos SJR (áreas y categorías con cuartiles)
         """
-        # Obtener métricas SJR para la revista
-        metrics = self._sjr_repo.get_journal_metrics(
+        # Obtener datos SJR para la revista
+        areas, categories_with_quartiles, sjr_year_used = self._sjr_repo.get_journal_data(
             publication.source_title, 
             publication.year
         )
         
-        # Obtener áreas temáticas
-        areas = self._sjr_repo.get_subject_areas(
-            publication.source_title,
-            publication.year
-        )
-        
-        publication.sjr_metrics = metrics
         publication.subject_areas = areas
+        publication.categories_with_quartiles = categories_with_quartiles
+        publication.sjr_year_used = sjr_year_used
         
         return publication
 
@@ -255,7 +293,6 @@ class PublicationService:
         
         by_year: Dict[int, int] = {}
         by_type: Dict[str, int] = {}
-        by_quartile: Dict[str, int] = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "Sin cuartil": 0}
         
         for pub in author_pubs.publications:
             # Por año
@@ -263,15 +300,10 @@ class PublicationService:
             
             # Por tipo
             by_type[pub.document_type] = by_type.get(pub.document_type, 0) + 1
-            
-            # Por mejor cuartil
-            quartile = pub.best_quartile or "Sin cuartil"
-            by_quartile[quartile] = by_quartile.get(quartile, 0) + 1
         
         return {
             "author_id": str(author_id),
             "total_publications": author_pubs.total_publications,
             "by_year": dict(sorted(by_year.items(), reverse=True)),
-            "by_type": by_type,
-            "by_quartile": by_quartile
+            "by_type": by_type
         }

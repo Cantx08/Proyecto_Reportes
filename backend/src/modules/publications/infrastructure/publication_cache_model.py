@@ -42,9 +42,10 @@ class PublicationCacheModel(Base):
     affiliation_name = Column(String(500), nullable=True)
     affiliation_id = Column(String(50), nullable=True)
     
-    # Áreas temáticas y métricas SJR (almacenadas como JSON)
+    # Áreas temáticas y categorías con cuartiles (almacenadas como JSON)
     subject_areas = Column(JSON, nullable=True, default=list)
-    sjr_metrics = Column(JSON, nullable=True, default=list)
+    categories_with_quartiles = Column(JSON, nullable=True, default=list)
+    sjr_year_used = Column(Integer, nullable=True)
     
     # Relación con la cuenta Scopus que originó la consulta
     scopus_account_id = Column(
@@ -75,5 +76,6 @@ class PublicationCacheModel(Base):
             "affiliation_name": self.affiliation_name or "",
             "affiliation_id": self.affiliation_id,
             "subject_areas": self.subject_areas or [],
-            "sjr_metrics": self.sjr_metrics or []
+            "categories_with_quartiles": self.categories_with_quartiles or [],
+            "sjr_year_used": self.sjr_year_used
         }

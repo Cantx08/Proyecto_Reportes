@@ -45,8 +45,7 @@ class ScopusPublicationRepository(IPublicationRepository):
                 params = {
                     "query": f"AU-ID({scopus_author_id})",
                     "start": start,
-                    "count": count,
-                    "view": "COMPLETE"  # Para obtener más detalles
+                    "count": count
                 }
                 
                 response = await client.get(url, headers=self._headers, params=params)

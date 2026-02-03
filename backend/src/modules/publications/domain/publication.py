@@ -3,21 +3,12 @@ from typing import List, Optional
 
 
 @dataclass
-class SJRMetric:
-    """Métrica SJR para una categoría específica."""
-    category: str           # Nombre de la categoría (ej: "Software", "Computer Science")
-    quartile: str           # Cuartil (Q1, Q2, Q3, Q4)
-    percentile: float       # Percentil calculado
-    sjr_year: int           # Año del SJR utilizado (mapeo dinámico 2025->2024)
-
-
-@dataclass
 class Publication:
     """
     Entidad de dominio que representa una publicación científica.
     
     Contiene los datos esenciales de una publicación obtenida de Scopus,
-    enriquecida con métricas SJR para las categorías temáticas.
+    enriquecida con datos SJR para las categorías temáticas.
     """
     # Identificadores
     scopus_id: str              # ID único de la publicación en Scopus
@@ -31,30 +22,17 @@ class Publication:
     source_title: str           # Nombre de la revista/conferencia
     document_type: str          # Tipo de documento (Article, Conference Paper, etc.)
     
-    # Filiación institucional
-    affiliation_name: str       # Nombre de la filiación principal del autor
+    # Filiación institucional del autor consultado
+    affiliation_name: str       # Nombre de la filiación del autor dueño del Scopus ID
     affiliation_id: Optional[str] = None  # ID de la filiación en Scopus
     
-    # Clasificación temática
-    subject_areas: List[str] = field(default_factory=list)  # Áreas temáticas generales
-    sjr_metrics: List[SJRMetric] = field(default_factory=list)  # Categorías con cuartiles
-
-    def best_quartile(self) -> Optional[str]:
-        """
-        Retorna el mejor cuartil de todas las categorías.
-        
-        Returns:
-            El mejor cuartil (Q1 > Q2 > Q3 > Q4) o None si no hay métricas.
-        """
-        if not self.sjr_metrics:
-            return None
-        
-        quartile_order = {"Q1": 1, "Q2": 2, "Q3": 3, "Q4": 4}
-        best = min(
-            self.sjr_metrics, 
-            key=lambda m: quartile_order.get(m.quartile, 5)
-        )
-        return best.quartile
+    # Clasificación temática (del SJR histórico)
+    # Áreas temáticas generales (ej: ["Computer Science", "Engineering"])
+    subject_areas: List[str] = field(default_factory=list)
+    # Categorías con cuartiles tal como vienen del SJR (ej: ["Software (Q1)", "Artificial Intelligence (Q2)"])
+    categories_with_quartiles: List[str] = field(default_factory=list)
+    # Año del SJR utilizado (para años futuros se mapea al último disponible)
+    sjr_year_used: Optional[int] = None
 
     def has_institutional_affiliation(self, institution_keywords: List[str]) -> bool:
         """

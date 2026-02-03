@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from .publication_cache_model import PublicationCacheModel
-from ..domain.publication import Publication, SJRMetric
+from ..domain.publication import Publication
 from ..domain.publication_cache_repository import IPublicationCacheRepository
 
 
@@ -97,17 +97,6 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
 
     def _model_to_entity(self, model: PublicationCacheModel) -> Publication:
         """Convierte un modelo de BD a entidad de dominio."""
-        # Reconstruir métricas SJR desde JSON
-        sjr_metrics = []
-        if model.sjr_metrics:
-            for m in model.sjr_metrics:
-                sjr_metrics.append(SJRMetric(
-                    category=m.get("category", ""),
-                    quartile=m.get("quartile", ""),
-                    percentile=m.get("percentile", 0.0),
-                    sjr_year=m.get("sjr_year", 0)
-                ))
-        
         return Publication(
             scopus_id=model.scopus_id,
             eid=model.eid or "",
@@ -120,7 +109,8 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
             affiliation_name=model.affiliation_name or "",
             affiliation_id=model.affiliation_id,
             subject_areas=model.subject_areas or [],
-            sjr_metrics=sjr_metrics
+            categories_with_quartiles=model.categories_with_quartiles or [],
+            sjr_year_used=model.sjr_year_used
         )
 
     def _entity_to_model(
@@ -129,17 +119,6 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
         scopus_account_id: UUID
     ) -> PublicationCacheModel:
         """Convierte una entidad de dominio a modelo de BD."""
-        # Serializar métricas SJR a JSON
-        sjr_metrics_json = [
-            {
-                "category": m.category,
-                "quartile": m.quartile,
-                "percentile": m.percentile,
-                "sjr_year": m.sjr_year
-            }
-            for m in pub.sjr_metrics
-        ]
-        
         return PublicationCacheModel(
             scopus_id=pub.scopus_id,
             eid=pub.eid,
@@ -152,7 +131,8 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
             affiliation_name=pub.affiliation_name,
             affiliation_id=pub.affiliation_id,
             subject_areas=pub.subject_areas,
-            sjr_metrics=sjr_metrics_json,
+            categories_with_quartiles=pub.categories_with_quartiles,
+            sjr_year_used=pub.sjr_year_used,
             scopus_account_id=scopus_account_id,
             cached_at=datetime.utcnow()
         )
@@ -169,13 +149,6 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
         model.affiliation_name = pub.affiliation_name
         model.affiliation_id = pub.affiliation_id
         model.subject_areas = pub.subject_areas
-        model.sjr_metrics = [
-            {
-                "category": m.category,
-                "quartile": m.quartile,
-                "percentile": m.percentile,
-                "sjr_year": m.sjr_year
-            }
-            for m in pub.sjr_metrics
-        ]
+        model.categories_with_quartiles = pub.categories_with_quartiles
+        model.sjr_year_used = pub.sjr_year_used
         model.cached_at = datetime.utcnow()

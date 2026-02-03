@@ -15,6 +15,7 @@ from src.modules.departments.infrastructure.department import DepartmentModel
 from src.modules.job_positions.infrastructure.job_position import JobPositionModel
 from src.modules.authors.infrastructure.author import AuthorModel
 from src.modules.scopus_accounts.infrastructure.scopus_account import ScopusAccountModel
+from src.modules.publications.infrastructure.publication_cache_model import PublicationCacheModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
