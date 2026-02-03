@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { scopusApi, ReportRequest } from '@/services/scopusApi';
+import { ReportRequest } from '@/features/reports/types';
+import { reportService } from '@/features/reports/services/reportService';
 import { formatDateToSpanish } from '@/utils/helpers';
-import DepartmentSelect from '../features/departments/components/DepartmentSelect';
-import JobPositionSelect from '../features/job-positions/components/JobPositionSelect';
+import DepartmentSelect from '../../departments/components/DepartmentSelect';
+import JobPositionSelect from '../../job-positions/components/JobPositionSelect';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
 
@@ -79,7 +80,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
         es_borrador: formData.es_borrador ?? true,
       };
 
-      const blob = await scopusApi.generateCertification(reportRequest);
+      const blob = await reportService.generateCertification(reportRequest);
       
       // Crear URL para descargar el PDF
       const url = window.URL.createObjectURL(blob);

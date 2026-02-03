@@ -12,11 +12,11 @@ import {
 } from 'lucide-react';
 import { ScopusIdInput } from '@/features/scopus-accounts/components/ScopusIdInput';
 import { AuthorSelect } from '@/features/authors/components/AuthorSelect';
-import { PublicationsList } from '@/components/PublicationsList';
-import { SubjectAreas } from '@/components/SubjectAreas';
-import { DocumentsByYear } from '@/components/DocumentsByYearChart';
+import { PublicationsList } from '@/features/publications/components/PublicationsList';
+import { SubjectAreas } from '@/features/publications/components/SubjectAreas';
+import { DocumentsByYear } from '@/features/publications/components/DocumentsByYearChart';
 import { ErrorNotification } from '@/components/ErrorNotification';
-import ReportGenerator from '@/components/ReportGenerator';
+import ReportGenerator from '@/features/reports/components/ReportGenerator';
 import { useScopusData } from '@/features/scopus-accounts/hooks/useScopusData';
 import { useAuthors } from '@/features/authors/hooks/useAuthors';
 

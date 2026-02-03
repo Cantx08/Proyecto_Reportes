@@ -1,29 +1,5 @@
-import {Autor} from "@/features/authors/types";
+import {Publication} from "@/features/publications/types";
 
-
-export interface Publication {
-    title: string;
-    year: string;
-    source: string;
-    document_type: string;
-    affiliation: string;
-    doi: string;
-    categories: string | CategoryDetail[];
-}
-
-export interface PublicationsResponse {
-    publications: Autor[];
-}
-
-export interface DocumentsByYearResponse {
-    author_ids: string[];
-    documents_by_year: Record<string, number>;
-}
-
-export interface SubjectAreasResponse {
-    author_ids: string[];
-    subject_areas: string[];
-}
 
 // Tipos para el estado del componente principal
 export interface AppState {

@@ -8,7 +8,8 @@ import {
   FileText,
   AlertCircle
 } from 'lucide-react';
-import { scopusApi } from '@/services/scopusApi';
+
+import { reportService } from "@/features/reports/services/reportService";
 
 export default function CertificationPage() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -109,7 +110,7 @@ export default function CertificationPage() {
     
     try {
       // Llamar al backend para procesar el borrador
-      const pdfBlob = await scopusApi.procesarBorrador(uploadedFile);
+      const pdfBlob = await reportService.processDraft(uploadedFile);
       
       // Crear URL del blob para descarga
       const url = window.URL.createObjectURL(pdfBlob);
