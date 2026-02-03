@@ -12,6 +12,7 @@ from .modules.departments.infrastructure.department_router import router as depa
 from .modules.job_positions.infrastructure.job_position_router import router as job_position_router
 from .modules.authors.infrastructure.author_router import router as author_router
 from .modules.scopus_accounts.infrastructure.scopus_account_router import router as account_router
+from .modules.publications.infrastructure.publication_router import router as publication_router
 
 # Obtener configuración
 container = get_container()
@@ -67,6 +68,7 @@ app.include_router(department_router)
 app.include_router(job_position_router)
 app.include_router(author_router)
 app.include_router(account_router)
+app.include_router(publication_router)
 # app.include_router(reports_router)
 
 

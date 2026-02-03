@@ -1,80 +1,102 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
-from backend.src.modules.publications.domain.publication import Publication
-from ..external.scopus_api_client import ScopusApiClient
-from backend.src.modules.publications.domain.publications_repository import PublicationsRepository
+import httpx
+
+from ..domain.publication_repository import IPublicationRepository
 
 
-class ScopusPublicationsRepository(PublicationsRepository):
-    """Repositorio de publicaciones usando la API de Scopus."""
+class ScopusPublicationRepository(IPublicationRepository):
+    """
+    Repositorio de publicaciones que consume la API de Scopus.
+    
+    Implementa la interfaz IPublicationRepository para obtener
+    publicaciones científicas desde el servicio de Elsevier.
+    """
 
-    def __init__(self, scopus_client: ScopusApiClient):
-        self._client = scopus_client
+    def __init__(self, api_key: str):
+        self._api_key = api_key
+        self._base_url = "https://api.elsevier.com"
+        self._headers = {
+            "Accept": "application/json",
+            "X-ELS-APIKey": self._api_key
+        }
+        self._timeout = httpx.Timeout(60.0, connect=10.0)
 
-    def _transform_entry_to_publication(self, entry: dict) -> Optional[Publication]:
-        """Convierte un entry de Scopus a una entidad Publication."""
-        try:
-            title = entry.get("dc:title", "")
-            year = self._get_year_from_date(entry.get("prism:coverDate", ""))
-            source = entry.get("prism:publicationName", "")
-            document_type = entry.get("subtypeDescription", "")
-            affiliation = self._retrieve_affiliation(entry)
-            doi = entry.get("prism:doi", "")
-
-            return Publication(
-                title=title,
-                year=year,
-                source=source,
-                document_type=document_type,
-                affiliation=affiliation,
-                doi=doi
-            )
-        except RuntimeError:
-            return None
-
-    @staticmethod
-    def _get_year_from_date(publication_date: str) -> str:
-        """Extrae el año de una fecha."""
-        return publication_date[:4] if publication_date else ""
-
-    @staticmethod
-    def _retrieve_affiliation(entry: dict) -> str:
+    async def get_publications_by_scopus_id(
+        self, 
+        scopus_author_id: str
+    ) -> List[Dict[str, Any]]:
         """
-        Busca si 'Escuela Politécnica Nacional' está entre las afiliaciones de la publicación.
+        Obtiene las publicaciones de un autor por su Scopus ID.
+        
+        Args:
+            scopus_author_id: ID del autor en Scopus
+            
+        Returns:
+            Lista de diccionarios con los datos crudos de las publicaciones
         """
-        affiliations = entry.get("affiliation", [])
+        all_entries = []
+        start = 0
+        count = 200  # Máximo permitido por la API de Scopus
+        
+        async with httpx.AsyncClient(timeout=self._timeout) as client:
+            while True:
+                url = f"{self._base_url}/content/search/scopus"
+                params = {
+                    "query": f"AU-ID({scopus_author_id})",
+                    "start": start,
+                    "count": count,
+                    "view": "COMPLETE"  # Para obtener más detalles
+                }
+                
+                response = await client.get(url, headers=self._headers, params=params)
+                response.raise_for_status()
+                
+                data = response.json()
+                search_results = data.get("search-results", {})
+                entries = search_results.get("entry", [])
+                
+                # Verificar si hay resultados válidos
+                if not entries or (len(entries) == 1 and entries[0].get("error")):
+                    break
+                
+                all_entries.extend(entries)
+                
+                # Verificar si hay más páginas
+                total_results = int(search_results.get("opensearch:totalResults", 0))
+                if start + count >= total_results:
+                    break
+                
+                start += count
+        
+        return all_entries
 
-        # Asegurarse de que sea una lista
-        if isinstance(affiliations, dict):
-            affiliations = [affiliations]
-
-        if not affiliations:
-            return "Sin filiación"
-
-        # Búsqueda de filiación EPN
-        for aff in affiliations:
-            aff_name = aff.get("affilname", "")
-            if aff_name and "escuela politécnica nacional" in aff_name.lower():
-                return aff_name
-
-        return "Sin filiación"
-
-    async def get_publications_by_author(self, author_id: str) -> List[Publication]:
-        """Obtiene las publicaciones de un autor específico."""
-        data = await self._client.get_publications_by_author(author_id)
-        entries = data.get("search-results", {}).get("entry", [])
-
-        publication_list = []
-        for entry in entries:
-            publication = self._transform_entry_to_publication(entry)
-            if publication:
-                publication_list.append(publication)
-
-        return publication_list
-
-    async def get_publication_details(self, scopus_id: str) -> Optional[dict]:
-        """Obtiene los detalles completos de una publicación."""
+    async def get_publication_details(
+        self, 
+        scopus_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Obtiene los detalles completos de una publicación específica.
+        
+        Args:
+            scopus_id: ID de la publicación en Scopus
+            
+        Returns:
+            Diccionario con los detalles completos o None si no existe
+        """
         try:
-            return await self._client.get_publication_details(scopus_id)
+            url = f"{self._base_url}/content/abstract/scopus_id/{scopus_id}"
+            
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                response = await client.get(url, headers=self._headers)
+                response.raise_for_status()
+                
+                data = response.json()
+                return data.get("abstracts-retrieval-response", {})
+                
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                return None
+            raise
         except Exception:
             return None

@@ -1,15 +1,75 @@
 from abc import ABC, abstractmethod
+from typing import List
+
+from .publication import SJRMetric
 
 
-class SJRRepository(ABC):
-    """Interfaz para el repositorio de datos SJR."""
+class ISJRRepository(ABC):
+    """
+    Interfaz del repositorio de datos SJR (Scimago Journal Rank).
     
+    Define el contrato para obtener métricas SJR de revistas científicas,
+    incluyendo categorías, cuartiles y percentiles.
+    """
+
     @abstractmethod
-    def get_journal_categories(self, journal_name: str, year: str) -> str:
-        """Obtiene las categorías de una revista en un año específico."""
+    def get_max_available_year(self) -> int:
+        """
+        Obtiene el año más reciente disponible en los datos SJR.
+        
+        Returns:
+            El año máximo disponible en el histórico SJR
+        """
         pass
-    
+
+    @abstractmethod
+    def get_journal_metrics(
+        self, 
+        journal_name: str, 
+        publication_year: int
+    ) -> List[SJRMetric]:
+        """
+        Obtiene las métricas SJR de una revista para un año específico.
+        
+        Si el año solicitado es mayor al disponible, utiliza el último año
+        disponible (mapeo dinámico).
+        
+        Args:
+            journal_name: Nombre de la revista/fuente
+            publication_year: Año de publicación del artículo
+            
+        Returns:
+            Lista de métricas SJR por categoría
+        """
+        pass
+
+    @abstractmethod
+    def get_subject_areas(
+        self, 
+        journal_name: str, 
+        publication_year: int
+    ) -> List[str]:
+        """
+        Obtiene las áreas temáticas de una revista.
+        
+        Args:
+            journal_name: Nombre de la revista/fuente
+            publication_year: Año de publicación
+            
+        Returns:
+            Lista de áreas temáticas (ej: ["Computer Science", "Engineering"])
+        """
+        pass
+
     @abstractmethod
     def normalize_journal_name(self, name: str) -> str:
-        """Normaliza el nombre de una revista para búsqueda."""
+        """
+        Normaliza el nombre de una revista para búsqueda consistente.
+        
+        Args:
+            name: Nombre original de la revista
+            
+        Returns:
+            Nombre normalizado (minúsculas, sin acentos, etc.)
+        """
         pass

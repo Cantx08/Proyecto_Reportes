@@ -1,91 +1,277 @@
-import asyncio
-from typing import List
-from ...domain.entities.author_publications import AuthorPublications
-from backend.src.modules.publications.domain.publication import PublicationsCollection
-from backend.src.modules.publications.domain.publications_repository import PublicationsRepository
-from backend.src.modules.publications.domain.sjr_repository import SJRRepository
-from ...domain.repositories.scopus_account_repository import ScopusAccountRepository
+from typing import List, Dict, Optional
+from uuid import UUID
+
+from .publication_dto import PublicationResponseDTO, AuthorPublicationsResponseDTO
+from ..domain.publication import Publication, SJRMetric
+from ..domain.publication_repository import IPublicationRepository
+from ..domain.publication_cache_repository import IPublicationCacheRepository
+from ..domain.sjr_repository import ISJRRepository
+from ...scopus_accounts.domain.scopus_account import ScopusAccount
+from ...scopus_accounts.domain.scopus_account_repository import IScopusAccountRepository
 
 
 class PublicationService:
-    """Servicio para manejo de publicaciones."""
+    """
+    Servicio de aplicación para gestión de publicaciones.
+    
+    Orquesta la obtención de publicaciones desde Scopus con estrategia de caché
+    y enriquecimiento con métricas SJR para las categorías temáticas.
+    """
+    
+    # Tiempo de validez de la caché en horas
+    CACHE_MAX_AGE_HOURS = 24
     
     def __init__(
         self, 
-        publications_repository: PublicationsRepository,
-        sjr_repository: SJRRepository,
-        scopus_account_repository: ScopusAccountRepository
+        publication_repo: IPublicationRepository,
+        cache_repo: Optional[IPublicationCacheRepository],
+        sjr_repo: ISJRRepository,
+        scopus_account_repo: IScopusAccountRepository
     ):
-        self._publications_repository = publications_repository
-        self._sjr_repository = sjr_repository
-        self._scopus_account_repository = scopus_account_repository
+        self._publication_repo = publication_repo
+        self._cache_repo = cache_repo
+        self._sjr_repo = sjr_repo
+        self._scopus_account_repo = scopus_account_repo
 
-    async def _resolve_scopus_ids(self, mixed_ids: List[str]) -> List[str]:
+    async def get_publications_by_author(
+        self, 
+        author_id: UUID,
+        force_refresh: bool = False
+    ) -> AuthorPublicationsResponseDTO:
         """
-        Resuelve una lista mezclada de IDs (Scopus IDs o Author IDs) a solo Scopus IDs.
+        Obtiene todas las publicaciones de un autor desde sus cuentas Scopus.
+        
+        Utiliza caché cuando está disponible para reducir llamadas a la API.
         
         Args:
-            mixed_ids: Lista que puede contener Scopus IDs (numéricos) o Author IDs (cualquier formato)
+            author_id: UUID del autor en el sistema
+            force_refresh: Si True, ignora la caché y consulta Scopus directamente
             
         Returns:
-            Lista de Scopus IDs únicos
+            DTO con las publicaciones del autor enriquecidas con métricas SJR
         """
-        scopus_ids = []
+        # 1. Obtener las cuentas Scopus del autor
+        scopus_accounts = await self._scopus_account_repo.get_by_author(author_id)
         
-        for id_value in mixed_ids:
-            # Si es numérico y tiene 11 dígitos, probablemente es un Scopus ID
-            if id_value.isdigit() and len(id_value) == 11:
-                scopus_ids.append(id_value)
-            else:
-                # Intentar buscar como Author ID en la base de datos
-                try:
-                    accounts = await self._scopus_account_repository.get_by_author_id(id_value)
-                    for account in accounts:
-                        if account.is_active:
-                            scopus_ids.append(account.scopus_id)
-                except Exception:
-                    # Si no se encuentra, asumir que es un Scopus ID de todas formas
-                    scopus_ids.append(id_value)
+        if not scopus_accounts:
+            raise ValueError(f"El autor no tiene cuentas Scopus asociadas.")
         
-        # Retornar lista única de IDs
-        return list(set(scopus_ids))
+        scopus_ids = [account.scopus_id for account in scopus_accounts]
+        
+        # 2. Obtener publicaciones de todas las cuentas Scopus
+        all_publications: List[Publication] = []
+        seen_scopus_ids = set()  # Para evitar duplicados
+        
+        for account in scopus_accounts:
+            # Intentar obtener desde caché primero
+            publications = await self._get_publications_with_cache(
+                account, 
+                force_refresh=force_refresh
+            )
+            
+            for pub in publications:
+                # Evitar duplicados (un artículo puede aparecer en múltiples cuentas)
+                if pub.scopus_id not in seen_scopus_ids:
+                    seen_scopus_ids.add(pub.scopus_id)
+                    all_publications.append(pub)
+        
+        # 3. Ordenar por año descendente
+        all_publications.sort(key=lambda p: p.year, reverse=True)
+        
+        return AuthorPublicationsResponseDTO(
+            author_id=str(author_id),
+            scopus_ids=scopus_ids,
+            total_publications=len(all_publications),
+            publications=[PublicationResponseDTO.from_entity(p) for p in all_publications]
+        )
 
-    async def fetch_grouped_publications(self, mixed_ids: List[str]) -> PublicationsCollection:
+    async def _get_publications_with_cache(
+        self, 
+        account: ScopusAccount,
+        force_refresh: bool = False
+    ) -> List[Publication]:
         """
-        Obtiene y agrupa publicaciones de múltiples autores.
+        Obtiene publicaciones usando la estrategia de caché.
+        
+        1. Si hay caché válida y no se fuerza refresh, usa caché
+        2. Si no hay caché o está expirada, consulta Scopus y actualiza caché
+        """
+        # Si no hay repositorio de caché, ir directo a Scopus
+        if self._cache_repo is None:
+            return await self._fetch_from_scopus(account.scopus_id)
+        
+        # Verificar si la caché es válida
+        if not force_refresh:
+            cache_valid = await self._cache_repo.is_cache_valid(
+                account.account_id, 
+                self.CACHE_MAX_AGE_HOURS
+            )
+            
+            if cache_valid:
+                # Usar caché
+                cached_pubs = await self._cache_repo.get_by_scopus_account(account.account_id)
+                if cached_pubs:
+                    return cached_pubs
+        
+        # Caché no válida o forzar refresh: consultar Scopus
+        publications = await self._fetch_from_scopus(account.scopus_id)
+        
+        # Guardar en caché
+        if publications:
+            await self._cache_repo.save_publications(publications, account.account_id)
+        
+        return publications
+
+    async def _fetch_from_scopus(self, scopus_id: str) -> List[Publication]:
+        """Obtiene publicaciones desde la API de Scopus y las enriquece con SJR."""
+        raw_publications = await self._publication_repo.get_publications_by_scopus_id(scopus_id)
+        
+        publications = []
+        for raw_pub in raw_publications:
+            pub = self._transform_raw_publication(raw_pub)
+            pub = self._enrich_with_sjr(pub)
+            publications.append(pub)
+        
+        return publications
+
+    async def get_publications_by_scopus_id(
+        self, 
+        scopus_id: str
+    ) -> List[PublicationResponseDTO]:
+        """
+        Obtiene las publicaciones de una cuenta Scopus específica.
+        
+        Este método NO usa caché ya que no tiene el account_id.
+        Útil para verificar publicaciones antes de vincular una cuenta.
         
         Args:
-            mixed_ids: Lista que puede contener Scopus IDs o Author IDs de la base de datos
+            scopus_id: ID de Scopus del autor
+            
+        Returns:
+            Lista de DTOs de publicaciones
         """
-        # Resolver todos los IDs a Scopus IDs (solo cuentas activas)
-        scopus_ids = await self._resolve_scopus_ids(mixed_ids)
+        publications = await self._fetch_from_scopus(scopus_id)
         
-        authors = []
+        # Ordenar por año descendente
+        publications.sort(key=lambda p: p.year, reverse=True)
         
-        async def fetch_single_author(scopus_id: str):
-            try:
-                pub_list = await self._publications_repository.get_publications_by_author(scopus_id)
+        return [PublicationResponseDTO.from_entity(p) for p in publications]
 
-                if pub_list:
-                    for pub in pub_list:
-                        if not pub.categories:
-                            pub.categories = self._sjr_repository.get_journal_categories(pub.source, pub.year)
-
-                    return AuthorPublications(author_id=scopus_id, publications_list=pub_list)
-            except Exception as e:
-                print(f"Error al obtener el autor {scopus_id}: {e}")
-                return None
-            return None
+    async def refresh_author_publications(self, author_id: UUID) -> AuthorPublicationsResponseDTO:
+        """
+        Fuerza la actualización de publicaciones desde Scopus.
         
-        tasks = [fetch_single_author(sid) for sid in scopus_ids]
-
-        results = await asyncio.gather(*tasks)
-
-        authors = [res for res in results if res is not None]
+        Invalida la caché existente y consulta Scopus directamente.
         
-        return PublicationsCollection(authors=authors)
+        Args:
+            author_id: UUID del autor
+            
+        Returns:
+            DTO con las publicaciones actualizadas
+        """
+        return await self.get_publications_by_author(author_id, force_refresh=True)
 
-    async def get_statistics_by_year(self, author_ids: List[str]) -> dict[str, int]:
-        """Obtiene estadísticas de publicaciones por año."""
-        collection = await self.fetch_grouped_publications(author_ids)
-        return collection.count_publications_by_year()
+    def _transform_raw_publication(self, raw: Dict) -> Publication:
+        """
+        Transforma los datos crudos de Scopus a una entidad Publication.
+        
+        Args:
+            raw: Diccionario con datos de la API de Scopus
+            
+        Returns:
+            Entidad Publication
+        """
+        # Extraer año de la fecha de publicación
+        cover_date = raw.get("prism:coverDate", "")
+        year = int(cover_date[:4]) if cover_date and len(cover_date) >= 4 else 0
+        
+        # Extraer filiación (buscar la primera disponible)
+        affiliations = raw.get("affiliation", [])
+        if isinstance(affiliations, dict):
+            affiliations = [affiliations]
+        
+        affiliation_name = "Sin filiación"
+        affiliation_id = None
+        if affiliations:
+            first_aff = affiliations[0]
+            affiliation_name = first_aff.get("affilname", "Sin filiación")
+            affiliation_id = first_aff.get("afid")
+        
+        return Publication(
+            scopus_id=raw.get("dc:identifier", "").replace("SCOPUS_ID:", ""),
+            eid=raw.get("eid", ""),
+            doi=raw.get("prism:doi"),
+            title=raw.get("dc:title", "Sin título"),
+            year=year,
+            publication_date=cover_date,
+            source_title=raw.get("prism:publicationName", ""),
+            document_type=raw.get("subtypeDescription", raw.get("prism:aggregationType", "")),
+            affiliation_name=affiliation_name,
+            affiliation_id=affiliation_id,
+            subject_areas=[],  # Se llenan en el enriquecimiento SJR
+            sjr_metrics=[]     # Se llenan en el enriquecimiento SJR
+        )
+
+    def _enrich_with_sjr(self, publication: Publication) -> Publication:
+        """
+        Enriquece una publicación con métricas SJR.
+        
+        Mapea dinámicamente años futuros al último año disponible.
+        
+        Args:
+            publication: Publicación a enriquecer
+            
+        Returns:
+            Publicación con métricas SJR
+        """
+        # Obtener métricas SJR para la revista
+        metrics = self._sjr_repo.get_journal_metrics(
+            publication.source_title, 
+            publication.year
+        )
+        
+        # Obtener áreas temáticas
+        areas = self._sjr_repo.get_subject_areas(
+            publication.source_title,
+            publication.year
+        )
+        
+        publication.sjr_metrics = metrics
+        publication.subject_areas = areas
+        
+        return publication
+
+    async def get_statistics_by_author(self, author_id: UUID) -> Dict:
+        """
+        Obtiene estadísticas de publicaciones de un autor.
+        
+        Args:
+            author_id: UUID del autor
+            
+        Returns:
+            Diccionario con estadísticas por año y por tipo
+        """
+        author_pubs = await self.get_publications_by_author(author_id)
+        
+        by_year: Dict[int, int] = {}
+        by_type: Dict[str, int] = {}
+        by_quartile: Dict[str, int] = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "Sin cuartil": 0}
+        
+        for pub in author_pubs.publications:
+            # Por año
+            by_year[pub.year] = by_year.get(pub.year, 0) + 1
+            
+            # Por tipo
+            by_type[pub.document_type] = by_type.get(pub.document_type, 0) + 1
+            
+            # Por mejor cuartil
+            quartile = pub.best_quartile or "Sin cuartil"
+            by_quartile[quartile] = by_quartile.get(quartile, 0) + 1
+        
+        return {
+            "author_id": str(author_id),
+            "total_publications": author_pubs.total_publications,
+            "by_year": dict(sorted(by_year.items(), reverse=True)),
+            "by_type": by_type,
+            "by_quartile": by_quartile
+        }
