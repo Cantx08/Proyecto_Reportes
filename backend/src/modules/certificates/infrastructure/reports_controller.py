@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import HTTPException
 from fastapi.responses import Response
-from backend.src.modules.publications.application.publication_service import PublicationService
-from backend.src.modules.publications.application.subject_area_service import SubjectAreaService
-from backend.src.modules.certificates.application.report_service import ReportService
-from backend.src.modules.publications.domain.publication import Publication
-from ....application.dto import ReportRequestDTO
+from ...publications.application.publication_service import PublicationService
+from ...publications.application.subject_area_service import SubjectAreaService
+from ..application.report_service import ReportService
+from ...publications.domain.publication import Publication
+from ..application.report_dto import ReportRequestDTO
 
 
 class ReportsController:
@@ -61,7 +61,7 @@ class ReportsController:
                 signatory=request.firmante,
                 signatory_name=request.firmante_nombre or "",
                 report_date=request.fecha or "",
-                es_borrador=request.es_borrador,
+                elaborador=request.elaborador or "M. Vásquez",
                 scopus_publications=scopus_pubs,
                 wos_publications=wos_pubs,
                 regional_publications=regional_pubs,
@@ -71,9 +71,8 @@ class ReportsController:
                 documents_by_year=pubs_by_year
             )
             
-            # Crear nombre del archivo
-            tipo_doc = "borrador" if request.es_borrador else "certificado_final"
-            file_name = f"{tipo_doc}_{request.docente_nombre.replace(' ', '_')}.pdf"
+            # Crear nombre del archivo (siempre certificado final)
+            file_name = f"certificado_{request.docente_nombre.replace(' ', '_')}.pdf"
             
             return Response(content=pdf_bytes, media_type="application/pdf", 
                             headers={"Content-Disposition": f"attachment; filename={file_name}"})

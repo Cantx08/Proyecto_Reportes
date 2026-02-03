@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
-from backend.src.modules.publications.domain.publication import Publication
-from backend.src.modules.certificates.domain.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections
+from ...publications.domain.publication import Publication
+from .report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections
 
 
 class IChartGenerator(ABC):
@@ -64,8 +64,8 @@ class IReportGenerator(ABC):
 
     @abstractmethod
     def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections,
-                        statistics: PublicationsStatistics, es_borrador: bool = True) -> bytes:
-        """Genera el reporte completo en formato PDF."""
+                        statistics: PublicationsStatistics) -> bytes:
+        """Genera el reporte completo en formato PDF con plantilla institucional."""
         pass
 
 

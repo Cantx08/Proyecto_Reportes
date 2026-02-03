@@ -9,7 +9,7 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
-from backend.src.modules.certificates.domain.template_overlay_repository import ITemplateOverlayService
+from ...domain.template_overlay_repository import ITemplateOverlayService
 
 logger = logging.getLogger(__name__)
 

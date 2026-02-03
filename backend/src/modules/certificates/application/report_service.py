@@ -1,9 +1,10 @@
 from typing import List, Union
-from backend.src.modules.publications.domain.publication import Publication
-from backend.src.modules.certificates.domain.report_repository import IReportGenerator
-from backend.src.modules.certificates.domain.report import (AuthorInfo, ReportConfiguration, PublicationCollections,
-                                                            PublicationsStatistics)
-from ...domain.enums import Gender, Authority
+from ...publications.domain.publication import Publication
+from ..domain.report_repository import IReportGenerator
+from ..domain.report import (AuthorInfo, ReportConfiguration, PublicationCollections,
+                             PublicationsStatistics)
+from ...authors.domain.gender import Gender
+from ..domain.authority import Authority
 
 
 class ReportService:
@@ -37,7 +38,7 @@ class ReportService:
             signatory: Union[int, str] = 1,
             signatory_name: str = "",
             report_date: str = "",
-            es_borrador: bool = True,
+            elaborador: str = "M. Vásquez",
 
             # Publicaciones
             scopus_publications: List[Publication] = None,
@@ -62,7 +63,7 @@ class ReportService:
             signatory: Tipo de firmante (1: Directora, 2: Vicerrector, o cargo personalizado)
             signatory_name: Nombre del firmante (requerido para firmantes personalizados)
             report_date: Fecha del reporte (opcional, usa fecha actual si no se proporciona)
-            es_borrador: True para generar borrador, False para certificado final con plantilla
+            elaborador: Nombre de quien elaboró el reporte
             scopus_publications: Lista de publicaciones Scopus
             wos_publications: Lista de publicaciones WOS
             regional_publications: Lista de publicaciones regionales
@@ -82,15 +83,15 @@ class ReportService:
 
         # Crear value objects
         author_info = self._create_author_profile(author_name, author_gender, department, role)
-        config = self._create_report_configuration(memorandum, signatory, signatory_name, report_date)
+        config = self._create_report_configuration(memorandum, signatory, signatory_name, report_date, elaborador)
         publications = self._create_publication_collections(
             scopus_publications, wos_publications, regional_publications,
             event_memory, book_chapters
         )
         statistics = self._generate_publication_statistics(subject_areas, documents_by_year)
 
-        # Generar reporte
-        return self._report_generator.generate_report(author_info, config, publications, statistics, es_borrador)
+        # Generar reporte (siempre genera formato final con plantilla)
+        return self._report_generator.generate_report(author_info, config, publications, statistics)
 
     @staticmethod
     def _check_input_data(name: str, gender: str, department: str, role: str) -> None:
@@ -124,7 +125,7 @@ class ReportService:
         )
 
     @staticmethod
-    def _create_report_configuration(memorandum: str, signatory: Union[int, str], signatory_name: str, date: str) -> ReportConfiguration:
+    def _create_report_configuration(memorandum: str, signatory: Union[int, str], signatory_name: str, date: str, elaborador: str = "M. Vásquez") -> ReportConfiguration:
         """Crea el value object ReportConfiguration."""
         # Si es un número, mapear a enum; si es string, crear objeto personalizado
         if isinstance(signatory, int):
@@ -137,9 +138,9 @@ class ReportService:
             }
 
         if date and date.strip():
-            return ReportConfiguration(memorandum.strip(), signatory_type, date.strip())
+            return ReportConfiguration(memorandum.strip(), signatory_type, date.strip(), elaborador)
         else:
-            return ReportConfiguration.generate_with_current_date(memorandum.strip(), signatory_type)
+            return ReportConfiguration.generate_with_current_date(memorandum.strip(), signatory_type, elaborador)
 
     @staticmethod
     def _create_publication_collections(

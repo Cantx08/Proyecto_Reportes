@@ -1,5 +1,5 @@
 /**
- * Tipos para el módulo de reportes
+ * Tipos para el módulo de certificados
  */
 
 export interface ReportRequest {
@@ -12,8 +12,25 @@ export interface ReportRequest {
     firmante?: number | string;
     firmante_nombre?: string;
     fecha?: string;
-    es_borrador?: boolean;
+    elaborador?: string;
 }
+
+/**
+ * Opción de elaborador disponible
+ */
+export interface ElaboradorOption {
+    value: string;
+    label: string;
+}
+
+/**
+ * Opciones de elaborador disponibles (constantes del cliente)
+ */
+export const ELABORADOR_OPTIONS: ElaboradorOption[] = [
+    { value: 'M. Vásquez', label: 'M. Vásquez' },
+    { value: 'S. Sánchez', label: 'S. Sánchez' },
+    { value: 'J. Sayago', label: 'J. Sayago' },
+];
 
 export interface ProcessDraftMetadata {
     memorando?: string;

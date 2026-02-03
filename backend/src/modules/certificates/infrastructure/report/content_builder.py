@@ -3,13 +3,12 @@ from typing import List, Any
 from reportlab.platypus import Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.units import cm
 from reportlab.lib import colors
-from backend.src.modules.certificates.domain.report_repository import IContentBuilder, IStyleManager, IChartGenerator, IPublicationFormatter
-from backend.src.modules.certificates.domain.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections
-from ....domain.enums import Authority
+from ...domain.report_repository import IContentBuilder, IStyleManager, IChartGenerator, IPublicationFormatter
+from ...domain.report import AuthorInfo, ReportConfiguration, PublicationsStatistics, PublicationCollections
+from ...domain.authority import Authority
 
 DIRECCION_DI = "Dr. Jaime Paúl Sayago Heredia"
 VICERRECTORADO_IIV = "Dra. Sandra Patricia Sánchez Gordón"
-AUTHOR_REPORT = "M. Vásquez"
 
 class ReportLabContentBuilder(IContentBuilder):
     """Constructor de contenido usando ReportLab."""
@@ -383,10 +382,10 @@ class ReportLabContentBuilder(IContentBuilder):
         signature_elements.append(Paragraph(f"<b>{signatory_role}</b>", signature_style))
         signature_elements.append(Spacer(1, 10))
         
-        # Tabla de elaboración
+        # Tabla de elaboración - usar el elaborador configurado
         table_style = self._style_manager.fetch_style('AuthorTable')
         table_details = [
-            [Paragraph("Elaborado por:", table_style), Paragraph(AUTHOR_REPORT, table_style)]
+            [Paragraph("Elaborado por:", table_style), Paragraph(config.elaborador, table_style)]
         ]
 
         author_table = Table(table_details, colWidths=[2*cm, 2*cm], hAlign='LEFT')

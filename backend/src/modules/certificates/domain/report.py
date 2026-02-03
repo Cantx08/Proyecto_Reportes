@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from typing import List, Dict, Union
 from datetime import datetime
 
-from backend.src.modules.publications.domain.publication import Publication
-from backend.src.domain.enums import Gender, Authority
+from ...publications.domain.publication import Publication
+from ...authors.domain.gender import Gender
+from .authority import Authority
 
 
 @dataclass(frozen=True)
@@ -47,12 +48,13 @@ class ReportConfiguration:
     memorandum: str
     signatory: Union[Authority, str, Dict[str, str]]  # Enum, string o dict con cargo/nombre
     report_date: str
+    elaborador: str = "M. Vásquez"  # Nombre de quien elaboró el reporte
     
     @classmethod
-    def generate_with_current_date(cls, memorandum: str = "", signatory: Union[Authority, str, Dict[str, str]] = Authority.DIRECTORA_INVESTIGACION):
+    def generate_with_current_date(cls, memorandum: str = "", signatory: Union[Authority, str, Dict[str, str]] = Authority.DIRECTORA_INVESTIGACION, elaborador: str = "M. Vásquez"):
         """Factory method para crear configuración con fecha actual."""
         report_date = datetime.now().strftime("%d de %B de %Y")
-        return cls(memorandum, signatory, report_date)
+        return cls(memorandum, signatory, report_date, elaborador)
 
 
 @dataclass(frozen=True)

@@ -4,8 +4,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
-from backend.src.modules.certificates.domain.report_repository import IReportGenerator, IContentBuilder
-from backend.src.modules.certificates.domain.report import AuthorInfo, ReportConfiguration, PublicationCollections, PublicationsStatistics
+from ...domain.report_repository import IReportGenerator, IContentBuilder
+from ...domain.report import AuthorInfo, ReportConfiguration, PublicationCollections, PublicationsStatistics
 from .template_overlay_service import TemplateOverlayService
 
 
@@ -45,8 +45,8 @@ class ReportLabReportGenerator(IReportGenerator):
         self._content_builder = content_builder
         self._template_service = TemplateOverlayService()
     
-    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics, es_borrador: bool = True) -> bytes:
-        """Genera el reporte completo en formato PDF."""
+    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> bytes:
+        """Genera el reporte completo en formato PDF con plantilla institucional."""
         buffer = io.BytesIO()
         doc = self._create_document(buffer)
         
@@ -58,9 +58,8 @@ class ReportLabReportGenerator(IReportGenerator):
         pdf_bytes = buffer.getvalue()
         buffer.close()
         
-        # Si no es borrador, aplicar plantilla
-        if not es_borrador:
-            pdf_bytes = self._template_service.overlay_content_on_template(pdf_bytes)
+        # Siempre aplicar plantilla institucional (ya no existe modo borrador)
+        pdf_bytes = self._template_service.overlay_content_on_template(pdf_bytes)
         
         return pdf_bytes
     

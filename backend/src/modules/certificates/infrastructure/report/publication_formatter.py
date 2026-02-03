@@ -1,7 +1,7 @@
 from typing import List, Any
 from reportlab.platypus import Paragraph, Spacer
-from backend.src.modules.publications.domain.publication import Publication
-from backend.src.modules.certificates.domain.report_repository import IPublicationFormatter, IStyleManager
+from ....publications.domain.publication import Publication
+from ...domain.report_repository import IPublicationFormatter, IStyleManager
 
 
 class ReportLabPublicationFormatter(IPublicationFormatter):
@@ -31,15 +31,12 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         # Construir texto base de la publicación
         pub_text = f"{num}. ({pub.year}) \"{pub.title}\". {pub.source}."
         
-        # Agregar información de categorías e indexación
-        format_type = "SCOPUS" if db_name == "Scopus" else db_name
-
-        # Normalizar y determinar si la publicación es de tipo conferencia
+        # Normalizar y determinar el tipo de documento
         source_type_raw = (pub.document_type or "").strip()
         source_type_lower = source_type_raw.lower()
-        is_conference = any(k in source_type_lower for k in (
-            'conference', 'proceedings', 'conference paper', 'congreso', 'conferencia'
-        ))
+        
+        # Obtener etiqueta de indexación según el tipo de documento
+        indexation_label = self._get_indexation_label(source_type_lower)
 
         # Considerar 'No indexada' como ausencia de categorías
         has_valid_categories = False
@@ -55,14 +52,11 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
         else:
             has_valid_categories = False
 
-        if is_conference and not has_valid_categories:
-            # Para conferencias sin categorías, usar una frase específica
-            pub_text += f" <b>Conferencia Indexada en {format_type}</b>."
-        elif has_valid_categories:
+        if has_valid_categories:
             journal_categories = self._format_categories(pub.categories)
-            pub_text += f" <b>Indexada en {format_type} - {journal_categories}</b>."
+            pub_text += f" <b>{indexation_label} - {journal_categories}</b>."
         else:
-            pub_text += f" <b>Indexada en {format_type}</b>."
+            pub_text += f" <b>{indexation_label}</b>."
         
         # Agregar DOI si existe
         if pub.doi:
@@ -77,6 +71,32 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
             pub_text = f"<b>{pub_text}</b>"
         
         return pub_text
+    
+    @staticmethod
+    def _get_indexation_label(document_type: str) -> str:
+        """
+        Obtiene la etiqueta de indexación según el tipo de documento.
+        
+        Args:
+            document_type: Tipo de documento en minúsculas
+            
+        Returns:
+            str: Etiqueta de indexación apropiada
+        """
+        # Mapeo de tipos de documento a etiquetas de indexación
+        if 'conference' in document_type or 'proceedings' in document_type:
+            return "Conferencia indexada en Scopus"
+        elif 'book chapter' in document_type or 'chapter' in document_type:
+            return "Cap. Libro indexado en Scopus"
+        elif 'book' in document_type and 'chapter' not in document_type:
+            return "Libro indexado en Scopus"
+        elif 'review' in document_type:
+            return "Review indexado en Scopus"
+        elif 'article' in document_type or document_type == '' or 'artículo' in document_type:
+            return "Indexada en Scopus"
+        else:
+            # Para otros tipos, usar etiqueta genérica
+            return "Indexada en Scopus"
     
     @staticmethod
     def _format_categories(categories: Any) -> str:

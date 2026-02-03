@@ -7,8 +7,8 @@ dependiendo de la abstracción ITemplateOverlayService en lugar de implementacio
 import io
 from typing import Optional
 from pypdf import PdfReader
-from src.application.dto.report_dto import ProcessDraftRequestDTO
-from src.domain.repositories.template_overlay_repository import ITemplateOverlayService
+from ..application.report_dto import ProcessDraftRequestDTO
+from ..domain.template_overlay_repository import ITemplateOverlayService
 
 
 class DraftProcessorService:

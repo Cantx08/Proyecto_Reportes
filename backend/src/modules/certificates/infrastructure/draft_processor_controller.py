@@ -4,8 +4,8 @@ Controlador para procesar borradores PDF.
 from typing import Optional
 from fastapi import UploadFile, HTTPException, Form
 from fastapi.responses import Response
-from backend.src.modules.certificates.application.draft_processor_service import DraftProcessorService
-from backend.src.modules.certificates.application.report_dto import ProcessDraftRequestDTO
+from ..application.draft_processor_service import DraftProcessorService
+from ..application.report_dto import ProcessDraftRequestDTO
 
 
 class DraftProcessorController:

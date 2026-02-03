@@ -2,7 +2,7 @@ from typing import Any
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib import colors
-from backend.src.modules.certificates.domain.report_repository import IStyleManager
+from ...domain.report_repository import IStyleManager
 
 
 class ReportLabStyleManager(IStyleManager):

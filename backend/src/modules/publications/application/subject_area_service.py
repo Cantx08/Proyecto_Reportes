@@ -1,7 +1,7 @@
 import asyncio
 from typing import List
-from backend.src.modules.publications.domain.subject_areas_repository import SubjectAreasRepository
-from ...domain.repositories.scopus_account_repository import ScopusAccountRepository
+from ..domain.subject_areas_repository import SubjectAreasRepository
+from ...scopus_accounts.domain.scopus_account_repository import IScopusAccountRepository
 
 
 class SubjectAreaService:

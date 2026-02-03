@@ -8,6 +8,7 @@ import DepartmentSelect from '../../departments/components/DepartmentSelect';
 import JobPositionSelect from '../../job-positions/components/JobPositionSelect';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
+import ElaboradorSelect from './ElaboradorSelect';
 
 import {AuthorResponse} from "@/features/authors/types";
 
@@ -28,7 +29,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
     firmante: 1,
     firmante_nombre: '',
     fecha: '',
-    es_borrador: true,
+    elaborador: 'M. Vásquez',
   });
 
   // Pre-llenar los campos cuando hay un autor seleccionado
@@ -39,8 +40,9 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
         ...prev,
         docente_nombre: fullName,
         docente_genero: selectedAuthor.gender || 'M',
-        departamento: selectedAuthor.department || '',
-        cargo: selectedAuthor.position || '',
+        // Los IDs de departamento y cargo se resuelven en los selectores
+        departamento: selectedAuthor.department_id || '',
+        cargo: selectedAuthor.job_position_id || '',
       }));
     }
   }, [selectedAuthor]);
@@ -77,7 +79,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
         firmante: formData.firmante || 1,
         firmante_nombre: formData.firmante_nombre || undefined,
         fecha: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
-        es_borrador: formData.es_borrador ?? true,
+        elaborador: formData.elaborador || 'M. Vásquez',
       };
 
       const blob = await reportService.generateCertification(reportRequest);
@@ -86,8 +88,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      const tipoDoc = formData.es_borrador ? 'borrador' : 'certificado_final';
-      link.download = `${tipoDoc}_${formData.docente_nombre.replace(/\s+/g, '_')}.pdf`;
+      link.download = `certificado_${formData.docente_nombre.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -214,42 +215,16 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             </p>
           )}
         </div>
-      </div>
 
-      {/* Toggle para borrador vs certificado final */}
-      <div className="mb-6 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-lg font-medium text-neutral-800 mb-1">
-              Tipo de Documento
-            </h4>
-            <p className="text-sm text-neutral-600">
-              {formData.es_borrador
-                ? 'Borrador'
-                : 'Certificado final'}
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className={`text-sm font-medium ${formData.es_borrador ? 'text-primary-600' : 'text-neutral-500'}`}>
-              Borrador
-            </span>
-            <button
-              type="button"
-              onClick={() => handleInputChange('es_borrador', !formData.es_borrador)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                formData.es_borrador ? 'bg-neutral-300' : 'bg-primary-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  formData.es_borrador ? 'translate-x-1' : 'translate-x-6'
-                }`}
-              />
-            </button>
-            <span className={`text-sm font-medium ${!formData.es_borrador ? 'text-primary-600' : 'text-neutral-500'}`}>
-              Final
-            </span>
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Elaborado por
+          </label>
+          <ElaboradorSelect
+            value={formData.elaborador || ''}
+            onChange={(value) => handleInputChange('elaborador', value)}
+            placeholder="Seleccione o escriba el elaborador"
+          />
         </div>
       </div>
 
@@ -259,7 +234,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
           disabled={isGenerating}
           className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
         >
-          {isGenerating ? 'Generando...' : `📄 Generar ${formData.es_borrador ? 'Borrador' : 'Certificado Final'}`}
+          {isGenerating ? 'Generando...' : '📄 Generar Certificado'}
         </button>
       </div>
     </div>

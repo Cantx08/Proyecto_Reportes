@@ -1,16 +1,16 @@
 import { axiosInstance } from "@/lib/axios";
-import { ReportRequest, ProcessDraftMetadata } from "@/features/reports/types";
+import { ReportRequest, ProcessDraftMetadata, ElaboradorOption } from "@/features/reports/types";
 
 /**
- * Servicio para generar reportes y certificados PDF.
+ * Servicio para generar certificados PDF de publicaciones académicas.
  */
 export const reportService = {
     /**
-     * Generar reporte de certificación
-     * @param reportData Datos del reporte a generar
+     * Generar certificado de publicaciones
+     * @param reportData Datos del certificado a generar
      */
     generateCertification: async (reportData: ReportRequest): Promise<Blob> => {
-        const response = await axiosInstance.post('/reports/inform', reportData, {
+        const response = await axiosInstance.post('/certificates/generate', reportData, {
             responseType: 'blob',
             headers: {
                 'Content-Type': 'application/json',
@@ -40,13 +40,21 @@ export const reportService = {
             if (metadata.fecha) formData.append('fecha', metadata.fecha);
         }
 
-        const response = await axiosInstance.post('/reports/process-draft', formData, {
+        const response = await axiosInstance.post('/certificates/process-draft', formData, {
             responseType: 'blob',
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
 
+        return response.data;
+    },
+
+    /**
+     * Obtener opciones de elaboradores disponibles
+     */
+    getElaboradores: async (): Promise<ElaboradorOption[]> => {
+        const response = await axiosInstance.get('/certificates/elaboradores');
         return response.data;
     },
 };
