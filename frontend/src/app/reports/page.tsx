@@ -1,148 +1,82 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   ClipboardCheck, 
-  Download,
-  Upload,
   FileText,
+  BarChart3,
+  ArrowLeft,
   AlertCircle
 } from 'lucide-react';
 
-import { reportService } from "@/features/reports/services/reportService";
+import { usePublicationsContext } from '@/contexts/PublicationsContext';
+import { PublicationsList } from '@/features/publications/components/PublicationsList';
+import { SubjectAreas } from '@/features/publications/components/SubjectAreas';
+import { DocumentsByYear } from '@/features/publications/components/DocumentsByYearChart';
+import ReportGenerator from '@/features/reports/components/ReportGenerator';
+import { ErrorNotification } from '@/components/ErrorNotification';
 
-export default function CertificationPage() {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+export default function CertificatePage() {
+  const router = useRouter();
+  const { data, hasData, clearPublicationsData } = usePublicationsContext();
+  const [error, setError] = React.useState<string | null>(null);
 
-  const validateFile = (file: File): string | null => {
-    // Validar tipo
-    if (file.type !== 'application/pdf') {
-      return 'Por favor seleccione un archivo PDF válido';
-    }
-
-    // Validar tamaño (10MB)
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return 'El archivo excede el tamaño máximo permitido (10MB)';
-    }
-
-    return null;
+  const handleBackToSearch = () => {
+    clearPublicationsData();
+    router.push('/publications');
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    setError(null);
-
-    if (file) {
-      const validationError = validateFile(file);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-
-      setUploadedFile(file);
-    }
+  const handleReportError = (errorMsg: string) => {
+    setError(errorMsg);
   };
 
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Solo desactivar isDragging si realmente salimos del contenedor principal
-    // e.currentTarget es el div con los event handlers
-    // e.relatedTarget es el elemento al que nos movemos
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    
-    // Verificar si el cursor está fuera de los límites del contenedor
-    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
-      setIsDragging(false);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Mantener el estado de dragging activo
-    if (!isDragging) {
-      setIsDragging(true);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    setError(null);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      const validationError = validateFile(file);
-      
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-
-      setUploadedFile(file);
-    }
-  };
-
-  const handleProcessReport = async () => {
-    if (!uploadedFile) {
-      setError('Por favor seleccione un archivo PDF');
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-    
-    try {
-      // Llamar al backend para procesar el borrador
-      const pdfBlob = await reportService.processDraft(uploadedFile);
-      
-      // Crear URL del blob para descarga
-      const url = window.URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'certificado_final.pdf';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      
-      // Reset form
-      setUploadedFile(null);
-      
-      // Mostrar mensaje de éxito
-      alert('Certificado generado y descargado exitosamente');
-      
-    } catch (error) {
-      console.error('Error processing report:', error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Error desconocido al procesar el certificado';
-      setError(errorMessage);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setUploadedFile(null);
+  const dismissError = () => {
     setError(null);
   };
+
+  // Estado vacío - redirigir a búsqueda
+  if (!hasData || !data) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
+                <ClipboardCheck className="h-6 w-6 mr-3 text-primary-500" />
+                Generación de Certificados
+              </h1>
+              <p className="text-neutral-600 mt-1">
+                Genere certificados de publicaciones académicas
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Empty State */}
+        <div className="bg-white rounded-lg border border-neutral-200 p-12">
+          <div className="text-center">
+            <AlertCircle className="mx-auto h-16 w-16 text-warning-400 mb-4" />
+            <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+              No hay publicaciones para certificar
+            </h2>
+            <p className="text-neutral-600 mb-6 max-w-md mx-auto">
+              Primero debe buscar las publicaciones de un autor en la sección de publicaciones.
+              Los resultados de la búsqueda se mostrarán aquí para generar el certificado.
+            </p>
+            <button
+              onClick={handleBackToSearch}
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center mx-auto"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Ir a Buscar Publicaciones
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -152,112 +86,98 @@ export default function CertificationPage() {
           <div>
             <h1 className="text-2xl font-bold text-neutral-900 flex items-center">
               <ClipboardCheck className="h-6 w-6 mr-3 text-primary-500" />
-              Generación de Certificaciones
+              Generación de Certificados
             </h1>
             <p className="text-neutral-600 mt-1">
-              Carga aquí el borrador para generar la certificación
+              Revise las publicaciones y genere el certificado oficial
             </p>
           </div>
+          <button
+            onClick={handleBackToSearch}
+            className="px-4 py-2 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 flex items-center transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Nueva Búsqueda
+          </button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="bg-white rounded-lg border border-neutral-200 p-6">
-        <div className="space-y-6">
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-              <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-red-800">Error</p>
-                <p className="text-sm text-red-600 mt-1">{error}</p>
-              </div>
-            </div>
-          )}
-
-          {/* File Upload with Drag & Drop */}
-          <div>
-            <div 
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
-                isDragging 
-                  ? 'border-primary-500 bg-primary-50' 
-                  : 'border-neutral-300 hover:border-neutral-400'
-              }`}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
-              <Upload className={`mx-auto h-16 w-16 mb-4 transition-colors ${
-                isDragging ? 'text-primary-500' : 'text-neutral-400'
-              }`} />
-              <div className="mb-2">
-                <label className="cursor-pointer">
-                  <span className="text-primary-500 hover:text-primary-600 font-medium text-lg">
-                    Haz clic para subir un archivo
-                  </span>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    disabled={isProcessing}
-                  />
-                </label>
-                <span className="text-neutral-600"> o arrastra y suelta aquí</span>
-              </div>
-              <p className="text-sm text-neutral-500">Solo archivos PDF hasta 10MB</p>
-              
-              {uploadedFile && (
-                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center justify-center text-green-800">
-                    <FileText className="h-5 w-5 mr-2" />
-                    <span className="font-medium">{uploadedFile.name}</span>
-                  </div>
-                  <p className="text-sm text-green-600 mt-2">
-                    Tamaño: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                  <button
-                    onClick={handleCancel}
-                    className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
-                    disabled={isProcessing}
-                  >
-                    Eliminar archivo
-                  </button>
-                </div>
-              )}
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="flex items-center">
+            <FileText className="h-8 w-8 text-primary-500 mr-3" />
+            <div>
+              <p className="text-sm text-neutral-600">Publicaciones</p>
+              <p className="text-2xl font-bold text-neutral-900">{data.publications.length}</p>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-neutral-200">
-            <button
-              onClick={handleCancel}
-              disabled={isProcessing}
-              className="px-6 py-2 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleProcessReport}
-              disabled={isProcessing || !uploadedFile}
-              className="px-6 py-2 bg-primary-500 text-white rounded-lg text-sm font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Procesando...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Generar Certificado
-                </>
-              )}
-            </button>
+        </div>
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="flex items-center">
+            <BarChart3 className="h-8 w-8 text-secondary-500 mr-3" />
+            <div>
+              <p className="text-sm text-neutral-600">Áreas Temáticas</p>
+              <p className="text-2xl font-bold text-neutral-900">{data.subjectAreas.length}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg border border-neutral-200 p-4">
+          <div className="flex items-center">
+            <ClipboardCheck className="h-8 w-8 text-success-500 mr-3" />
+            <div>
+              <p className="text-sm text-neutral-600">Años de Publicación</p>
+              <p className="text-2xl font-bold text-neutral-900">{Object.keys(data.documentsByYear).length}</p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Main Content Grid */}
+      <div className="space-y-6">
+        {/* Formulario de Generación - Primero */}
+        <div className="bg-white rounded-lg border border-neutral-200 p-6">
+          <div className="flex items-center mb-6">
+            <ClipboardCheck className="h-6 w-6 text-primary-600 mr-3" />
+            <div>
+              <h2 className="text-lg font-semibold text-neutral-900">
+                Datos del Certificado
+              </h2>
+              <p className="text-sm text-neutral-600">
+                Complete los datos para generar el certificado oficial
+              </p>
+            </div>
+          </div>
+          <ReportGenerator
+            authorIds={data.authorIds}
+            selectedAuthor={data.selectedAuthor}
+            onError={handleReportError}
+          />
+        </div>
+
+        {/* Results Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Publicaciones - Ocupa 2 columnas */}
+          <div className="lg:col-span-2">
+            <PublicationsList publications={data.publications} />
+          </div>
+
+          {/* Sidebar - Áreas Temáticas */}
+          <div className="space-y-6">
+            <SubjectAreas areas={data.subjectAreas} />
+          </div>
+        </div>
+
+        {/* Gráfico de Documentos por Año - Ancho completo */}
+        {Object.keys(data.documentsByYear).length > 0 && (
+          <div className="w-full">
+            <DocumentsByYear documentsByYear={data.documentsByYear} />
+          </div>
+        )}
+      </div>
+
+      {/* Error Notification */}
+      <ErrorNotification error={error} onDismiss={dismissError} />
     </div>
   );
 }

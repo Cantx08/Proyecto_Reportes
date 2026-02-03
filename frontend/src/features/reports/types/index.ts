@@ -31,10 +31,3 @@ export const ELABORADOR_OPTIONS: ElaboradorOption[] = [
     { value: 'S. Sánchez', label: 'S. Sánchez' },
     { value: 'J. Sayago', label: 'J. Sayago' },
 ];
-
-export interface ProcessDraftMetadata {
-    memorando?: string;
-    firmante?: number;
-    firmante_nombre?: string;
-    fecha?: string;
-}

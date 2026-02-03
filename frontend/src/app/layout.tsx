@@ -2,6 +2,7 @@ import './globals.css'
 import type {Metadata} from 'next'
 import {Inter} from 'next/font/google'
 import {SidebarProvider} from '@/contexts/SidebarContext'
+import {PublicationsProvider} from '@/contexts/PublicationsContext'
 import MainLayout from '@/components/layout/MainLayout'
 import React from "react";
 
@@ -33,9 +34,11 @@ export default function RootLayout({
         </head>
         <body className={inter.className}>
             <SidebarProvider>
-                <MainLayout>
-                    {children}
-                </MainLayout>
+                <PublicationsProvider>
+                    <MainLayout>
+                        {children}
+                    </MainLayout>
+                </PublicationsProvider>
             </SidebarProvider>
         </body>
         </html>

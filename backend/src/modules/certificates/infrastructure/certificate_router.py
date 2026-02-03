@@ -2,25 +2,22 @@
 Router para el módulo de certificados.
 Define los endpoints para generar certificados de publicaciones académicas.
 """
-from typing import Optional, List
+from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
-from ..application.report_dto import ReportRequestDTO, ProcessDraftRequestDTO
+from ..application.report_dto import ReportRequestDTO
 from ..application.report_service import ReportService
-from ..application.draft_processor_service import DraftProcessorService
 from ..domain.report_repository import IReportGenerator
-from ..domain.template_overlay_repository import ITemplateOverlayService
 from ..domain.elaborador import Elaborador
 from .report.pdf_generator import ReportLabReportGenerator
 from .report.content_builder import ReportLabContentBuilder
 from .report.style_manager import ReportLabStyleManager
 from .report.chart_generator import MatplotlibChartGenerator
 from .report.publication_formatter import ReportLabPublicationFormatter
-from .report.template_overlay_service import TemplateOverlayService
 from ...publications.infrastructure.scopus_publication_repository import ScopusPublicationRepository
 from ...publications.infrastructure.sjr_file_repository import SJRFileRepository
 from ...publications.infrastructure.db_publication_cache_repository import DBPublicationCacheRepository
@@ -68,14 +65,6 @@ def get_publication_service(db: Session = Depends(get_db)) -> PublicationService
         sjr_repo=sjr_repo,
         scopus_account_repo=scopus_account_repo
     )
-
-
-def get_draft_processor_service() -> DraftProcessorService:
-    """
-    Factory para crear el servicio de procesamiento de borradores.
-    """
-    template_service: ITemplateOverlayService = TemplateOverlayService()
-    return DraftProcessorService(template_service)
 
 
 @router.post(
@@ -215,64 +204,6 @@ async def generate_certificate(
         raise HTTPException(status_code=400, detail=f"Datos inválidos: {str(ve)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generando el certificado: {str(e)}")
-
-
-@router.post(
-    "/process-draft",
-    response_class=Response,
-    summary="Procesar borrador PDF",
-    description="""
-    Procesa un PDF externo y le aplica la plantilla institucional.
-    
-    Útil para convertir documentos PDF existentes en certificados oficiales
-    con el formato y membrete institucional de la EPN.
-    """
-)
-async def process_draft(
-    file: UploadFile = File(..., description="Archivo PDF a procesar"),
-    memorando: Optional[str] = Form(None, description="Número de memorando"),
-    firmante: Optional[int] = Form(None, description="Tipo de firmante (1=Directora, 2=Vicerrector)"),
-    firmante_nombre: Optional[str] = Form(None, description="Nombre del firmante personalizado"),
-    fecha: Optional[str] = Form(None, description="Fecha del certificado"),
-    draft_service: DraftProcessorService = Depends(get_draft_processor_service)
-):
-    """Endpoint para procesar un borrador PDF y aplicar plantilla institucional."""
-    # Validar tipo de archivo
-    if not file.content_type or 'pdf' not in file.content_type.lower():
-        raise HTTPException(status_code=400, detail="El archivo debe ser un PDF")
-    
-    # Leer contenido del archivo
-    try:
-        draft_pdf_bytes = await file.read()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al leer el archivo: {str(e)}")
-    
-    # Validar tamaño máximo (10MB)
-    max_size = 10 * 1024 * 1024
-    if len(draft_pdf_bytes) > max_size:
-        raise HTTPException(status_code=400, detail="El archivo excede el tamaño máximo permitido (10MB)")
-    
-    # Crear DTO con metadatos
-    metadata = ProcessDraftRequestDTO(
-        memorando=memorando,
-        firmante=firmante,
-        firmante_nombre=firmante_nombre,
-        fecha=fecha
-    )
-    
-    # Procesar el borrador
-    try:
-        final_pdf_bytes = await draft_service.process_draft(draft_pdf_bytes, metadata)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al procesar el borrador: {str(e)}")
-    
-    return Response(
-        content=final_pdf_bytes,
-        media_type="application/pdf",
-        headers={"Content-Disposition": "attachment; filename=certificado_final.pdf"}
-    )
 
 
 @router.get(

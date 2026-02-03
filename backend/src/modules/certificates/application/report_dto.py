@@ -13,12 +13,3 @@ class ReportRequestDTO(BaseModel):
     firmante_nombre: Optional[str] = Field(None, description="Nombre del firmante (requerido para firmantes personalizados)")
     fecha: Optional[str] = Field(None, description="Fecha del reporte (opcional, usa fecha actual si no se especifica)")
     elaborador: str = Field("M. Vásquez", description="Nombre de quien elaboró el reporte (selección de opciones predefinidas o texto manual)")
-
-
-class ProcessDraftRequestDTO(BaseModel):
-    """DTO para procesar un borrador existente y convertirlo en certificado final."""
-    # Los metadatos se envían como Form data junto con el archivo
-    memorando: Optional[str] = Field(None, description="Número de memorando (opcional)")
-    firmante: Optional[int] = Field(None, description="Tipo de firmante (1=Directora, 2=Vicerrectora)")
-    firmante_nombre: Optional[str] = Field(None, description="Nombre personalizado del firmante")
-    fecha: Optional[str] = Field(None, description="Fecha del certificado (opcional)")
