@@ -127,23 +127,41 @@ export const useScopusData = () => {
 
       // Procesar Author IDS (usando el nuevo endpoint)
       for (const authorId of authorIds) {
-        setState(prev => ({ ...prev, loadingProgress: `Obteniendo publicaciones del autor...` }));
+        setState(prev => ({ 
+          ...prev, 
+          loadingProgress: `Obteniendo publicaciones del autor (esto puede tardar varios minutos)...` 
+        }));
         try {
           const response = await publicationService.getByAuthor(authorId);
           allPublications = [...allPublications, ...response.publications];
         } catch (error) {
           console.error(`Error al obtener publicaciones del autor ${authorId}:`, error);
+          // Propagar el error con un mensaje más claro
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : 'Error al obtener publicaciones del autor';
+          setState(prev => ({
+            ...prev,
+            error: errorMessage,
+            isLoading: false,
+            loadingProgress: null
+          }));
+          return; // Detener la ejecución si hay error
         }
       }
 
       // Procesar Scopus IDS directamente
       for (const scopusId of scopusIds) {
-        setState(prev => ({ ...prev, loadingProgress: `Obteniendo publicaciones de Scopus ID ${scopusId}...` }));
+        setState(prev => ({ 
+          ...prev, 
+          loadingProgress: `Obteniendo publicaciones de Scopus ID ${scopusId}...` 
+        }));
         try {
           const publications = await publicationService.getByScopusId(scopusId);
           allPublications = [...allPublications, ...publications];
         } catch (error) {
           console.error(`Error al obtener publicaciones de Scopus ID ${scopusId}:`, error);
+          // Continuar con el siguiente ID en caso de error
         }
       }
 

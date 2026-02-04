@@ -28,6 +28,6 @@ export interface ElaboradorOption {
  */
 export const ELABORADOR_OPTIONS: ElaboradorOption[] = [
     { value: 'M. Vásquez', label: 'M. Vásquez' },
-    { value: 'S. Sánchez', label: 'S. Sánchez' },
-    { value: 'J. Sayago', label: 'J. Sayago' },
+    { value: 'C. Calderón', label: 'C. Calderón' },
+    { value: 'C. Rivadeneira', label: 'C. Rivadeneira' },
 ];

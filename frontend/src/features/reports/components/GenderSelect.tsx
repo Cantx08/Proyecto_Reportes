@@ -78,7 +78,7 @@ const GenderSelect: React.FC<GenderSelectProps> = ({
 
   // Mostrar etiqueta completa si es una opción predefinida
   const displayValue = (() => {
-    const option = genderOptions.find(opt => opt.value === value);
+    const option = GENDER_OPTIONS.find(opt => opt.value === value);
     return option ? option.label : value;
   })();
   

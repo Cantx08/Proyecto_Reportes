@@ -4,8 +4,6 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ClipboardCheck, 
-  FileText,
-  BarChart3,
   ArrowLeft,
   AlertCircle
 } from 'lucide-react';
@@ -21,6 +19,12 @@ export default function CertificatePage() {
   const router = useRouter();
   const { data, hasData, clearPublicationsData } = usePublicationsContext();
   const [error, setError] = React.useState<string | null>(null);
+
+  // Log para debug
+  React.useEffect(() => {
+    console.log('[REPORTS PAGE] Context data:', data);
+    console.log('[REPORTS PAGE] Selected Author:', data?.selectedAuthor);
+  }, [data]);
 
   const handleBackToSearch = () => {
     clearPublicationsData();
@@ -102,59 +106,8 @@ export default function CertificatePage() {
         </div>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-lg border border-neutral-200 p-4">
-          <div className="flex items-center">
-            <FileText className="h-8 w-8 text-primary-500 mr-3" />
-            <div>
-              <p className="text-sm text-neutral-600">Publicaciones</p>
-              <p className="text-2xl font-bold text-neutral-900">{data.publications.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-neutral-200 p-4">
-          <div className="flex items-center">
-            <BarChart3 className="h-8 w-8 text-secondary-500 mr-3" />
-            <div>
-              <p className="text-sm text-neutral-600">Áreas Temáticas</p>
-              <p className="text-2xl font-bold text-neutral-900">{data.subjectAreas.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg border border-neutral-200 p-4">
-          <div className="flex items-center">
-            <ClipboardCheck className="h-8 w-8 text-success-500 mr-3" />
-            <div>
-              <p className="text-sm text-neutral-600">Años de Publicación</p>
-              <p className="text-2xl font-bold text-neutral-900">{Object.keys(data.documentsByYear).length}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content Grid */}
       <div className="space-y-6">
-        {/* Formulario de Generación - Primero */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-6">
-          <div className="flex items-center mb-6">
-            <ClipboardCheck className="h-6 w-6 text-primary-600 mr-3" />
-            <div>
-              <h2 className="text-lg font-semibold text-neutral-900">
-                Datos del Certificado
-              </h2>
-              <p className="text-sm text-neutral-600">
-                Complete los datos para generar el certificado oficial
-              </p>
-            </div>
-          </div>
-          <ReportGenerator
-            authorIds={data.authorIds}
-            selectedAuthor={data.selectedAuthor}
-            onError={handleReportError}
-          />
-        </div>
-
         {/* Results Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Publicaciones - Ocupa 2 columnas */}
@@ -174,6 +127,23 @@ export default function CertificatePage() {
             <DocumentsByYear documentsByYear={data.documentsByYear} />
           </div>
         )}
+
+        {/* Formulario de Generación */}
+        <div className="bg-white rounded-lg border border-neutral-200 p-6">
+          <div className="flex items-center mb-6">
+            <ClipboardCheck className="h-6 w-6 text-primary-600 mr-3" />
+            <div>
+              <h2 className="text-lg font-semibold text-neutral-900">
+                Datos del Certificado
+              </h2>
+            </div>
+          </div>
+          <ReportGenerator
+            authorIds={data.authorIds}
+            selectedAuthor={data.selectedAuthor}
+            onError={handleReportError}
+          />
+        </div>
       </div>
 
       {/* Error Notification */}

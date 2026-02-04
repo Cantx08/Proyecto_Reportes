@@ -36,11 +36,18 @@ export default function PublicationsPage() {
     clearResults,
   } = useScopusData();
 
-  const { authors } = useAuthors();
+  const { authors, fetchAuthors } = useAuthors();
   const { setPublicationsData } = usePublicationsContext();
 
   const [searchMode, setSearchMode] = useState<'scopus' | 'database'>('scopus');
   const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]);
+
+  // Cargar autores cuando se cambia al modo database
+  useEffect(() => {
+    if (searchMode === 'database') {
+      fetchAuthors();
+    }
+  }, [searchMode, fetchAuthors]);
 
   const handleAuthorSelect = (authorId: string) => {
     // Solo permite seleccionar un autor a la vez (certificaciones individuales)
@@ -73,18 +80,30 @@ export default function PublicationsPage() {
     if (publications.length > 0 && !isLoading) {
       // Guardar datos en el contexto
       const validScopusIds = scopusIds.filter((scopusId: string) => scopusId.trim() !== '');
+      
+      // Obtener el autor seleccionado AHORA, antes de redirigir
+      let authorToSave: AuthorResponse | undefined = undefined;
+      if (searchMode === 'database' && selectedAuthorIds.length > 0) {
+        const firstSelectedId = selectedAuthorIds[0];
+        console.log('[PUBLICATIONS] Looking for author ID:', firstSelectedId);
+        console.log('[PUBLICATIONS] Authors array:', authors);
+        console.log('[PUBLICATIONS] Authors length:', authors.length);
+        authorToSave = authors.find(author => author.author_id === firstSelectedId);
+        console.log('[PUBLICATIONS] Saving author to context:', authorToSave);
+      }
+      
       setPublicationsData({
         publications,
         subjectAreas,
         documentsByYear,
         authorIds: [...validScopusIds, ...selectedAuthorIds],
-        selectedAuthor: getSelectedAuthor(),
+        selectedAuthor: authorToSave,
       });
 
       // Redirigir a la página de certificados
       router.push('/reports');
     }
-  }, [publications, isLoading, documentsByYear, getSelectedAuthor, router, scopusIds, selectedAuthorIds, setPublicationsData, subjectAreas]);
+  }, [publications, isLoading, documentsByYear, router, scopusIds, selectedAuthorIds, setPublicationsData, subjectAreas, searchMode, authors]);
 
   const dismissError = () => {
     clearResults();
@@ -183,7 +202,7 @@ export default function PublicationsPage() {
           {/* Info box */}
           <div className="mt-6 p-4 bg-info-50 border border-info-200 rounded-lg">
             <div className="flex items-start">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <ArrowRight className="h-5 w-5 text-info-500" />
               </div>
               <div className="ml-3">
@@ -219,17 +238,28 @@ export default function PublicationsPage() {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="mt-8 text-center py-8">
-              <div className="inline-flex items-center flex-col">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                <span className="text-lg text-neutral-600 mb-2">
+            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <div className="flex items-center flex-col">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
+                <span className="text-lg font-medium text-blue-900 mb-2">
                   Procesando datos de Scopus...
                 </span>
                 {loadingProgress && (
-                  <span className="text-sm text-neutral-500">
-                    {loadingProgress}
-                  </span>
+                  <div className="mt-3 text-center">
+                    <span className="text-sm text-blue-700 font-medium block mb-1">
+                      {loadingProgress}
+                    </span>
+                    <span className="text-xs text-blue-600">
+                      Esta operación puede tardar varios minutos si el autor tiene múltiples cuentas Scopus o muchas publicaciones.
+                    </span>
+                  </div>
                 )}
+                <div className="mt-4 flex items-center space-x-2 text-xs text-blue-600">
+                  <svg className="animate-pulse h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="8"/>
+                  </svg>
+                  <span>Esperando respuesta del servidor...</span>
+                </div>
               </div>
             </div>
           )}

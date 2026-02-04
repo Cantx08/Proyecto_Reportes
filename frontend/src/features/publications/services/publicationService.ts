@@ -4,6 +4,18 @@ import {
     PublicationsStatsResponse
 } from "@/src/features/publications/types";
 import { axiosInstance } from "@/src/lib/axios";
+import axios from 'axios';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Instancia específica para publicaciones con timeout extendido
+const publicationAxiosInstance = axios.create({
+    baseURL: API_BASE_URL,
+    timeout: 180000, // 3 minutos para consultas de publicaciones que pueden tardar
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
 /**
  * Servicio para gestionar publicaciones científicas.
@@ -19,12 +31,27 @@ export const publicationService = {
         authorId: string, 
         refresh: boolean = false
     ): Promise<AuthorPublicationsResponse> => {
-        const params = refresh ? { refresh: true } : {};
-        const { data } = await axiosInstance.get(
-            `/publications/author/${authorId}`,
-            { params }
-        );
-        return data;
+        try {
+            const params = refresh ? { refresh: true } : {};
+            const { data } = await publicationAxiosInstance.get(
+                `/publications/author/${authorId}`,
+                { params }
+            );
+            return data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.code === 'ECONNABORTED') {
+                    throw new Error('La consulta está tardando más de lo esperado. El autor puede tener muchas publicaciones o múltiples cuentas Scopus. Por favor, intente nuevamente.');
+                }
+                if (error.response?.status === 404) {
+                    throw new Error('El autor no tiene cuentas Scopus asociadas.');
+                }
+                if (error.response?.status === 500) {
+                    throw new Error('Error al obtener publicaciones desde Scopus. Por favor, intente nuevamente.');
+                }
+            }
+            throw error;
+        }
     },
 
     /**
