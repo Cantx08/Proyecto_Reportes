@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
-import { apiUtils } from '@/services/servicesApi';
+import { apiUtils } from '@/src/services/servicesApi';
 import { 
     AuthorPublicationsResponse, 
     Publication,
     PublicationsStatsResponse,
     PublicationFilters
-} from '@/features/publications/types';
-import { publicationService } from '@/features/publications/services/publicationService';
+} from '@/src/features/publications/types';
+import { publicationService } from '@/src/features/publications/services/publicationService';
 
 export interface UsePublicationsState {
     publications: Publication[];

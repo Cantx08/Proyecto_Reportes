@@ -2,8 +2,8 @@ import {
     AuthorPublicationsResponse,
     Publication,
     PublicationsStatsResponse
-} from "@/features/publications/types";
-import { axiosInstance } from "@/lib/axios";
+} from "@/src/features/publications/types";
+import { axiosInstance } from "@/src/lib/axios";
 
 /**
  * Servicio para gestionar publicaciones científicas.

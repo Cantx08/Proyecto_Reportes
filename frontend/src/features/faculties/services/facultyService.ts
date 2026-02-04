@@ -1,5 +1,5 @@
-import {Faculty} from "@/features/faculties/types";
-import {axiosInstance} from "@/lib/axios";
+import {Faculty} from "@/src/features/faculties/types";
+import {axiosInstance} from "@/src/lib/axios";
 
 export const facultyService = {
     getFaculties: async (): Promise<Faculty[]> => {

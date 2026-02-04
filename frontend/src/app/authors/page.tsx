@@ -2,7 +2,6 @@
 
 import React, {useState, useEffect} from 'react';
 import Link from 'next/link';
-import {useAuthors} from '@/features/authors/hooks/useAuthors';
 import {
     Plus,
     Edit,
@@ -16,12 +15,13 @@ import {
     ChevronRight,
     Upload
 } from 'lucide-react';
-import {facultyService} from "@/features/faculties/services/facultyService";
-import {departmentService} from "@/features/departments/services/departmentService";
-import {Faculty} from "@/features/faculties/types";
-import {DepartmentResponse} from "@/features/departments/types";
-import {JobPositionResponse} from "@/features/job-positions/types";
-import {jobPositionService} from "@/features/job-positions/services/jobPositionService";
+import {useAuthors} from "@/src/features/authors/hooks/useAuthors";
+import {Faculty} from "@/src/features/faculties/types";
+import {DepartmentResponse} from "@/src/features/departments/types";
+import {JobPositionResponse} from "@/src/features/job-positions/types";
+import {facultyService} from "@/src/features/faculties/services/facultyService";
+import {departmentService} from "@/src/features/departments/services/departmentService";
+import {jobPositionService} from "@/src/features/job-positions/services/jobPositionService";
 
 
 export default function AuthorsPage() {
@@ -33,6 +33,13 @@ export default function AuthorsPage() {
     const [jobPositions, setJobPositions] = useState<JobPositionResponse[]>([]);
     const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
+
+    // Handler para cambiar facultad y resetear departamento
+    const handleFacultyChange = (facultyId: string) => {
+        setSelectedFaculty(facultyId);
+        setSelectedDepartment('all');
+        setCurrentPage(1);
+    };
     const [currentPage, setCurrentPage] = useState(1);
     const [hoveredRow, setHoveredRow] = useState<string | null>(null);
     const [importing, setImporting] = useState(false);
@@ -113,15 +120,6 @@ export default function AuthorsPage() {
         return matchesSearch && matchesFaculty && matchesDepartment;
     });
 
-// Reset department filter when faculty changes
-    useEffect(() => {
-        setSelectedDepartment('all');
-    }, [selectedFaculty]);
-
-// Reset department filter when faculty changes
-    useEffect(() => {
-        setSelectedDepartment('all');
-    }, [selectedFaculty]);
 
 // Función para limpiar todos los filtros
     const clearFilters = () => {
@@ -161,14 +159,17 @@ export default function AuthorsPage() {
 
 // Paginación
     const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
+
+    // Auto-reset page cuando cambian los filtros
+    const validCurrentPage = currentPage > totalPages ? 1 : currentPage;
+    const startIndex = (validCurrentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedAuthors = filteredAuthors.slice(startIndex, endIndex);
 
-// Reset page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, selectedFaculty, selectedDepartment]);
+    // Actualizar currentPage si es inválida
+    if (currentPage !== validCurrentPage && totalPages > 0) {
+        setCurrentPage(validCurrentPage);
+    }
 
     if (loading) {
         return (
@@ -371,7 +372,7 @@ export default function AuthorsPage() {
                         {/* Faculty Filter */}
                         <select
                             value={selectedFaculty}
-                            onChange={(e) => setSelectedFaculty(e.target.value)}
+                            onChange={(e) => handleFacultyChange(e.target.value)}
                             className={`w-64 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${
                                 selectedFaculty !== 'all' ? 'border-secondary-400 bg-secondary-50' : 'border-neutral-300'
                             }`}
@@ -427,7 +428,7 @@ export default function AuthorsPage() {
                             {searchTerm && (
                                 <span
                                     className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 text-xs font-medium rounded-full">
-                  Búsqueda: "{searchTerm.length > 20 ? searchTerm.substring(0, 20) + '...' : searchTerm}"
+                  Búsqueda: &quot;{searchTerm.length > 20 ? searchTerm.substring(0, 20) + '...' : searchTerm}&quot;
                   <button onClick={() => setSearchTerm('')} className="hover:bg-primary-200 rounded-full p-0.5">
                     <X className="h-3 w-3"/>
                   </button>
@@ -437,7 +438,7 @@ export default function AuthorsPage() {
                                 <span
                                     className="inline-flex items-center gap-1 px-3 py-1 bg-secondary-100 text-secondary-800 text-xs font-medium rounded-full">
                   Facultad
-                  <button onClick={() => setSelectedFaculty('all')}
+                  <button onClick={() => handleFacultyChange('all')}
                           className="hover:bg-secondary-200 rounded-full p-0.5">
                     <X className="h-3 w-3"/>
                   </button>

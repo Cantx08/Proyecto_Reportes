@@ -1,7 +1,7 @@
-import {useCallback, useEffect, useState} from 'react';
-import {apiUtils} from '@/services/servicesApi';
-import {JobPositionCreateRequest, JobPositionResponse, JobPositionUpdateRequest} from "@/features/job-positions/types";
-import {jobPositionService} from "@/features/job-positions/services/jobPositionService";
+import {useCallback, useState} from 'react';
+import {apiUtils} from '@/src/services/servicesApi';
+import {JobPositionCreateRequest, JobPositionResponse, JobPositionUpdateRequest} from "@/src/features/job-positions/types";
+import {jobPositionService} from "@/src/features/job-positions/services/jobPositionService";
 
 export interface UseJobPositionsState {
   positions: JobPositionResponse[];
@@ -130,10 +130,6 @@ export function useJobPositions(): UseJobPositionsState & UseJobPositionsActions
     }
   }, []);
 
-  // Cargar posiciones al montar el componente
-  useEffect(() => {
-    fetchPositions();
-  }, [fetchPositions]);
 
   return {
     ...state,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 interface GenderSelectProps {
   value: string;
@@ -10,6 +10,11 @@ interface GenderSelectProps {
   placeholder?: string;
 }
 
+const GENDER_OPTIONS = [
+  { value: 'M', label: 'Masculino' },
+  { value: 'F', label: 'Femenino' }
+];
+
 const GenderSelect: React.FC<GenderSelectProps> = ({
   value,
   onChange,
@@ -18,27 +23,19 @@ const GenderSelect: React.FC<GenderSelectProps> = ({
   placeholder = 'Escriba o seleccione un género'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState<Array<{value: string, label: string}>>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const genderOptions = [
-    { value: 'M', label: 'Masculino' },
-    { value: 'F', label: 'Femenino' }
-  ];
-
-  // Filtrar opciones basado en el texto ingresado
-  useEffect(() => {
+  // Filtrar opciones según el texto ingresado usando useMemo
+  const filteredOptions = useMemo(() => {
     if (!value.trim()) {
-      setFilteredOptions(genderOptions);
-      return;
+      return GENDER_OPTIONS;
     }
 
-    const filtered = genderOptions.filter(option => 
+    return GENDER_OPTIONS.filter(option =>
       option.label.toLowerCase().includes(value.toLowerCase()) ||
       option.value.toLowerCase().includes(value.toLowerCase())
     );
-    setFilteredOptions(filtered);
   }, [value]);
 
   // Cerrar dropdown al hacer clic fuera
@@ -119,7 +116,7 @@ const GenderSelect: React.FC<GenderSelectProps> = ({
       {isOpen && value.trim() && filteredOptions.length === 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
           <div className="text-gray-500 text-sm">
-            No se encontraron opciones que coincidan con "{value}".
+            No se encontraron opciones que coincidan con &quot;{value}&quot;.
           </div>
         </div>
       )}

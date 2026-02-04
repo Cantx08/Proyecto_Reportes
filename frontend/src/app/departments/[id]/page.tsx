@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useDepartments } from '@/features/departments/hooks/useDepartments';
-import { FacultySelect } from '@/features/faculties/components/FacultySelect';
+import { useDepartments } from '@/src/features/departments/hooks/useDepartments';
+import { FacultySelect } from '@/src/features/faculties/components/FacultySelect';
+import {DepartmentUpdateRequest} from "@/src/features/departments/types";
 import { Building, ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import {DepartmentUpdateRequest} from "@/features/departments/types";
 
 export default function EditDepartmentPage() {
   const router = useRouter();

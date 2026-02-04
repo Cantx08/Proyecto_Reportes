@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
-import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
-import { ErrorNotification } from '@/components/ErrorNotification';
-import Breadcrumb from '@/components/layout/Breadcrumb';
 import { Briefcase, Save, ArrowLeft, Loader2 } from 'lucide-react';
-import {JobPositionResponse, JobPositionUpdateRequest} from "@/features/job-positions/types";
+import { useJobPositions } from '@/src/features/job-positions/hooks/useJobPositions';
+import {JobPositionResponse, JobPositionUpdateRequest} from "@/src/features/job-positions/types";
+import Breadcrumb from "@/src/components/layout/Breadcrumb";
+import {ErrorNotification} from "@/src/components/ErrorNotification";
 
 const EditPositionPage: React.FC = () => {
   const router = useRouter();

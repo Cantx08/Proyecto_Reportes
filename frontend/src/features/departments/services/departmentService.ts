@@ -1,5 +1,5 @@
-import {axiosInstance} from "@/lib/axios";
-import {DepartmentCreateRequest, DepartmentResponse, DepartmentUpdateRequest} from "@/features/departments/types";
+import {axiosInstance} from "@/src/lib/axios";
+import {DepartmentCreateRequest, DepartmentResponse, DepartmentUpdateRequest} from "@/src/features/departments/types";
 
 export const departmentService = {
     /**

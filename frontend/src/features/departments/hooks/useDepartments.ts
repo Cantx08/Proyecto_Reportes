@@ -1,7 +1,7 @@
-import {useCallback, useEffect, useState} from 'react';
-import {apiUtils} from '@/services/servicesApi';
-import {DepartmentCreateRequest, DepartmentResponse, DepartmentUpdateRequest} from "@/features/departments/types";
-import {departmentService} from "@/features/departments/services/departmentService";
+import {useCallback, useState} from 'react';
+import {apiUtils} from '@/src/services/servicesApi';
+import {DepartmentCreateRequest, DepartmentResponse, DepartmentUpdateRequest} from "@/src/features/departments/types";
+import {departmentService} from "@/src/features/departments/services/departmentService";
 
 export interface UseDepartmentsState {
   departments: DepartmentResponse[];
@@ -141,10 +141,6 @@ export function useDepartments(): UseDepartmentsState & UseDepartmentsActions {
     }
   }, []);
 
-  // Cargar departamentos al montar el componente
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
 
   return {
     ...state,

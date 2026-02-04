@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Check, Loader2 } from 'lucide-react';
-import { useAuthors } from '@/features/authors/hooks/useAuthors';
+import { useAuthors } from '@/src/features/authors/hooks/useAuthors';
 
 interface AuthorSelectorProps {
   onAuthorSelect: (authorId: string) => void;

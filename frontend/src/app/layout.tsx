@@ -1,9 +1,9 @@
 import './globals.css'
 import type {Metadata} from 'next'
 import {Inter} from 'next/font/google'
-import {SidebarProvider} from '@/contexts/SidebarContext'
-import {PublicationsProvider} from '@/contexts/PublicationsContext'
-import MainLayout from '@/components/layout/MainLayout'
+import {SidebarProvider} from '@/src/contexts/SidebarContext'
+import {PublicationsProvider} from '@/src/contexts/PublicationsContext'
+import MainLayout from '@/src/components/layout/MainLayout'
 import React from "react";
 
 const inter = Inter({subsets: ['latin']})

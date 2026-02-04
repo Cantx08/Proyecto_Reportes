@@ -25,7 +25,7 @@ export const capitalizeWords = (text: string): string => {
 };
 
 /**
- * Valida si una URL es válida
+ * Validar si una URL es válida
  */
 export const isValidUrl = (url: string): boolean => {
   try {
@@ -46,7 +46,7 @@ export const generateId = (): string => {
 /**
  * Debounce function para retrasar la ejecución de una función
  */
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   waitFor: number
 ): (...args: Parameters<T>) => void => {
@@ -108,7 +108,7 @@ export const slugify = (text: string): string => {
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '') // Remover caracteres especiales
-    .replace(/[\s_-]+/g, '-') // Reemplazar espacios y guiones con un solo guión
+    .replace(/[\s_-]+/g, '-') // Reemplazar espacios y guiones con un solo guion
     .replace(/^-+|-+$/g, ''); // Remover guiones al inicio y final
 };
 

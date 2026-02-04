@@ -3,7 +3,7 @@
 import React from 'react'; // Ya no necesitamos useState
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { SidebarProvider } from '@/contexts/SidebarContext';
+import { SidebarProvider } from '@/src/contexts/SidebarContext';
 
 interface MainLayoutProps {
     children: React.ReactNode;

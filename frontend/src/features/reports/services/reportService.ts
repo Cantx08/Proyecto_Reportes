@@ -1,5 +1,5 @@
-import { axiosInstance } from "@/lib/axios";
-import { ReportRequest, ElaboradorOption } from "@/features/reports/types";
+import { axiosInstance } from "@/src/lib/axios";
+import { ReportRequest, ElaboradorOption } from "@/src/features/reports/types";
 
 /**
  * Servicio para generar certificados PDF de publicaciones académicas.

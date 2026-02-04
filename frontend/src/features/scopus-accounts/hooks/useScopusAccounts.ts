@@ -1,7 +1,7 @@
 import {useCallback, useState} from 'react';
-import {apiUtils} from '@/services/servicesApi';
-import {ScopusAccountCreateRequest, ScopusAccountResponse} from "@/features/scopus-accounts/types";
-import {scopusAccountsService} from "@/features/scopus-accounts/services/scopusAccountService";
+import {apiUtils} from '@/src/services/servicesApi';
+import {ScopusAccountCreateRequest, ScopusAccountResponse} from "@/src/features/scopus-accounts/types";
+import {scopusAccountsService} from "@/src/features/scopus-accounts/services/scopusAccountService";
 
 export interface UseScopusAccountsState {
     accounts: ScopusAccountResponse[];

@@ -1,20 +1,22 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useRouter} from 'next/navigation';
-import {useAuthors} from '@/features/authors/hooks/useAuthors';
-import {useDepartments} from '@/features/departments/hooks/useDepartments';
-import {useJobPositions} from '@/features/job-positions/hooks/useJobPositions';
-import {scopusAccountsService} from "@/features/scopus-accounts/services/scopusAccountService";
 import {ArrowLeft, Save, Loader2, UserPlus, User, AlertCircle, GraduationCap, BookOpen} from 'lucide-react';
 import Link from 'next/link';
-import ScopusAccountsManager from '@/features/scopus-accounts/components/ScopusAccountsManager';
+import {useAuthors} from '@/src/features/authors/hooks/useAuthors';
+import {useDepartments} from '@/src/features/departments/hooks/useDepartments';
+import {useJobPositions} from '@/src/features/job-positions/hooks/useJobPositions';
+import {scopusAccountsService} from "@/src/features/scopus-accounts/services/scopusAccountService";
+import ScopusAccountsManager, {
+    ScopusAccountUiItem
+} from '@/src/features/scopus-accounts/components/ScopusAccountsManager';
 
 export default function NewAuthorPage() {
     const router = useRouter();
     const {createAuthor, creating, error} = useAuthors();
-    const {departments, loading: loadingDepartments} = useDepartments();
-    const {positions, loading: loadingPositions} = useJobPositions();
+    const {departments, loading: loadingDepartments, fetchDepartments} = useDepartments();
+    const {positions, loading: loadingPositions, fetchPositions} = useJobPositions();
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -26,7 +28,12 @@ export default function NewAuthorPage() {
         department_id: ''
     });
 
-    const [scopusAccounts, setScopusAccounts] = useState<any[]>([]);
+    useEffect(() => {
+        fetchDepartments();
+        fetchPositions();
+    }, [fetchDepartments, fetchPositions]);
+
+    const [scopusAccounts, setScopusAccounts] = useState<ScopusAccountUiItem[]>([]);
 
     const [validationErrors, setValidationErrors] = useState<{
         first_name?: string;

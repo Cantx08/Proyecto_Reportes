@@ -3,8 +3,8 @@ import {
     AuthorResponse,
     AuthorUpdateRequest,
     ImportAuthorsResponse
-} from "@/features/authors/types";
-import {axiosInstance} from "@/lib/axios";
+} from "@/src/features/authors/types";
+import {axiosInstance} from "@/src/lib/axios";
 
 export const authorService = {
     /**

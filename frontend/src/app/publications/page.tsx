@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   FileText, 
@@ -9,14 +9,14 @@ import {
   Microscope,
   ArrowRight
 } from 'lucide-react';
-import { ScopusIdInput } from '@/features/scopus-accounts/components/ScopusIdInput';
-import { AuthorSelect } from '@/features/authors/components/AuthorSelect';
-import { ErrorNotification } from '@/components/ErrorNotification';
-import { useScopusData } from '@/features/scopus-accounts/hooks/useScopusData';
-import { useAuthors } from '@/features/authors/hooks/useAuthors';
-import { usePublicationsContext } from '@/contexts/PublicationsContext';
+import { ScopusIdInput } from '@/src/features/scopus-accounts/components/ScopusIdInput';
+import { AuthorSelect } from '@/src/features/authors/components/AuthorSelect';
+import { ErrorNotification } from '@/src/components/ErrorNotification';
+import { useScopusData } from '@/src/features/scopus-accounts/hooks/useScopusData';
+import { useAuthors } from '@/src/features/authors/hooks/useAuthors';
+import { usePublicationsContext } from '@/src/contexts/PublicationsContext';
 
-import { AuthorResponse } from "@/features/authors/types";
+import { AuthorResponse } from "@/src/features/authors/types";
 
 export default function PublicationsPage() {
   const router = useRouter();
@@ -48,17 +48,17 @@ export default function PublicationsPage() {
   };
 
   // Obtener el primer autor seleccionado de la base de datos
-  const getSelectedAuthor = (): AuthorResponse | undefined => {
+  const getSelectedAuthor = useCallback((): AuthorResponse | undefined => {
     if (searchMode === 'database' && selectedAuthorIds.length > 0) {
       const firstSelectedId = selectedAuthorIds[0];
       return authors.find(author => author.author_id === firstSelectedId);
     }
     return undefined;
-  };
+  }, [searchMode, selectedAuthorIds, authors]);
 
   const handleSearch = async () => {
     // Combinar Scopus IDs y Author IDs
-    const validScopusIds = scopusIds.filter(id => id.trim() !== '');
+    const validScopusIds = scopusIds.filter((scopusId: string) => scopusId.trim() !== '');
     const allIds = [...validScopusIds, ...selectedAuthorIds];
 
     if (allIds.length === 0) {
@@ -72,7 +72,7 @@ export default function PublicationsPage() {
   useEffect(() => {
     if (publications.length > 0 && !isLoading) {
       // Guardar datos en el contexto
-      const validScopusIds = scopusIds.filter(id => id.trim() !== '');
+      const validScopusIds = scopusIds.filter((scopusId: string) => scopusId.trim() !== '');
       setPublicationsData({
         publications,
         subjectAreas,
@@ -84,7 +84,7 @@ export default function PublicationsPage() {
       // Redirigir a la página de certificados
       router.push('/reports');
     }
-  }, [publications, isLoading]);
+  }, [publications, isLoading, documentsByYear, getSelectedAuthor, router, scopusIds, selectedAuthorIds, setPublicationsData, subjectAreas]);
 
   const dismissError = () => {
     clearResults();
@@ -201,7 +201,7 @@ export default function PublicationsPage() {
           {/* Search Button */}
           <button
             onClick={handleSearch}
-            disabled={isLoading || (scopusIds.filter(id => id.trim()).length === 0 && selectedAuthorIds.length === 0)}
+            disabled={isLoading || (scopusIds.filter((scopusId: string) => scopusId.trim()).length === 0 && selectedAuthorIds.length === 0)}
             className="w-full mt-6 py-3 px-4 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-sm font-medium"
           >
             {isLoading ? (

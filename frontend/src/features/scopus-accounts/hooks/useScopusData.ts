@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import type { AppState, ValidationResult } from '@/types/api';
-import { publicationService } from "@/features/publications/services/publicationService";
-import { Publication } from "@/features/publications/types";
+import type { AppState, ValidationResult } from '@/src/types/api';
+import { publicationService } from "@/src/features/publications/services/publicationService";
+import { Publication } from "@/src/features/publications/types";
 
 const initialState: AppState = {
   scopusIds: [''],
@@ -91,7 +91,7 @@ export const useScopusData = () => {
 
   // Buscar datos de Scopus
   const searchScopusData = useCallback(async (mixedIds?: string[]) => {
-    // Si se pasan IDs mixtos, usarlos. Si no, usar los del estado
+    // Si se pasan IDS mixtos, usarlos. Si no, usar los del estado
     const idsToSearch = mixedIds || state.scopusIds;
     
     // Separar IDs: UUIDs (author_id) vs numéricos (Scopus ID)
@@ -125,7 +125,7 @@ export const useScopusData = () => {
     try {
       let allPublications: Publication[] = [];
 
-      // Procesar Author IDs (usando el nuevo endpoint)
+      // Procesar Author IDS (usando el nuevo endpoint)
       for (const authorId of authorIds) {
         setState(prev => ({ ...prev, loadingProgress: `Obteniendo publicaciones del autor...` }));
         try {
@@ -136,7 +136,7 @@ export const useScopusData = () => {
         }
       }
 
-      // Procesar Scopus IDs directamente
+      // Procesar Scopus IDS directamente
       for (const scopusId of scopusIds) {
         setState(prev => ({ ...prev, loadingProgress: `Obteniendo publicaciones de Scopus ID ${scopusId}...` }));
         try {

@@ -1,5 +1,5 @@
-import {ScopusAccountCreateRequest, ScopusAccountResponse} from "@/features/scopus-accounts/types";
-import {axiosInstance} from "@/lib/axios";
+import {ScopusAccountCreateRequest, ScopusAccountResponse} from "@/src/features/scopus-accounts/types";
+import {axiosInstance} from "@/src/lib/axios";
 
 export const scopusAccountsService = {
     /**

@@ -10,12 +10,12 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-import { usePublicationsContext } from '@/contexts/PublicationsContext';
-import { PublicationsList } from '@/features/publications/components/PublicationsList';
-import { SubjectAreas } from '@/features/publications/components/SubjectAreas';
-import { DocumentsByYear } from '@/features/publications/components/DocumentsByYearChart';
-import ReportGenerator from '@/features/reports/components/ReportGenerator';
-import { ErrorNotification } from '@/components/ErrorNotification';
+import { usePublicationsContext } from '@/src/contexts/PublicationsContext';
+import { PublicationsList } from '@/src/features/publications/components/PublicationsList';
+import { SubjectAreas } from '@/src/features/publications/components/SubjectAreas';
+import { DocumentsByYear } from '@/src/features/publications/components/DocumentsByYearChart';
+import ReportGenerator from '@/src/features/reports/components/ReportGenerator';
+import { ErrorNotification } from '@/src/components/ErrorNotification';
 
 export default function CertificatePage() {
   const router = useRouter();

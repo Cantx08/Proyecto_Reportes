@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ELABORADOR_OPTIONS } from '@/features/reports/types';
+import { ELABORADOR_OPTIONS } from '@/src/features/reports/types';
 
 interface ElaboradorSelectProps {
   value: string;
@@ -19,12 +19,8 @@ const ElaboradorSelect: React.FC<ElaboradorSelectProps> = ({
   placeholder = "Seleccione o escriba el elaborador"
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value || '');
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setInputValue(value || '');
-  }, [value]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -37,20 +33,17 @@ const ElaboradorSelect: React.FC<ElaboradorSelectProps> = ({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-    onChange(newValue);
+    onChange(e.target.value);
     setIsOpen(true);
   };
 
   const handleOptionSelect = (optionValue: string) => {
-    setInputValue(optionValue);
     onChange(optionValue);
     setIsOpen(false);
   };
 
   const filteredOptions = ELABORADOR_OPTIONS.filter(option =>
-    option.label.toLowerCase().includes(inputValue.toLowerCase())
+    option.label.toLowerCase().includes((value || '').toLowerCase())
   );
 
   return (
@@ -59,7 +52,7 @@ const ElaboradorSelect: React.FC<ElaboradorSelectProps> = ({
         type="text"
         className="w-full p-3 border border-neutral-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
         placeholder={placeholder}
-        value={inputValue}
+        value={value || ''}
         onChange={handleInputChange}
         onFocus={() => setIsOpen(true)}
       />
@@ -80,15 +73,15 @@ const ElaboradorSelect: React.FC<ElaboradorSelectProps> = ({
             ))
           ) : (
             <li className="px-4 py-2 text-neutral-500 italic">
-              {inputValue ? `Usar: "${inputValue}"` : 'No hay opciones disponibles'}
+              {value ? `Usar: "${value}"` : 'No hay opciones disponibles'}
             </li>
           )}
-          {inputValue && !ELABORADOR_OPTIONS.some(opt => opt.value === inputValue) && (
+          {value && !ELABORADOR_OPTIONS.some(opt => opt.value === value) && (
             <li
               className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-primary-600 border-t"
-              onClick={() => handleOptionSelect(inputValue)}
+              onClick={() => handleOptionSelect(value)}
             >
-              ✓ Usar valor personalizado: &quot;{inputValue}&quot;
+              ✓ Usar valor personalizado: &quot;{value}&quot;
             </li>
           )}
         </ul>

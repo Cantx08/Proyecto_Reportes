@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Publication } from '@/features/publications/types';
+import { Publication } from '@/src/features/publications/types';
 
 interface PublicationsListProps {
     publications: Publication[];

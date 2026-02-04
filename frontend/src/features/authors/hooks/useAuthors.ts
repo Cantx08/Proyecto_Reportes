@@ -1,7 +1,8 @@
-import {useCallback, useEffect, useState} from 'react';
-import {apiUtils} from '@/services/servicesApi';
-import {AuthorCreateRequest, AuthorResponse, AuthorUpdateRequest} from "@/features/authors/types";
-import {authorService} from "@/features/authors/services/authorService";
+import {useCallback, useState} from 'react';
+import {AuthorCreateRequest, AuthorResponse, AuthorUpdateRequest} from "@/src/features/authors/types";
+import {authorService} from "@/src/features/authors/services/authorService";
+import {apiUtils} from "@/src/services/servicesApi";
+
 
 export interface UseAuthorsState {
     authors: AuthorResponse[];
@@ -164,10 +165,6 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
         }
     }, [fetchAuthors]);
 
-    // Cargar autores al montar el componente
-    useEffect(() => {
-        fetchAuthors();
-    }, [fetchAuthors]);
 
     return {
         ...state,

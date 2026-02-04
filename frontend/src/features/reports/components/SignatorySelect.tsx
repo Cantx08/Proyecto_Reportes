@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 
 interface SignatorySelectProps {
   positionValue: number | string;
@@ -12,6 +12,11 @@ interface SignatorySelectProps {
   placeholder?: string;
 }
 
+const FIRMANTE_OPTIONS = [
+  { value: 1, label: 'Director de Investigación' },
+  { value: 2, label: 'Vicerrectora de Investigación' }
+];
+
 const FirmanteSelect: React.FC<SignatorySelectProps> = ({
   positionValue,
   nameValue,
@@ -22,37 +27,27 @@ const FirmanteSelect: React.FC<SignatorySelectProps> = ({
   placeholder = 'Escriba o seleccione un firmante'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState<Array<{value: number, label: string}>>([]);
-  const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const firmanteOptions = [
-    { value: 1, label: 'Director de Investigación' },
-    { value: 2, label: 'Vicerrectora de Investigación' }
-  ];
-
-  // Sincronizar el valor del input con el prop positionValue
-  useEffect(() => {
+  // Calcular el valor del input basado en positionValue usando useMemo
+  const inputValue = useMemo(() => {
     if (typeof positionValue === 'number') {
-      const option = firmanteOptions.find(opt => opt.value === positionValue);
-      setInputValue(option ? option.label : '');
-    } else {
-      setInputValue(String(positionValue));
+      const option = FIRMANTE_OPTIONS.find(opt => opt.value === positionValue);
+      return option ? option.label : '';
     }
+    return String(positionValue);
   }, [positionValue]);
 
-  // Filtrar opciones basado en el texto ingresado
-  useEffect(() => {
+  // Filtrar opciones según el texto ingresado usando useMemo
+  const filteredOptions = useMemo(() => {
     if (!inputValue.trim()) {
-      setFilteredOptions(firmanteOptions);
-      return;
+      return FIRMANTE_OPTIONS;
     }
 
-    const filtered = firmanteOptions.filter(option => 
+    return FIRMANTE_OPTIONS.filter(option =>
       option.label.toLowerCase().includes(inputValue.toLowerCase())
     );
-    setFilteredOptions(filtered);
   }, [inputValue]);
 
   // Cerrar dropdown al hacer clic fuera
@@ -69,7 +64,6 @@ const FirmanteSelect: React.FC<SignatorySelectProps> = ({
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
-    setInputValue(newValue);
     onPositionChange(newValue);
     setIsOpen(true);
   };
@@ -79,7 +73,6 @@ const FirmanteSelect: React.FC<SignatorySelectProps> = ({
   };
 
   const handleSelectOption = (option: {value: number, label: string}) => {
-    setInputValue(option.label);
     onPositionChange(option.value); // Enviamos el número para opciones predefinidas
     // Limpiar el nombre cuando se selecciona una opción predefinida
     onNameChange('');
@@ -100,7 +93,7 @@ const FirmanteSelect: React.FC<SignatorySelectProps> = ({
 
   // Determinar si necesitamos mostrar el campo de nombre
   const showNombreField = typeof positionValue === 'string' && positionValue.trim() !== '';
-  const isCustomFirmante = !firmanteOptions.some(opt => opt.value === positionValue);
+  const isCustomFirmante = !FIRMANTE_OPTIONS.some(opt => opt.value === positionValue);
 
   const baseClassName = "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
   const errorClassName = error ? "border-red-500 focus:ring-red-500 focus:border-red-500" : "";
@@ -141,7 +134,7 @@ const FirmanteSelect: React.FC<SignatorySelectProps> = ({
         {isOpen && inputValue.trim() && filteredOptions.length === 0 && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
             <div className="text-gray-500 text-sm">
-              No se encontraron opciones que coincidan con "{inputValue}".
+              No se encontraron opciones que coincidan con &quot;{inputValue}&quot;.
               <br />
               <span className="text-blue-600 font-medium">Puede escribir el cargo personalizado.</span>
             </div>

@@ -3,7 +3,7 @@
 import React, {useState, useEffect} from 'react';
 import {Plus, Trash2, Loader2} from 'lucide-react';
 
-import {scopusAccountsService} from "@/features/scopus-accounts/services/scopusAccountService";
+import {scopusAccountsService} from "@/src/features/scopus-accounts/services/scopusAccountService";
 
 export interface ScopusAccountUiItem {
     account_id?: string;
@@ -55,7 +55,7 @@ export default function ScopusAccountsManager({
         };
 
         loadAccounts();
-    }, [author_id]);
+    }, [author_id, onChange]);
 
     useEffect(() => {
         if (!author_id) {
@@ -193,7 +193,12 @@ export default function ScopusAccountsManager({
                             type="text"
                             value={newScopusId}
                             onChange={(e) => setNewScopusId(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAccount())}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddAccount();
+                                }
+                            }}
                             placeholder="Ej: 57211234567"
                             disabled={loading}
                             className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:opacity-50 transition-colors"

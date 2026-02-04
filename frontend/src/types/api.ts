@@ -1,4 +1,4 @@
-import {Publication} from "@/features/publications/types";
+import {Publication} from "@/src/features/publications/types";
 
 
 // Tipos para el estado del componente principal

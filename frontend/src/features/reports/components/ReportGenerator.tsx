@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ReportRequest } from '@/features/reports/types';
-import { reportService } from '@/features/reports/services/reportService';
-import { formatDateToSpanish } from '@/utils/helpers';
+import { ReportRequest } from '@/src/features/reports/types';
+import { reportService } from '@/src/features/reports/services/reportService';
+import { formatDateToSpanish } from '@/src/utils/helpers';
 import DepartmentSelect from '../../departments/components/DepartmentSelect';
 import JobPositionSelect from '../../job-positions/components/JobPositionSelect';
 import GenderSelect from './GenderSelect';
 import FirmanteSelect from './SignatorySelect';
 import ElaboradorSelect from './ElaboradorSelect';
 
-import {AuthorResponse} from "@/features/authors/types";
+import {AuthorResponse} from "@/src/features/authors/types";
 
 interface ReportGeneratorProps {
   authorIds: string[];

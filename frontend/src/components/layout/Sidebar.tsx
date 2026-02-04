@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {useSidebar} from '@/contexts/SidebarContext';
+import {useSidebar} from '@/src/contexts/SidebarContext';
 import {
     Home,
     Users,
@@ -13,6 +13,7 @@ import {
     ChevronsLeft,
     ChevronsRight
 } from 'lucide-react';
+import Image from "next/image";
 
 const navigation = [
     {name: 'Inicio', href: '/', icon: Home},
@@ -35,10 +36,13 @@ const Sidebar: React.FC = () => {
             }`}>
                 <div className="flex items-center space-x-3">
                     <div className="flex h-10 w-10 items-center justify-center">
-                        <img
+                        <Image
                             src="/logo_viiv.png"
                             alt="Logo Departamento"
-                            className="h-8 w-8 object-contain"
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 object-contain"
+                            priority
                         />
                     </div>
                     {!isCollapsed && (
@@ -105,9 +109,13 @@ const Sidebar: React.FC = () => {
                     isCollapsed ? 'justify-center' : 'space-x-3'
                 }`}>
                     <div className="flex h-8 w-8 items-center justify-center">
-                        <img src="/logo_epn_bn.png"
-                             alt="Logo EPN b/n"
-                             className="h-7 w-7 object-contain"/>
+                        <Image
+                            src="/logo_epn_bn.png"
+                            alt="Logo EPN"
+                            width={32}
+                            height={32}
+                            className="h-8 w-8 object-contain"
+                        />
                     </div>
                     {!isCollapsed && (
                         <div>

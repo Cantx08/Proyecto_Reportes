@@ -3,10 +3,10 @@
 import React, {useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import {useJobPositions} from '@/features/job-positions/hooks/useJobPositions';
-import {ErrorNotification} from '@/components/ErrorNotification';
 import {Briefcase, Save, ArrowLeft} from 'lucide-react';
-import {JobPositionCreateRequest} from "@/features/job-positions/types";
+import {useJobPositions} from '@/src/features/job-positions/hooks/useJobPositions';
+import {ErrorNotification} from '@/src/components/ErrorNotification';
+import {JobPositionCreateRequest} from "@/src/features/job-positions/types";
 
 const NewPositionPage: React.FC = () => {
     const router = useRouter();

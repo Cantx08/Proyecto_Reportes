@@ -44,16 +44,22 @@ api.interceptors.response.use(
 // SERVICIOS UTILITARIOS
 // ===============================
 
+interface ValidationErrorDetail {
+    msg: string;
+    loc?: string[];
+    type?: string;
+}
+
 export const apiUtils = {
     /**
-     * Manejo de errores común para todas las APIs
+     * Manejo de errores para la API
      */
     handleError(error: unknown): string {
         if (axios.isAxiosError(error)) {
             console.error("Error detallado:", error.response?.data);
             if (error.response?.data?.detail) {
                 if (Array.isArray(error.response.data.detail)) {
-                    return error.response.data.detail.map((e: any) => e.msg).join(', ');
+                    return error.response.data.detail.map((e: ValidationErrorDetail) => e.msg).join(', ');
                 }
                 return error.response.data.detail;
             }

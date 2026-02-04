@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useJobPositions } from '@/features/job-positions/hooks/useJobPositions';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useJobPositions } from '@/src/features/job-positions/hooks/useJobPositions';
 
-import {JobPositionResponse} from "@/features/job-positions/types";
+import {JobPositionResponse} from "@/src/features/job-positions/types";
 
 interface JobPositionSelectProps {
   value: string;
@@ -20,25 +20,27 @@ const JobPositionSelect: React.FC<JobPositionSelectProps> = ({
   className = '',
   placeholder = 'Escriba o seleccione una posición'
 }) => {
-  const { positions, loading, error: fetchError } = useJobPositions();
+  const { positions, loading, error: fetchError, fetchPositions } = useJobPositions();
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredPositions, setFilteredPositions] = useState<JobPositionResponse[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filtrar posiciones según se ingrese el texto
+  // Cargar posiciones al montar
   useEffect(() => {
-    if (!positions || !positions.length) return;
-    
+    fetchPositions();
+  }, [fetchPositions]);
+
+  // Filtrar posiciones según se ingrese el texto usando useMemo
+  const filteredPositions = useMemo(() => {
+    if (!positions || !positions.length) return [];
+
     if (!value.trim()) {
-      setFilteredPositions(positions);
-      return;
+      return positions;
     }
 
-    const filtered = positions.filter((position: JobPositionResponse) =>
+    return positions.filter((position: JobPositionResponse) =>
       position.pos_name.toLowerCase().includes(value.toLowerCase())
     );
-    setFilteredPositions(filtered);
   }, [value, positions]);
 
   // Cerrar dropdown al hacer clic fuera
@@ -125,7 +127,7 @@ const JobPositionSelect: React.FC<JobPositionSelectProps> = ({
       {isOpen && !loading && !fetchError && value.trim() && filteredPositions.length === 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
           <div className="text-gray-500 text-sm">
-            No se encontraron posiciones que coincidan con "{value}".
+            No se encontraron posiciones que coincidan con &quot;{value}&quot;.
           </div>
         </div>
       )}

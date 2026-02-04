@@ -1,5 +1,5 @@
-import {axiosInstance} from "@/lib/axios";
-import {JobPositionCreateRequest, JobPositionResponse, JobPositionUpdateRequest} from "@/features/job-positions/types";
+import {axiosInstance} from "@/src/lib/axios";
+import {JobPositionCreateRequest, JobPositionResponse, JobPositionUpdateRequest} from "@/src/features/job-positions/types";
 
 export const jobPositionService = {
     /**
