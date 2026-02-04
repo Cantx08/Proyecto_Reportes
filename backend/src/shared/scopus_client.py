@@ -1,5 +1,7 @@
-import httpx
+""" Cliente para la API de Scopus. """
+
 from typing import Dict, Any
+from httpx import Timeout, AsyncClient
 
 class ScopusApiClient:
     """Cliente para la API de Scopus."""
@@ -11,7 +13,8 @@ class ScopusApiClient:
             "Accept": "application/json",
             "X-ELS-APIKey": self._api_key
         }
-        self._timeout = httpx.Timeout(60.0, connect=10.0)
+        # Aumentar timeout para autores con muchas publicaciones
+        self._timeout = Timeout(120.0, connect=10.0)
 
     async def get_publications_by_author(self, author_id: str) -> Dict[str, Any]:
         """Busca publicaciones de un autor en Scopus."""
@@ -23,7 +26,7 @@ class ScopusApiClient:
             "start": start,
             "count": count
         }
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with AsyncClient(timeout=self._timeout) as client:
             response = await client.get(url, headers=self._headers, params=params)
             response.raise_for_status()
             return response.json()
@@ -31,7 +34,7 @@ class ScopusApiClient:
     async def get_publication_details(self, scopus_id: str) -> Dict[str, Any]:
         """Obtiene detalles completos de una publicación."""
         url = f"{self._base_url}/content/abstract/scopus_id/{scopus_id}"
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with AsyncClient(timeout=self._timeout) as client:
             response = await client.get(url, headers=self._headers)
             response.raise_for_status()
             return response.json()
@@ -45,7 +48,7 @@ class ScopusApiClient:
         params = {
             "view": "ENHANCED"
         }
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with AsyncClient(timeout=self._timeout) as client:
             response = await client.get(url, headers=self._headers, params=params)
             response.raise_for_status()
             return response.json()

@@ -129,7 +129,7 @@ class ReportService:
         """Crea el value object ReportConfiguration."""
         # Si es un número, mapear a enum; si es string, crear objeto personalizado
         if isinstance(signatory, int):
-            signatory_type = Authority.DIRECTORA_INVESTIGACION if signatory == 1 else Authority.VICERRECTOR_INVESTIGACION
+            signatory_type = Authority.DIRECTOR_INVESTIGACION if signatory == 1 else Authority.VICERRECTOR_INVESTIGACION
         else:
             # Para firmantes personalizados, crear un diccionario con cargo y nombre
             signatory_type = {

@@ -95,6 +95,12 @@ async def generate_certificate(
 ):
     """Endpoint para generar un certificado de publicaciones."""
     try:
+        # Log de datos recibidos
+        print(f"[CERT] Datos recibidos: {request.model_dump()}")
+        print(f"[CERT] Nombre: {request.docente_nombre}")
+        print(f"[CERT] Departamento: {request.departamento}")
+        print(f"[CERT] Cargo: {request.cargo}")
+        
         # Recolectar publicaciones de todos los author_ids
         all_publications: List[Publication] = []
         all_subject_areas: set = set()
@@ -203,6 +209,9 @@ async def generate_certificate(
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=f"Datos inválidos: {str(ve)}")
     except Exception as e:
+        import traceback
+        print(f"[CERT ERROR] Traceback completo:")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Error generando el certificado: {str(e)}")
 
 

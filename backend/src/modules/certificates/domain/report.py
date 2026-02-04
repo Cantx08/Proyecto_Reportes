@@ -51,7 +51,7 @@ class ReportConfiguration:
     elaborador: str = "M. Vásquez"  # Nombre de quien elaboró el reporte
     
     @classmethod
-    def generate_with_current_date(cls, memorandum: str = "", signatory: Union[Authority, str, Dict[str, str]] = Authority.DIRECTORA_INVESTIGACION, elaborador: str = "M. Vásquez"):
+    def generate_with_current_date(cls, memorandum: str = "", signatory: Union[Authority, str, Dict[str, str]] = Authority.DIRECTOR_INVESTIGACION, elaborador: str = "M. Vásquez"):
         """Factory method para crear configuración con fecha actual."""
         report_date = datetime.now().strftime("%d de %B de %Y")
         return cls(memorandum, signatory, report_date, elaborador)

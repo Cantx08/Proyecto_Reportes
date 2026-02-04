@@ -26,10 +26,10 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
     def _generate_publications_list(self, pub: Publication, num: int, db_name: str) -> str:
         """Construye el texto formateado de una publicación."""
         # Verificar si alguna categoría contiene Q1
-        has_q1 = self._contains_q1_category(pub.categories)
+        has_q1 = self._contains_q1_category(pub.categories_with_quartiles)
         
         # Construir texto base de la publicación
-        pub_text = f"{num}. ({pub.year}) \"{pub.title}\". {pub.source}."
+        pub_text = f"{num}. ({pub.year}) \"{pub.title}\". {pub.source_title}."
         
         # Normalizar y determinar el tipo de documento
         source_type_raw = (pub.document_type or "").strip()
@@ -40,20 +40,20 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
 
         # Considerar 'No indexada' como ausencia de categorías
         has_valid_categories = False
-        if pub.categories:
-            # si categories es string y contiene 'no indexada', lo tratamos como sin categorías
-            if isinstance(pub.categories, str) and 'no indexada' in pub.categories.lower():
+        if pub.categories_with_quartiles:
+            # si categories_with_quartiles es string y contiene 'no indexada', lo tratamos como sin categorías
+            if isinstance(pub.categories_with_quartiles, str) and 'no indexada' in pub.categories_with_quartiles.lower():
                 has_valid_categories = False
             else:
                 # lista o string válidos
                 # si formato resultante no es vacío, consideramos que hay categorías
-                formatted = self._format_categories(pub.categories)
+                formatted = self._format_categories(pub.categories_with_quartiles)
                 has_valid_categories = bool(formatted and formatted.strip())
         else:
             has_valid_categories = False
 
         if has_valid_categories:
-            journal_categories = self._format_categories(pub.categories)
+            journal_categories = self._format_categories(pub.categories_with_quartiles)
             pub_text += f" <b>{indexation_label} - {journal_categories}</b>."
         else:
             pub_text += f" <b>{indexation_label}</b>."
@@ -63,7 +63,7 @@ class ReportLabPublicationFormatter(IPublicationFormatter):
             pub_text += f" DOI: {pub.doi}"
         
         # Agregar indicación de filiación si no es EPN
-        if pub.affiliation and "escuela politécnica nacional" not in pub.affiliation.lower():
+        if pub.affiliation_name and "escuela politécnica nacional" not in pub.affiliation_name.lower():
             pub_text += " <u>(Sin Filiación)</u>"
         
         # Si tiene al menos una categoría Q1, aplicar negritas a toda la publicación

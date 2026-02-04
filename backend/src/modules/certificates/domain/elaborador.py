@@ -12,8 +12,8 @@ class Elaborador(Enum):
     elaborar los certificados de publicaciones.
     """
     M_VASQUEZ = "M. Vásquez"
-    S_SANCHEZ = "S. Sánchez"
-    J_SAYAGO = "J. Sayago"
+    C_CALDERON = "C. Calderón"
+    C_RIVADENEIRA = "C. Rivadeneira"
     
     @classmethod
     def from_str(cls, value: str) -> "Elaborador":

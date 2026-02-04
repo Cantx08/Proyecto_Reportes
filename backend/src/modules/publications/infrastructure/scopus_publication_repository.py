@@ -1,7 +1,7 @@
+""" Repositorio de publicaciones que consume la API de Scopus. """
+
 from typing import List, Optional, Dict, Any
-
-import httpx
-
+from httpx import Timeout, AsyncClient, HTTPStatusError, RequestError
 from ..domain.publication_repository import IPublicationRepository
 
 
@@ -20,7 +20,8 @@ class ScopusPublicationRepository(IPublicationRepository):
             "Accept": "application/json",
             "X-ELS-APIKey": self._api_key
         }
-        self._timeout = httpx.Timeout(60.0, connect=10.0)
+        # Aumentar timeout para autores con muchas publicaciones
+        self._timeout = Timeout(120.0, connect=10.0)
 
     async def get_publications_by_scopus_id(
         self, 
@@ -39,7 +40,7 @@ class ScopusPublicationRepository(IPublicationRepository):
         start = 0
         count = 200  # Máximo permitido por la API de Scopus
         
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with AsyncClient(timeout=self._timeout) as client:
             while True:
                 url = f"{self._base_url}/content/search/scopus"
                 params = {
@@ -58,16 +59,12 @@ class ScopusPublicationRepository(IPublicationRepository):
                 # Verificar si hay resultados válidos
                 if not entries or (len(entries) == 1 and entries[0].get("error")):
                     break
-                
                 all_entries.extend(entries)
-                
                 # Verificar si hay más páginas
                 total_results = int(search_results.get("opensearch:totalResults", 0))
                 if start + count >= total_results:
                     break
-                
                 start += count
-        
         return all_entries
 
     async def get_publication_details(
@@ -85,17 +82,14 @@ class ScopusPublicationRepository(IPublicationRepository):
         """
         try:
             url = f"{self._base_url}/content/abstract/scopus_id/{scopus_id}"
-            
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
+            async with AsyncClient(timeout=self._timeout) as client:
                 response = await client.get(url, headers=self._headers)
                 response.raise_for_status()
-                
                 data = response.json()
-                return data.get("abstracts-retrieval-response", {})
-                
-        except httpx.HTTPStatusError as e:
+                return data.get("abstracts-retrieval-response", {})               
+        except HTTPStatusError as e:
             if e.response.status_code == 404:
                 return None
             raise
-        except Exception:
+        except RequestError:
             return None

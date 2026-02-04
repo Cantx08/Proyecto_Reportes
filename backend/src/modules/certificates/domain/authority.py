@@ -11,7 +11,7 @@ class Authority(Enum):
     Define las autoridades institucionales que pueden
     firmar los certificados de publicaciones.
     """
-    DIRECTORA_INVESTIGACION = 1
+    DIRECTOR_INVESTIGACION = 1
     VICERRECTOR_INVESTIGACION = 2
     
     @classmethod
@@ -36,7 +36,7 @@ class Authority(Enum):
     def get_title(self) -> str:
         """Retorna el título formal del firmante."""
         titles = {
-            Authority.DIRECTORA_INVESTIGACION: "Directora de Investigación",
+            Authority.DIRECTOR_INVESTIGACION: "Director de Investigación",
             Authority.VICERRECTOR_INVESTIGACION: "Vicerrector de Investigación"
         }
         return titles.get(self, "Autoridad")

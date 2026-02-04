@@ -88,9 +88,14 @@ class ReportsController:
         filtered = []
         
         for pub in publications:
-            source_lower = (pub.source or "").lower()
+            source_lower = (pub.source_title or "").lower()
             document_type_lower = (pub.document_type or "").lower()
-            categories_lower = (pub.categories or "").lower()
+            categories_str = ""
+            if pub.categories_with_quartiles:
+                if isinstance(pub.categories_with_quartiles, list):
+                    categories_str = " ".join(pub.categories_with_quartiles).lower()
+                else:
+                    categories_str = str(pub.categories_with_quartiles).lower()
             
             if source_name == "scopus":
                 # TODAS las publicaciones se consideran Scopus por defecto,
@@ -109,7 +114,7 @@ class ReportsController:
                 # Publicaciones Web of Science - criterio específico
                 if ("web of science" in source_lower or 
                     "wos" in source_lower or
-                    "conference proceedings citation index" in categories_lower):
+                    "conference proceedings citation index" in categories_str):
                     filtered.append(pub)
             
             elif source_name == "regional":
@@ -124,7 +129,7 @@ class ReportsController:
                 # Las memorias se agregarán manualmente en el futuro, por lo tanto
                 # este filtro NO debe capturar ninguna publicación por ahora.
                 # Solo capturará memorias si tienen un marcador manual explícito.
-                if "memoria_manual" in categories_lower:  # Marcador para futuro
+                if "memoria_manual" in categories_str:  # Marcador para futuro
                     filtered.append(pub)
             
             elif source_name == "libro":

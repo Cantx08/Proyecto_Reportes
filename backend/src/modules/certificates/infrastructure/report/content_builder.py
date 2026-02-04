@@ -324,7 +324,7 @@ class ReportLabContentBuilder(IContentBuilder):
         publication_count = publications.get_total_publications()
         
         if isinstance(config.signatory, Authority):
-            if config.signatory == Authority.DIRECTORA_INVESTIGACION:
+            if config.signatory == Authority.DIRECTOR_INVESTIGACION:
                 signatory_entity = "la Dirección de Investigación"
             else:
                 signatory_entity = "el Vicerrectorado de Investigación, Innovación y Vinculación"
@@ -362,7 +362,7 @@ class ReportLabContentBuilder(IContentBuilder):
         
         # Información del firmante
         if isinstance(config.signatory, Authority):
-            if config.signatory == Authority.DIRECTORA_INVESTIGACION:
+            if config.signatory == Authority.DIRECTOR_INVESTIGACION:
                 authority = DIRECCION_DI
                 signatory_role = "DIRECTOR DE INVESTIGACIÓN DE LA ESCUELA POLITÉCNICA NACIONAL"
             else:

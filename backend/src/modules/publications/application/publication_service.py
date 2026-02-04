@@ -1,6 +1,8 @@
+""" Servicio de aplicación para gestión de publicaciones. """
+
 from typing import List, Dict, Optional
 from uuid import UUID
-
+import logging
 from .publication_dto import PublicationResponseDTO, AuthorPublicationsResponseDTO
 from ..domain.publication import Publication
 from ..domain.publication_repository import IPublicationRepository
@@ -8,6 +10,8 @@ from ..domain.publication_cache_repository import IPublicationCacheRepository
 from ..domain.sjr_repository import ISJRRepository
 from ...scopus_accounts.domain.scopus_account import ScopusAccount
 from ...scopus_accounts.domain.scopus_account_repository import IScopusAccountRepository
+
+logger = logging.getLogger(__name__)
 
 
 class PublicationService:
@@ -22,7 +26,7 @@ class PublicationService:
     CACHE_MAX_AGE_HOURS = 24
     
     def __init__(
-        self, 
+        self,
         publication_repo: IPublicationRepository,
         cache_repo: Optional[IPublicationCacheRepository],
         sjr_repo: ISJRRepository,
@@ -50,24 +54,32 @@ class PublicationService:
         Returns:
             DTO con las publicaciones del autor enriquecidas con métricas SJR
         """
+        logger.info(f"Obteniendo publicaciones del autor {author_id}, force_refresh={force_refresh}")
+        
         # 1. Obtener las cuentas Scopus del autor
         scopus_accounts = await self._scopus_account_repo.get_by_author(author_id)
         
         if not scopus_accounts:
+            logger.warning(f"Autor {author_id} no tiene cuentas Scopus asociadas")
             raise ValueError(f"El autor no tiene cuentas Scopus asociadas.")
         
+        logger.info(f"Autor tiene {len(scopus_accounts)} cuenta(s) Scopus")
         scopus_ids = [account.scopus_id for account in scopus_accounts]
         
         # 2. Obtener publicaciones de todas las cuentas Scopus
         all_publications: List[Publication] = []
         seen_scopus_ids = set()  # Para evitar duplicados
         
-        for account in scopus_accounts:
+        for i, account in enumerate(scopus_accounts, 1):
+            logger.info(f"Procesando cuenta Scopus {i}/{len(scopus_accounts)}: {account.scopus_id}")
+            
             # Intentar obtener desde caché primero
             publications = await self._get_publications_with_cache(
                 account, 
                 force_refresh=force_refresh
             )
+            
+            logger.info(f"Obtenidas {len(publications)} publicaciones de la cuenta {account.scopus_id}")
             
             for pub in publications:
                 # Evitar duplicados (un artículo puede aparecer en múltiples cuentas)
@@ -77,6 +89,8 @@ class PublicationService:
         
         # 3. Ordenar por año descendente
         all_publications.sort(key=lambda p: p.year, reverse=True)
+        
+        logger.info(f"Total de {len(all_publications)} publicaciones únicas obtenidas para el autor {author_id}")
         
         return AuthorPublicationsResponseDTO(
             author_id=str(author_id),
