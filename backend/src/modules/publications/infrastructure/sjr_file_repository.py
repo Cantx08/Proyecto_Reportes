@@ -1,3 +1,4 @@
+from functools import lru_cache
 import unicodedata
 import logging
 import pandas as pd
@@ -42,6 +43,7 @@ class SJRFileRepository(ISJRRepository):
         
         return [], [], target_year
 
+    @lru_cache(maxsize=2048)
     def normalize_journal_name(self, name: str) -> str:
         if not isinstance(name, str):
             name = str(name) if name else ""

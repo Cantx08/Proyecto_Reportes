@@ -1,3 +1,6 @@
+""""Repositorio de caché de publicaciones usando PostgreSQL."""
+
+from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime, timedelta
 from typing import List, Optional
 from uuid import UUID
@@ -47,32 +50,58 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
         publications: List[Publication], 
         scopus_account_id: UUID
     ) -> int:
-        """Guarda o actualiza publicaciones en la caché."""
-        saved_count = 0
-        
+        """Guarda o actualiza masivamente usando un solo query (Bulk Upsert)."""
+        if not publications:
+            return 0
+
+        # Preparamos los diccionarios de datos
+        records = []
         for pub in publications:
-            # Buscar si ya existe
-            existing = self._db.query(PublicationCacheModel).filter(
-                PublicationCacheModel.scopus_id == pub.scopus_id
-            ).first()
-            
-            if existing:
-                # Actualizar registro existente
-                self._update_model(existing, pub)
-            else:
-                # Crear nuevo registro
-                model = self._entity_to_model(pub, scopus_account_id)
-                self._db.add(model)
-            
-            saved_count += 1
-        
+            model = self._entity_to_model(pub, scopus_account_id)
+            # Convertimos el modelo SQLAlchemy a diccionario para el insert core
+            record = {
+                "scopus_id": model.scopus_id,
+                "eid": model.eid,
+                "doi": model.doi,
+                "title": model.title,
+                "year": model.year,
+                "publication_date": model.publication_date,
+                "source_title": model.source_title,
+                "document_type": model.document_type,
+                "affiliation_name": model.affiliation_name,
+                "affiliation_id": model.affiliation_id,
+                "subject_areas": model.subject_areas,
+                "categories_with_quartiles": model.categories_with_quartiles,
+                "sjr_year_used": model.sjr_year_used,
+                "scopus_account_id": model.scopus_account_id,
+                "cached_at": model.cached_at
+            }
+            records.append(record)
+
+        # Definimos la sentencia de inserción
+        stmt = insert(PublicationCacheModel).values(records)
+
+        # Definimos qué hacer en caso de conflicto (si el scopus_id ya existe)
+        # Excluimos 'scopus_id' del update porque es la clave
+        update_dict = {
+            col.name: col
+            for col in stmt.excluded
+            if col.name not in ['scopus_id', 'scopus_account_id'] # No actualizar IDs clave
+        }
+
+        # Agregamos la cláusula ON CONFLICT
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['scopus_id'], # Asumiendo que scopus_id es unique o PK
+            set_=update_dict
+        )
+
         try:
+            self._db.execute(stmt)
             self._db.commit()
-        except Exception:
+            return len(publications)
+        except Exception as e:
             self._db.rollback()
-            raise
-        
-        return saved_count
+            raise e
 
     async def is_cache_valid(self, scopus_account_id: UUID, max_age_hours: int = 24) -> bool:
         """Verifica si la caché está vigente (no más antigua que max_age_hours)."""

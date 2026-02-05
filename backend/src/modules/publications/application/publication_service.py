@@ -1,5 +1,6 @@
 """ Servicio de aplicación para gestión de publicaciones. """
 
+import asyncio
 from typing import List, Dict, Optional
 from uuid import UUID
 import logging
@@ -66,26 +67,23 @@ class PublicationService:
         logger.info(f"Autor tiene {len(scopus_accounts)} cuenta(s) Scopus")
         scopus_ids = [account.scopus_id for account in scopus_accounts]
         
+        tasks = [
+            self._get_publications_with_cache(account, force_refresh=force_refresh)
+            for account in scopus_accounts
+        ]
+
+        result_lists = await asyncio.gather(*tasks)
+
         # 2. Obtener publicaciones de todas las cuentas Scopus
         all_publications: List[Publication] = []
         seen_scopus_ids = set()  # Para evitar duplicados
         
-        for i, account in enumerate(scopus_accounts, 1):
-            logger.info(f"Procesando cuenta Scopus {i}/{len(scopus_accounts)}: {account.scopus_id}")
-            
-            # Intentar obtener desde caché primero
-            publications = await self._get_publications_with_cache(
-                account, 
-                force_refresh=force_refresh
-            )
-            
-            logger.info(f"Obtenidas {len(publications)} publicaciones de la cuenta {account.scopus_id}")
-            
+        for publications in result_lists:
             for pub in publications:
-                # Evitar duplicados (un artículo puede aparecer en múltiples cuentas)
                 if pub.scopus_id not in seen_scopus_ids:
                     seen_scopus_ids.add(pub.scopus_id)
                     all_publications.append(pub)
+
         
         # 3. Ordenar por año descendente
         all_publications.sort(key=lambda p: p.year, reverse=True)
