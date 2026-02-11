@@ -39,11 +39,6 @@ class SJRFileRepository(ISJRRepository):
     ) -> Tuple[List[str], List[str], int]:
         """
         Busca datos de la revista usando ISSNs con fallback por nombre.
-        
-        Args:
-            issns: Lista de ISSNs (impreso y/o electrónico) de la publicación
-            publication_year: Año de la publicación
-            source_title: Nombre de la revista (fallback si no hay match por ISSN)
         """
         if not self._issn_cache and not self._name_cache:
             return [], [], publication_year
@@ -81,8 +76,6 @@ class SJRFileRepository(ISJRRepository):
     def _normalize_issn_input(issn: str) -> str:
         """Limpia un ISSN individual para búsqueda."""
         clean = issn.replace('-', '').strip()
-        # Si por alguna razón quedó de 7 dígitos (ej: Excel se comió el cero antes de llegar aquí),
-        # intentamos rellenar, aunque Scopus suele enviarlo bien.
         if len(clean) == 7 and clean.isdigit():
             clean = clean.zfill(8)
         return clean
@@ -110,40 +103,38 @@ class SJRFileRepository(ISJRRepository):
         Carga el CSV, calcula percentiles y puebla el caché indexado por ISSN.
         """
         try:
-            # 1. Cargar Dataframe forzando tipos string para evitar que pandas elimine ceros
-            # 'dtype=str' es crucial para leer ISSNs como "01234567" y no 1234567
+            # Leer CSV forzando string para no perder ceros en ISSN
             df = pd.read_csv(self._csv_path, sep=';', decimal=',', dtype=str)
             
-            # Limpiar nombres de columnas (strip espacios)
+            # Limpiar nombres de columnas
             df.columns = [c.strip() for c in df.columns]
 
-            # CORRECCIÓN CRÍTICA 1: Detectar columna ISSN sin importar mayúsculas/minúsculas
+            # Detectar columna ISSN
             col_map = {c.lower(): c for c in df.columns}
-            issn_col_name = col_map.get('issn') # Busca 'issn', 'Issn', 'ISSN'
+            issn_col_name = col_map.get('issn')
             
             rank_col = 'Rank'
             if 'Rank' not in df.columns and 'SJR Rank' in df.columns:
                 rank_col = 'SJR Rank'
             
-            # Convertir Rank y Year a numéricos (ya que leímos todo como string)
+            # Convertir a numéricos
             df[rank_col] = pd.to_numeric(df[rank_col], errors='coerce').fillna(float('inf'))
             df['year'] = pd.to_numeric(df['year'], errors='coerce').fillna(0).astype(int)
 
-            # Normalizar Título
             df['Title_norm'] = df['Title'].apply(self.normalize_journal_name)
             
-            # Manejo de Issn
             if issn_col_name:
                 df['Issn_Final'] = df[issn_col_name].fillna('')
             else:
                 logger.warning("¡Columna ISSN no encontrada en el CSV de SJR!")
                 df['Issn_Final'] = ''
             
-            # Detectar año máximo
             self._max_year_available = int(df['year'].max()) if not df.empty else 0
 
-            # --- FASE 1: Construir universos Q1 ---
-            q1_universes: Dict[Tuple[int, str], List[float]] = defaultdict(list)
+            # --- FASE 1: Construir universos COMPLETOS (Corregido) ---
+            # Ahora guardamos TODOS los ranks de cada categoría, no solo los Q1.
+            # Esto nos permite saber el total real de revistas (el denominador).
+            category_universes: Dict[Tuple[int, str], List[float]] = defaultdict(list)
             processed_rows = []
 
             for _, row in df.iterrows():
@@ -165,21 +156,21 @@ class SJRFileRepository(ISJRRepository):
                         'issn_raw': issn_str
                     })
 
+                    # CORRECCIÓN: Agregamos el rank a la lista de la categoría SIEMPRE.
+                    # Así 'len(category_universes[key])' será el total real (ej: 71, no 72 estimado).
                     for cat in parsed_cats:
-                        if cat['quartile'] == 'Q1':
-                            q1_universes[(year, cat['name'])].append(rank)
+                        category_universes[(year, cat['name'])].append(rank)
 
                 except (ValueError, TypeError):
                     continue
 
-            # Ordenar universos
-            for key in q1_universes:
-                q1_universes[key].sort()
+            # Ordenamos las listas para poder calcular la posición (ranking relativo)
+            for key in category_universes:
+                category_universes[key].sort()
 
-            # --- FASE 2: Calcular percentiles y guardar caché POR ISSN y NOMBRE ---
+            # --- FASE 2: Calcular percentiles y guardar caché ---
             count_issn_entries = 0
             count_name_entries = 0
-            count_missed_issn = 0
             
             for item in processed_rows:
                 title_norm = item['key'][0]
@@ -187,19 +178,27 @@ class SJRFileRepository(ISJRRepository):
                 my_rank = item['rank']
                 final_categories_str = []
 
-                # Lógica de Top 10%
+                # Lógica de cálculo de Top 10%
                 for cat in item['categories']:
                     cat_name = cat['name']
                     quartile = cat['quartile']
                     cat_display = f"{cat_name} ({quartile})" if quartile else cat_name
 
+                    # Solo nos interesa marcar Top 10% si la revista ya es Q1
                     if quartile == 'Q1':
-                        universe = q1_universes.get((year, cat_name), [])
-                        total_q1 = len(universe)
-                        if total_q1 > 0:
+                        universe = category_universes.get((year, cat_name), [])
+                        total_journals = len(universe)
+                        
+                        if total_journals > 0:
                             try:
-                                new_position = universe.index(my_rank) + 1
-                                percent_top = (new_position / total_q1) * 25.0
+                                # Encontramos la posición de mi rank en el universo completo ordenado
+                                # index es 0-based, así que sumamos 1 para obtener el ranking (1st, 2nd...)
+                                # Usamos .index() que retorna la primera coincidencia (mejor ranking en caso de empate)
+                                real_position = universe.index(my_rank) + 1
+                                
+                                # CÁLCULO PRECISO: (Posición / Total Real) * 100
+                                percent_top = (real_position / total_journals) * 100.0
+                                
                                 if percent_top <= 10.0:
                                     cat_display += f"[Categoría dentro del 10% superior ({percent_top:.1f})]"
                             except ValueError:
@@ -208,26 +207,19 @@ class SJRFileRepository(ISJRRepository):
 
                 result_tuple = (item['areas'], final_categories_str)
 
-                # CACHÉ PRIMARIO: por ISSN
+                # Guardar en Caché Primario (ISSN)
                 issn_list = self._parse_issns(item['issn_raw'])
-                
-                if not issn_list:
-                    count_missed_issn += 1
-                
                 for issn in issn_list:
                     self._issn_cache[(issn, year)] = result_tuple
                     count_issn_entries += 1
                 
-                # CACHÉ SECUNDARIO: por nombre normalizado de revista
+                # Guardar en Caché Secundario (Nombre)
                 if title_norm:
                     self._name_cache[(title_norm, year)] = result_tuple
                     count_name_entries += 1
             
             logger.info(
-                f"SJR cargado. "
-                f"Caché ISSN: {count_issn_entries} entradas. "
-                f"Caché Nombre: {count_name_entries} entradas. "
-                f"Revistas sin ISSN útil: {count_missed_issn}. "
+                f"SJR cargado. ISSNs: {count_issn_entries}. Nombres: {count_name_entries}. "
                 f"Año máximo: {self._max_year_available}"
             )
 
@@ -238,27 +230,17 @@ class SJRFileRepository(ISJRRepository):
 
     @staticmethod
     def _parse_issns(issn_str: str) -> List[str]:
-        """
-        Parsea y normaliza ISSNs.
-        CORRECCIÓN CRÍTICA 2: Recuperar ceros a la izquierda si se perdieron.
-        """
         if not issn_str or issn_str.lower() == 'nan':
             return []
         
-        # Reemplazar comas por espacios para separar
         clean_str = issn_str.replace(',', ' ')
         parts = clean_str.split()
         
         results = []
         for p in parts:
-            # 1. Quitar guiones y espacios
             clean_issn = p.replace('-', '').strip()
-            
-            # 2. Validar si es numérico y tiene longitud 7 (error común de Excel/Pandas)
-            # Un ISSN (E-ISSN) tiene 8 caracteres. El último puede ser 'X'.
             if len(clean_issn) == 7 and clean_issn.isdigit():
                 clean_issn = clean_issn.zfill(8)
-            
             if clean_issn:
                 results.append(clean_issn)
         return results
