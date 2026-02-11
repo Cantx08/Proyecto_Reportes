@@ -2,7 +2,7 @@ from functools import lru_cache
 import unicodedata
 import logging
 import pandas as pd
-from typing import Dict, Tuple, List, Any
+from typing import Dict, Tuple, List
 from collections import defaultdict
 
 from ..domain.sjr_repository import ISJRRepository
@@ -12,16 +12,19 @@ logger = logging.getLogger(__name__)
 class SJRFileRepository(ISJRRepository):
     """
     Repositorio de datos SJR basado en archivo CSV.
-    Implementa lógica de cálculo para identificar el Top 10% de publicaciones
-    usando ISSN como identificador principal.
+    Implementa lógica de cálculo para identificar el Top 10% de publicaciones.
+    
+    Estrategia de búsqueda:
+    1. Búsqueda primaria por ISSN (impreso/electrónico)
+    2. Fallback por nombre normalizado de revista
     """
 
     def __init__(self, csv_path: str):
         self._csv_path = csv_path
-        # CAMBIO ESTRUCTURA CACHÉ:
-        # Clave: (issn_normalizado, año) -> Valor: (áreas, categorías_formateadas)
-        # Un ISSN apunta a una única configuración de revista en un año.
-        self._data_cache: Dict[Tuple[str, int], Tuple[List[str], List[str]]] = {}
+        # Caché primario: (issn_normalizado, año) -> (áreas, categorías)
+        self._issn_cache: Dict[Tuple[str, int], Tuple[List[str], List[str]]] = {}
+        # Caché secundario (fallback): (nombre_normalizado, año) -> (áreas, categorías)
+        self._name_cache: Dict[Tuple[str, int], Tuple[List[str], List[str]]] = {}
         self._max_year_available: int = 0
         self._load_data()
 
@@ -31,41 +34,61 @@ class SJRFileRepository(ISJRRepository):
     def get_journal_data(
         self, 
         issns: List[str], 
-        publication_year: int
+        publication_year: int,
+        source_title: str = ""
     ) -> Tuple[List[str], List[str], int]:
         """
-        Busca datos de la revista usando la lista de ISSNs proporcionada.
-        Retorna la primera coincidencia encontrada en el caché.
+        Busca datos de la revista usando ISSNs con fallback por nombre.
+        
+        Args:
+            issns: Lista de ISSNs (impreso y/o electrónico) de la publicación
+            publication_year: Año de la publicación
+            source_title: Nombre de la revista (fallback si no hay match por ISSN)
         """
-        if not self._data_cache:
+        if not self._issn_cache and not self._name_cache:
             return [], [], publication_year
         
         target_year = self._resolve_year(publication_year)
         
-        # Iteramos sobre los ISSNs que trae la publicación (print, electronic, etc.)
+        # 1. Búsqueda primaria por ISSN
         for issn in issns:
             if not issn:
                 continue
-            
-            # Buscamos en el caché por (issn, año)
-            # Scimago en CSV suele tener los ISSN sin guiones o separados por coma.
-            # Aquí normalizamos quitando guiones para coincidir con cómo guardamos en _load_data
-            clean_issn = issn.replace('-', '').strip()
-            
-            data = self._data_cache.get((clean_issn, target_year))
+            clean_issn = self._normalize_issn_input(issn)
+            data = self._issn_cache.get((clean_issn, target_year))
             if data:
                 areas, categories = data
+                logger.debug(f"SJR match por ISSN '{clean_issn}' año {target_year}")
                 return areas, categories, target_year
         
-        # Si no hubo coincidencia por ningún ISSN
+        # 2. Fallback por nombre de revista
+        if source_title:
+            normalized_name = self.normalize_journal_name(source_title)
+            data = self._name_cache.get((normalized_name, target_year))
+            if data:
+                areas, categories = data
+                logger.debug(f"SJR match por nombre '{source_title}' año {target_year}")
+                return areas, categories, target_year
+        
+        if issns or source_title:
+            logger.debug(
+                f"Sin match SJR: ISSNs={issns}, título='{source_title}', año={target_year}"
+            )
+        
         return [], [], target_year
+
+    @staticmethod
+    def _normalize_issn_input(issn: str) -> str:
+        """Limpia un ISSN individual para búsqueda."""
+        clean = issn.replace('-', '').strip()
+        # Si por alguna razón quedó de 7 dígitos (ej: Excel se comió el cero antes de llegar aquí),
+        # intentamos rellenar, aunque Scopus suele enviarlo bien.
+        if len(clean) == 7 and clean.isdigit():
+            clean = clean.zfill(8)
+        return clean
 
     @lru_cache(maxsize=2048)
     def normalize_journal_name(self, name: str) -> str:
-        """
-        Mantenemos este método porque la Interfaz ISJRRepository lo exige,
-        aunque ya no lo usemos para la búsqueda principal.
-        """
         if not isinstance(name, str):
             name = str(name) if name else ""
         
@@ -87,39 +110,40 @@ class SJRFileRepository(ISJRRepository):
         Carga el CSV, calcula percentiles y puebla el caché indexado por ISSN.
         """
         try:
-            # 1. Cargar Dataframe
-            df = pd.read_csv(self._csv_path, sep=';', decimal=',')
+            # 1. Cargar Dataframe forzando tipos string para evitar que pandas elimine ceros
+            # 'dtype=str' es crucial para leer ISSNs como "01234567" y no 1234567
+            df = pd.read_csv(self._csv_path, sep=';', decimal=',', dtype=str)
             
-            # Normalizar nombres de columnas (strip spaces, etc)
+            # Limpiar nombres de columnas (strip espacios)
             df.columns = [c.strip() for c in df.columns]
 
-            # Verificar columna Rank
+            # CORRECCIÓN CRÍTICA 1: Detectar columna ISSN sin importar mayúsculas/minúsculas
+            col_map = {c.lower(): c for c in df.columns}
+            issn_col_name = col_map.get('issn') # Busca 'issn', 'Issn', 'ISSN'
+            
             rank_col = 'Rank'
             if 'Rank' not in df.columns and 'SJR Rank' in df.columns:
                 rank_col = 'SJR Rank'
             
-            # Asegurar tipos de datos
-            df['Title_norm'] = df['Title'].apply(self.normalize_journal_name)
+            # Convertir Rank y Year a numéricos (ya que leímos todo como string)
             df[rank_col] = pd.to_numeric(df[rank_col], errors='coerce').fillna(float('inf'))
+            df['year'] = pd.to_numeric(df['year'], errors='coerce').fillna(0).astype(int)
+
+            # Normalizar Título
+            df['Title_norm'] = df['Title'].apply(self.normalize_journal_name)
             
-            # Asegurar que existe columna Issn y convertirla a string
-            if 'Issn' in df.columns:
-                df['Issn'] = df['Issn'].astype(str)
+            # Manejo de Issn
+            if issn_col_name:
+                df['Issn_Final'] = df[issn_col_name].fillna('')
             else:
-                # Si no existe la columna Issn, creamos una vacía para no romper el código
-                df['Issn'] = ''
+                logger.warning("¡Columna ISSN no encontrada en el CSV de SJR!")
+                df['Issn_Final'] = ''
             
             # Detectar año máximo
-            try:
-                self._max_year_available = int(df['year'].max())
-            except:
-                self._max_year_available = 0
+            self._max_year_available = int(df['year'].max()) if not df.empty else 0
 
-            # --- FASE 1: Construir universos de comparación (Q1) ---
-            # Diccionario: {(Año, NombreCategoria): [Lista de Ranks de revistas Q1]}
+            # --- FASE 1: Construir universos Q1 ---
             q1_universes: Dict[Tuple[int, str], List[float]] = defaultdict(list)
-
-            # Lista temporal para procesar en Fase 2
             processed_rows = []
 
             for _, row in df.iterrows():
@@ -129,22 +153,18 @@ class SJRFileRepository(ISJRRepository):
                     title_norm = row['Title_norm']
                     areas_str = str(row.get('Areas', ''))
                     categories_str = str(row.get('Categories', ''))
-                    # Capturamos el ISSN crudo (ej: "18790534, 00104655")
-                    issn_str = str(row.get('Issn', ''))
+                    issn_str = str(row.get('Issn_Final', ''))
 
-                    # Parsear categorías estructuradas
                     parsed_cats = self._parse_categories_structured(categories_str)
                     
-                    # Guardar datos para la Fase 2
                     processed_rows.append({
-                        'key': (title_norm, year), # Mantenemos key temporal por compatibilidad lógica
+                        'key': (title_norm, year),
                         'rank': rank,
                         'areas': self._parse_areas(areas_str),
                         'categories': parsed_cats,
-                        'issn_raw': issn_str  # Guardamos el ISSN crudo
+                        'issn_raw': issn_str
                     })
 
-                    # Poblar universo: Si es Q1, agregamos su rank a la lista de esa categoría
                     for cat in parsed_cats:
                         if cat['quartile'] == 'Q1':
                             q1_universes[(year, cat['name'])].append(rank)
@@ -152,100 +172,108 @@ class SJRFileRepository(ISJRRepository):
                 except (ValueError, TypeError):
                     continue
 
-            # Ordenar las listas de ranks (ascendente: Rank 1 es mejor que Rank 20)
+            # Ordenar universos
             for key in q1_universes:
                 q1_universes[key].sort()
 
-            # --- FASE 2: Calcular percentiles y guardar caché POR ISSN ---
-            count_entries = 0
+            # --- FASE 2: Calcular percentiles y guardar caché POR ISSN y NOMBRE ---
+            count_issn_entries = 0
+            count_name_entries = 0
+            count_missed_issn = 0
+            
             for item in processed_rows:
+                title_norm = item['key'][0]
                 year = item['key'][1]
                 my_rank = item['rank']
                 final_categories_str = []
 
-                # Cálculo de Top 10%
+                # Lógica de Top 10%
                 for cat in item['categories']:
                     cat_name = cat['name']
                     quartile = cat['quartile']
-                    
                     cat_display = f"{cat_name} ({quartile})" if quartile else cat_name
 
                     if quartile == 'Q1':
                         universe = q1_universes.get((year, cat_name), [])
                         total_q1 = len(universe)
-                        
                         if total_q1 > 0:
                             try:
-                                # Nueva posición: índice en la lista ordenada + 1
                                 new_position = universe.index(my_rank) + 1
-                                # Porcentaje dentro del Q1 (que es el 25% total)
                                 percent_top = (new_position / total_q1) * 25.0
-                                
                                 if percent_top <= 10.0:
                                     cat_display += f"[Categoría dentro del 10% superior ({percent_top:.1f})]"
                             except ValueError:
                                 pass 
-
                     final_categories_str.append(cat_display)
 
-                # PROCESAMIENTO DE ISSN
-                # Obtenemos los ISSNs limpios de esta fila
+                result_tuple = (item['areas'], final_categories_str)
+
+                # CACHÉ PRIMARIO: por ISSN
                 issn_list = self._parse_issns(item['issn_raw'])
                 
-                # Guardamos en caché una entrada por cada ISSN que tenga la revista
-                # Todos apuntan a los mismos datos calculados (áreas y categorías)
+                if not issn_list:
+                    count_missed_issn += 1
+                
                 for issn in issn_list:
-                    self._data_cache[(issn, year)] = (item['areas'], final_categories_str)
-                    count_entries += 1
+                    self._issn_cache[(issn, year)] = result_tuple
+                    count_issn_entries += 1
+                
+                # CACHÉ SECUNDARIO: por nombre normalizado de revista
+                if title_norm:
+                    self._name_cache[(title_norm, year)] = result_tuple
+                    count_name_entries += 1
             
-            logger.info(f"SJR cargado por ISSN. Total de claves en caché: {count_entries}. Año máximo: {self._max_year_available}")
+            logger.info(
+                f"SJR cargado. "
+                f"Caché ISSN: {count_issn_entries} entradas. "
+                f"Caché Nombre: {count_name_entries} entradas. "
+                f"Revistas sin ISSN útil: {count_missed_issn}. "
+                f"Año máximo: {self._max_year_available}"
+            )
 
         except FileNotFoundError:
             logger.error(f"No se encontró el archivo SJR en {self._csv_path}")
         except Exception as e:
-            logger.error(f"Error procesando SJR: {e}")
+            logger.error(f"Error procesando SJR: {e}", exc_info=True)
 
     @staticmethod
     def _parse_issns(issn_str: str) -> List[str]:
         """
-        Convierte cadena CSV "18790534, 00104655" en lista ['18790534', '00104655'].
-        Elimina guiones y espacios.
+        Parsea y normaliza ISSNs.
+        CORRECCIÓN CRÍTICA 2: Recuperar ceros a la izquierda si se perdieron.
         """
         if not issn_str or issn_str.lower() == 'nan':
             return []
         
-        # Scimago suele usar ", " como separador. A veces " "
-        # Normalizamos reemplazando comas por espacios para split más fácil si es mixto
+        # Reemplazar comas por espacios para separar
         clean_str = issn_str.replace(',', ' ')
         parts = clean_str.split()
         
         results = []
         for p in parts:
-            # Quitamos guiones y espacios
+            # 1. Quitar guiones y espacios
             clean_issn = p.replace('-', '').strip()
+            
+            # 2. Validar si es numérico y tiene longitud 7 (error común de Excel/Pandas)
+            # Un ISSN (E-ISSN) tiene 8 caracteres. El último puede ser 'X'.
+            if len(clean_issn) == 7 and clean_issn.isdigit():
+                clean_issn = clean_issn.zfill(8)
+            
             if clean_issn:
                 results.append(clean_issn)
         return results
 
     @staticmethod
     def _parse_categories_structured(categories_str: str) -> List[Dict[str, str]]:
-        """
-        Parsea string: "Immunology (Q1); Other (Q2)" -> [{'name': 'Immunology', 'quartile': 'Q1'}, ...]
-        """
         if not categories_str or categories_str == 'nan':
             return []
-        
         results = []
         parts = categories_str.split(';')
         for part in parts:
             part = part.strip()
-            if not part:
-                continue
-            
+            if not part: continue
             quartile = ""
             name = part
-            
-            # Extraer Q1, Q2, etc.
             if part.endswith(')'):
                 last_open = part.rfind('(')
                 if last_open != -1:
@@ -253,7 +281,6 @@ class SJRFileRepository(ISJRRepository):
                     if q_candidate.startswith('Q') and len(q_candidate) <= 3:
                         quartile = q_candidate
                         name = part[:last_open].strip()
-            
             results.append({'name': name, 'quartile': quartile})
         return results
 

@@ -24,10 +24,15 @@ class ISJRRepository(ABC):
     def get_journal_data(
         self, 
         issns: List[str], 
-        publication_year: int
+        publication_year: int,
+        source_title: str = ""
     ) -> Tuple[List[str], List[str], int]:
         """
         Obtiene los datos SJR de una revista para un año específico.
+        
+        Estrategia de búsqueda:
+        1. Búsqueda primaria por ISSNs (impreso/electrónico)
+        2. Fallback por nombre normalizado de revista
         
         Si el año solicitado es mayor al disponible, utiliza el último año
         disponible (mapeo dinámico).
@@ -35,6 +40,7 @@ class ISJRRepository(ABC):
         Args:
             issns: Lista de ISSNs asociados a la revista/fuente
             publication_year: Año de publicación del artículo
+            source_title: Nombre de la revista (usado como fallback)
             
         Returns:
             Tupla con:

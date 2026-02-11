@@ -201,12 +201,12 @@ class PublicationService:
 
     def _enrich_with_sjr(self, publication: Publication) -> Publication:
         """
-        Enriquece usando la lista de ISSNs en lugar del nombre.
+        Enriquece usando ISSNs como búsqueda primaria, con fallback por nombre de revista.
         """
-        # --- CAMBIO AQUÍ: Pasamos publication.issns ---
         areas, categories_with_quartiles, sjr_year_used = self._sjr_repo.get_journal_data(
             publication.issns, 
-            publication.year
+            publication.year,
+            publication.source_title
         )
         
         publication.subject_areas = areas
