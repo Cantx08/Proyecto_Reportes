@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 class PublicationService:
     """
     Servicio de aplicación para gestión de publicaciones.
-    
-    Orquesta la obtención de publicaciones desde Scopus con estrategia de caché
-    y enriquecimiento con métricas SJR para las categorías temáticas.
     """
     
     # Tiempo de validez de la caché en horas
@@ -43,18 +40,6 @@ class PublicationService:
         author_id: UUID,
         force_refresh: bool = False
     ) -> AuthorPublicationsResponseDTO:
-        """
-        Obtiene todas las publicaciones de un autor desde sus cuentas Scopus.
-        
-        Utiliza caché cuando está disponible para reducir llamadas a la API.
-        
-        Args:
-            author_id: UUID del autor en el sistema
-            force_refresh: Si True, ignora la caché y consulta Scopus directamente
-            
-        Returns:
-            DTO con las publicaciones del autor enriquecidas con métricas SJR
-        """
         logger.info(f"Obteniendo publicaciones del autor {author_id}, force_refresh={force_refresh}")
         
         # 1. Obtener las cuentas Scopus del autor
@@ -76,14 +61,13 @@ class PublicationService:
 
         # 2. Obtener publicaciones de todas las cuentas Scopus
         all_publications: List[Publication] = []
-        seen_scopus_ids = set()  # Para evitar duplicados
+        seen_scopus_ids = set()
         
         for publications in result_lists:
             for pub in publications:
                 if pub.scopus_id not in seen_scopus_ids:
                     seen_scopus_ids.add(pub.scopus_id)
                     all_publications.append(pub)
-
         
         # 3. Ordenar por año descendente
         all_publications.sort(key=lambda p: p.year, reverse=True)
@@ -102,17 +86,9 @@ class PublicationService:
         account: ScopusAccount,
         force_refresh: bool = False
     ) -> List[Publication]:
-        """
-        Obtiene publicaciones usando la estrategia de caché.
-        
-        1. Si hay caché válida y no se fuerza refresh, usa caché
-        2. Si no hay caché o está expirada, consulta Scopus y actualiza caché
-        """
-        # Si no hay repositorio de caché, ir directo a Scopus
         if self._cache_repo is None:
             return await self._fetch_from_scopus(account.scopus_id)
         
-        # Verificar si la caché es válida
         if not force_refresh:
             cache_valid = await self._cache_repo.is_cache_valid(
                 account.account_id, 
@@ -120,15 +96,12 @@ class PublicationService:
             )
             
             if cache_valid:
-                # Usar caché
                 cached_pubs = await self._cache_repo.get_by_scopus_account(account.account_id)
                 if cached_pubs:
                     return cached_pubs
         
-        # Caché no válida o forzar refresh: consultar Scopus
         publications = await self._fetch_from_scopus(account.scopus_id)
         
-        # Guardar en caché
         if publications:
             await self._cache_repo.save_publications(publications, account.account_id)
         
@@ -150,61 +123,41 @@ class PublicationService:
         self, 
         scopus_id: str
     ) -> List[PublicationResponseDTO]:
-        """
-        Obtiene las publicaciones de una cuenta Scopus específica.
-        
-        Este método NO usa caché ya que no tiene el account_id.
-        Útil para verificar publicaciones antes de vincular una cuenta.
-        
-        Args:
-            scopus_id: ID de Scopus del autor
-            
-        Returns:
-            Lista de DTOs de publicaciones
-        """
         publications = await self._fetch_from_scopus(scopus_id)
-        
-        # Ordenar por año descendente
         publications.sort(key=lambda p: p.year, reverse=True)
-        
         return [PublicationResponseDTO.from_entity(p) for p in publications]
 
     async def refresh_author_publications(self, author_id: UUID) -> AuthorPublicationsResponseDTO:
-        """
-        Fuerza la actualización de publicaciones desde Scopus.
-        
-        Invalida la caché existente y consulta Scopus directamente.
-        
-        Args:
-            author_id: UUID del autor
-            
-        Returns:
-            DTO con las publicaciones actualizadas
-        """
         return await self.get_publications_by_author(author_id, force_refresh=True)
 
     def _transform_raw_publication(self, raw: Dict, scopus_author_id: str) -> Publication:
         """
         Transforma los datos crudos de Scopus a una entidad Publication.
-        
-        Args:
-            raw: Diccionario con datos de la API de Scopus
-            scopus_author_id: ID de Scopus del autor específico cuya afiliación buscamos
-            
-        Returns:
-            Entidad Publication
+        Ahora extrae también los ISSNs.
         """
-        # Extraer año de la fecha de publicación
         cover_date = raw.get("prism:coverDate", "")
         year = int(cover_date[:4]) if cover_date and len(cover_date) >= 4 else 0
         
-        # Extraer filiación del autor específico (dueño del Scopus ID)
         affiliation_name, affiliation_id = self._get_author_affiliation(raw, scopus_author_id)
         
+        # --- NUEVA LÓGICA DE EXTRACCIÓN DE ISSN ---
+        issns = []
+        # ISSN Impreso
+        if raw.get("prism:issn"):
+            issns.append(str(raw.get("prism:issn")).strip())
+        # ISSN Electrónico
+        if raw.get("prism:eIssn"):
+            issns.append(str(raw.get("prism:eIssn")).strip())
+        # ------------------------------------------
+
         return Publication(
             scopus_id=raw.get("dc:identifier", "").replace("SCOPUS_ID:", ""),
             eid=raw.get("eid", ""),
             doi=raw.get("prism:doi"),
+            
+            # Asignamos la lista
+            issns=issns,
+            
             title=raw.get("dc:title", "Sin título"),
             year=year,
             publication_date=cover_date,
@@ -212,39 +165,21 @@ class PublicationService:
             document_type=raw.get("subtypeDescription", raw.get("prism:aggregationType", "")),
             affiliation_name=affiliation_name,
             affiliation_id=affiliation_id,
-            subject_areas=[],              # Se llenan en el enriquecimiento SJR
-            categories_with_quartiles=[],  # Se llenan en el enriquecimiento SJR
+            subject_areas=[],
+            categories_with_quartiles=[],
             sjr_year_used=None
         )
 
     def _get_author_affiliation(self, raw: Dict, scopus_author_id: str) -> tuple[str, Optional[str]]:
-        """
-        Obtiene la afiliación específica del autor dueño del Scopus ID.
-        
-        La API de Scopus puede incluir información del autor en diferentes campos:
-        - 'author': Lista de autores con sus afiliaciones
-        - 'affiliation': Lista de todas las afiliaciones de la publicación
-        
-        Args:
-            raw: Diccionario con datos de la API de Scopus
-            scopus_author_id: ID de Scopus del autor específico
-            
-        Returns:
-            Tupla con (nombre_afiliación, id_afiliación)
-        """
-        # Intentar encontrar al autor específico en la lista de autores
         authors = raw.get("author", [])
         if isinstance(authors, dict):
             authors = [authors]
         
-        # Buscar el autor por su AU-ID (Scopus Author ID)
         for author in authors:
             authid = author.get("authid", "")
             if authid == scopus_author_id:
-                # Encontramos al autor, obtener su afiliación
                 afid = author.get("afid")
                 if afid:
-                    # Buscar el nombre de la afiliación en la lista de afiliaciones
                     affiliations = raw.get("affiliation", [])
                     if isinstance(affiliations, dict):
                         affiliations = [affiliations]
@@ -252,11 +187,8 @@ class PublicationService:
                     for aff in affiliations:
                         if aff.get("afid") == afid:
                             return aff.get("affilname", "Sin filiación"), afid
-                    
-                    # Si no encontramos el nombre, retornamos solo el ID
                     return "Afiliación ID: " + afid, afid
         
-        # Fallback: usar la primera afiliación disponible si no encontramos al autor
         affiliations = raw.get("affiliation", [])
         if isinstance(affiliations, dict):
             affiliations = [affiliations]
@@ -269,19 +201,11 @@ class PublicationService:
 
     def _enrich_with_sjr(self, publication: Publication) -> Publication:
         """
-        Enriquece una publicación con datos SJR.
-        
-        Mapea dinámicamente años futuros al último año disponible.
-        
-        Args:
-            publication: Publicación a enriquecer
-            
-        Returns:
-            Publicación con datos SJR (áreas y categorías con cuartiles)
+        Enriquece usando la lista de ISSNs en lugar del nombre.
         """
-        # Obtener datos SJR para la revista
+        # --- CAMBIO AQUÍ: Pasamos publication.issns ---
         areas, categories_with_quartiles, sjr_year_used = self._sjr_repo.get_journal_data(
-            publication.source_title, 
+            publication.issns, 
             publication.year
         )
         
@@ -292,25 +216,13 @@ class PublicationService:
         return publication
 
     async def get_statistics_by_author(self, author_id: UUID) -> Dict:
-        """
-        Obtiene estadísticas de publicaciones de un autor.
-        
-        Args:
-            author_id: UUID del autor
-            
-        Returns:
-            Diccionario con estadísticas por año y por tipo
-        """
         author_pubs = await self.get_publications_by_author(author_id)
         
         by_year: Dict[int, int] = {}
         by_type: Dict[str, int] = {}
         
         for pub in author_pubs.publications:
-            # Por año
             by_year[pub.year] = by_year.get(pub.year, 0) + 1
-            
-            # Por tipo
             by_type[pub.document_type] = by_type.get(pub.document_type, 0) + 1
         
         return {

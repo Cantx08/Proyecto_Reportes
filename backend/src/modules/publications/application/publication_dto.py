@@ -1,6 +1,6 @@
+
 from typing import List, Optional
 from pydantic import BaseModel
-
 from ..domain.publication import Publication
 
 
@@ -9,6 +9,7 @@ class PublicationResponseDTO(BaseModel):
     scopus_id: str
     eid: str
     doi: Optional[str]
+    issns: List[str]
     title: str
     year: int
     publication_date: str
@@ -26,6 +27,10 @@ class PublicationResponseDTO(BaseModel):
             scopus_id=publication.scopus_id,
             eid=publication.eid,
             doi=publication.doi,
+            
+            # Mapeamos la lista de ISSNs de la entidad
+            issns=publication.issns if hasattr(publication, 'issns') else [],
+
             title=publication.title,
             year=publication.year,
             publication_date=publication.publication_date,

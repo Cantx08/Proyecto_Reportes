@@ -23,7 +23,7 @@ class ISJRRepository(ABC):
     @abstractmethod
     def get_journal_data(
         self, 
-        journal_name: str, 
+        issns: List[str], 
         publication_year: int
     ) -> Tuple[List[str], List[str], int]:
         """
@@ -33,7 +33,7 @@ class ISJRRepository(ABC):
         disponible (mapeo dinámico).
         
         Args:
-            journal_name: Nombre de la revista/fuente
+            issns: Lista de ISSNs asociados a la revista/fuente
             publication_year: Año de publicación del artículo
             
         Returns:

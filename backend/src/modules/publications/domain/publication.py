@@ -27,6 +27,7 @@ class Publication:
     affiliation_id: Optional[str] = None  # ID de la filiación en Scopus
     
     # Clasificación temática (del SJR histórico)
+    issns: List[str] = field(default_factory=list)  # ISSNs asociados a la publicación
     # Áreas temáticas generales (ej: ["Computer Science", "Engineering"])
     subject_areas: List[str] = field(default_factory=list)
     # Categorías con cuartiles tal como vienen del SJR (ej: ["Software (Q1)", "Artificial Intelligence (Q2)"])
