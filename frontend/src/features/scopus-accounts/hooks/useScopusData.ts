@@ -67,7 +67,7 @@ export const useScopusData = () => {
   }, []);
 
   /**
-   * Extrae áreas temáticas únicas de las publicaciones
+   * Extrae áreas temáticas únicas de las publicaciones (fallback para Scopus IDs directos)
    */
   const extractSubjectAreas = (publications: Publication[]): string[] => {
     const areasSet = new Set<string>();
@@ -75,6 +75,19 @@ export const useScopusData = () => {
       pub.subject_areas?.forEach(area => areasSet.add(area));
     });
     return Array.from(areasSet).sort();
+  };
+
+  /**
+   * Obtiene áreas temáticas del autor desde la API Author Retrieval de Scopus
+   */
+  const fetchAuthorSubjectAreas = async (authorId: string): Promise<string[]> => {
+    try {
+      const response = await publicationService.getSubjectAreasByAuthor(authorId);
+      return response.subject_areas;
+    } catch (error) {
+      console.error(`Error al obtener áreas temáticas del autor ${authorId}:`, error);
+      return [];
+    }
   };
 
   /**
@@ -173,8 +186,26 @@ export const useScopusData = () => {
         return acc;
       }, [] as Publication[]);
 
-      // Extraer datos derivados
-      const subjectAreas = extractSubjectAreas(uniquePublications);
+      // Obtener áreas temáticas del autor desde Author Retrieval API
+      // Si hay author IDs (UUID), consultar el endpoint dedicado
+      // Si solo hay Scopus IDs directos, extraer de las publicaciones (fallback)
+      let subjectAreas: string[];
+      if (authorIds.length > 0) {
+        setState(prev => ({
+          ...prev,
+          loadingProgress: 'Obteniendo áreas temáticas del autor...'
+        }));
+        
+        const areasSet = new Set<string>();
+        for (const authorId of authorIds) {
+          const areas = await fetchAuthorSubjectAreas(authorId);
+          areas.forEach(area => areasSet.add(area));
+        }
+        subjectAreas = Array.from(areasSet).sort();
+      } else {
+        subjectAreas = extractSubjectAreas(uniquePublications);
+      }
+      
       const documentsByYear = calculateDocumentsByYear(uniquePublications);
 
       setState(prev => ({

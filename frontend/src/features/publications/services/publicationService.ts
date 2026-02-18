@@ -1,5 +1,6 @@
 import {
     AuthorPublicationsResponse,
+    AuthorSubjectAreasResponse,
     Publication,
     PublicationsStatsResponse
 } from "@/src/features/publications/types";
@@ -85,5 +86,19 @@ export const publicationService = {
         authorId: string
     ): Promise<AuthorPublicationsResponse> => {
         return publicationService.getByAuthor(authorId, true);
+    },
+
+    /**
+     * Obtener áreas temáticas de un autor desde la API Author Retrieval de Scopus
+     * Fusiona áreas de todas las cuentas Scopus del autor, eliminando duplicados
+     * @param authorId UUID del autor en el sistema
+     */
+    getSubjectAreasByAuthor: async (
+        authorId: string
+    ): Promise<AuthorSubjectAreasResponse> => {
+        const { data } = await publicationAxiosInstance.get(
+            `/publications/author/${authorId}/subject-areas`
+        );
+        return data;
     }
 };

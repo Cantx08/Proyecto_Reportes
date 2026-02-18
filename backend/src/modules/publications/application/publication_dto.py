@@ -9,7 +9,7 @@ class PublicationResponseDTO(BaseModel):
     scopus_id: str
     eid: str
     doi: Optional[str]
-    issns: List[str]
+    source_id: Optional[str]
     title: str
     year: int
     publication_date: str
@@ -28,8 +28,8 @@ class PublicationResponseDTO(BaseModel):
             eid=publication.eid,
             doi=publication.doi,
             
-            # Mapeamos la lista de ISSNs de la entidad
-            issns=publication.issns if hasattr(publication, 'issns') else [],
+            # Mapeamos el Sourceid de la revista
+            source_id=publication.source_id,
 
             title=publication.title,
             year=publication.year,

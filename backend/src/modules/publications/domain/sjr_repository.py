@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 class ISJRRepository(ABC):
@@ -23,7 +23,7 @@ class ISJRRepository(ABC):
     @abstractmethod
     def get_journal_data(
         self, 
-        issns: List[str], 
+        source_id: Optional[str], 
         publication_year: int,
         source_title: str = ""
     ) -> Tuple[List[str], List[str], int]:
@@ -31,14 +31,14 @@ class ISJRRepository(ABC):
         Obtiene los datos SJR de una revista para un año específico.
         
         Estrategia de búsqueda:
-        1. Búsqueda primaria por ISSNs (impreso/electrónico)
+        1. Búsqueda primaria por Sourceid (identificador único de la revista)
         2. Fallback por nombre normalizado de revista
         
         Si el año solicitado es mayor al disponible, utiliza el último año
         disponible (mapeo dinámico).
         
         Args:
-            issns: Lista de ISSNs asociados a la revista/fuente
+            source_id: Sourceid de la revista/fuente en Scopus/SJR
             publication_year: Año de publicación del artículo
             source_title: Nombre de la revista (usado como fallback)
             

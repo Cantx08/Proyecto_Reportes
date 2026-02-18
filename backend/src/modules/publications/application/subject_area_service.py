@@ -1,86 +1,92 @@
+"""Servicio para obtener áreas temáticas de un autor desde Scopus Author Retrieval."""
+
 import asyncio
+import logging
 from typing import List
-from ..domain.subject_areas_repository import SubjectAreasRepository
+from uuid import UUID
+
+from ..domain.author_subject_area_repository import IAuthorSubjectAreaRepository
 from ...scopus_accounts.domain.scopus_account_repository import IScopusAccountRepository
+
+logger = logging.getLogger(__name__)
 
 
 class SubjectAreaService:
-    """Servicio para manejo de áreas temáticas."""
+    """
+    Servicio para obtener las áreas temáticas de un autor.
+    
+    Flujo:
+    1. Recibe el ID interno del autor (UUID).
+    2. Busca todas sus cuentas Scopus (scopus_id).
+    3. Consulta la API de Author Retrieval para cada scopus_id.
+    4. Fusiona las áreas temáticas eliminando duplicados.
+    """
 
     def __init__(
-        self, 
-        scopus_repository: SubjectAreasRepository, 
-        mapping_repository: SubjectAreasRepository,
-        scopus_account_repository: ScopusAccountRepository
+        self,
+        author_sa_repo: IAuthorSubjectAreaRepository,
+        scopus_account_repo: IScopusAccountRepository
     ):
-        self._scopus_repository = scopus_repository  # Para obtener datos de Scopus
-        self._mapping_repository = mapping_repository  # Para mapear usando CSV
-        self._scopus_account_repository = scopus_account_repository
+        self._author_sa_repo = author_sa_repo
+        self._scopus_account_repo = scopus_account_repo
 
-    async def _resolve_scopus_ids(self, mixed_ids: List[str]) -> List[str]:
+    async def get_subject_areas_by_author(self, author_id: UUID) -> List[str]:
         """
-        Resuelve una lista mezclada de IDs (Scopus IDs o Author IDs) a solo Scopus IDs.
+        Obtiene las áreas temáticas fusionadas de todas las cuentas Scopus de un autor.
         
         Args:
-            mixed_ids: Lista que puede contener Scopus IDs (numéricos) o Author IDs (cualquier formato)
+            author_id: UUID del autor en el sistema
             
         Returns:
-            Lista de Scopus IDs únicos
-        """
-        scopus_ids = []
-        
-        for id_value in mixed_ids:
-            # Si es numérico y tiene 11 dígitos, probablemente es un Scopus ID
-            if id_value.isdigit() and len(id_value) == 11:
-                scopus_ids.append(id_value)
-            else:
-                # Intentar buscar como Author ID en la base de datos
-                try:
-                    accounts = await self._scopus_account_repository.get_by_author_id(id_value)
-                    for account in accounts:
-                        if account.is_active:
-                            scopus_ids.append(account.scopus_id)
-                except Exception:
-                    # Si no se encuentra, asumir que es un Scopus ID de todas formas
-                    scopus_ids.append(id_value)
-        
-        # Retornar lista única de IDs
-        return list(set(scopus_ids))
-
-    async def get_subject_areas(self, mixed_ids: List[str]) -> List[str]:
-        """
-        Obtiene las áreas temáticas principales (generales) de múltiples autores.
-        Mapea las subáreas específicas a áreas temáticas generales usando el CSV.
-        
-        Args:
-            mixed_ids: Lista que puede contener Scopus IDs o Author IDs de la base de datos
-        """
-        # Resolver todos los IDs a Scopus IDs
-        scopus_ids = await self._resolve_scopus_ids(mixed_ids)
-        
-        categories = set()
-
-        # Obtener todas las subáreas específicas de Scopus
-        async def fetch_author_areas(scopus_id):
-            try:
-                areas = await self._scopus_repository.get_subject_areas_by_author(scopus_id)
-                return areas
-            except Exception as e:
-                print(f"Error obteniendo áreas para autor {scopus_id}: {e}")
-                return []
+            Lista ordenada de áreas temáticas únicas
             
-        tasks = [fetch_author_areas(sid) for sid in scopus_ids]
+        Raises:
+            ValueError: Si el autor no tiene cuentas Scopus asociadas
+        """
+        # 1. Buscar cuentas Scopus del autor
+        scopus_accounts = await self._scopus_account_repo.get_by_author(author_id)
+
+        if not scopus_accounts:
+            logger.warning("Autor %s no tiene cuentas Scopus asociadas", author_id)
+            raise ValueError("El autor no tiene cuentas Scopus asociadas.")
+
+        scopus_ids = [account.scopus_id for account in scopus_accounts]
+        logger.info(
+            "Obteniendo subject areas para autor %s con %d cuenta(s) Scopus",
+            author_id, len(scopus_ids)
+        )
+
+        # 2. Consultar Author Retrieval para cada cuenta en paralelo
+        tasks = [
+            self._author_sa_repo.get_subject_areas_by_scopus_id(sid)
+            for sid in scopus_ids
+        ]
         results = await asyncio.gather(*tasks)
 
+        # 3. Fusionar eliminando duplicados
+        merged_areas: set[str] = set()
         for areas_list in results:
             for area in areas_list:
-                categories.add(area.name)
-        
-        # Mapear subáreas a áreas temáticas principales
-        subject_areas = set()
-        for category in categories:
-            subject_area = self._mapping_repository.map_category_to_area(category)
-            if subject_area:
-                subject_areas.add(subject_area)
+                merged_areas.add(area)
 
-        return sorted(list(subject_areas))
+        sorted_areas = sorted(merged_areas)
+        logger.info(
+            "Autor %s: %d áreas temáticas únicas obtenidas de %d cuentas",
+            author_id, len(sorted_areas), len(scopus_ids)
+        )
+
+        return sorted_areas
+
+    async def get_subject_areas_by_scopus_id(self, scopus_id: str) -> List[str]:
+        """
+        Obtiene las áreas temáticas de una sola cuenta Scopus.
+        
+        Args:
+            scopus_id: ID del autor en Scopus
+            
+        Returns:
+            Lista ordenada de áreas temáticas
+        """
+        areas = await self._author_sa_repo.get_subject_areas_by_scopus_id(scopus_id)
+        return sorted(set(areas))
+

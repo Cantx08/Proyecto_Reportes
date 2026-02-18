@@ -11,6 +11,7 @@ export interface Publication {
     scopus_id: string;
     eid: string;
     doi: string | null;
+    source_id: string | null;
     title: string;
     year: number;
     publication_date: string;
@@ -49,6 +50,15 @@ export interface PublicationsStatsResponse {
     total_publications: number;
     documents_by_year: DocumentsByYearItem[];
     documents_by_type: Record<string, number>;
+}
+
+/**
+ * Respuesta del endpoint de áreas temáticas del autor
+ */
+export interface AuthorSubjectAreasResponse {
+    author_id: string;
+    scopus_ids: string[];
+    subject_areas: string[];
 }
 
 /**

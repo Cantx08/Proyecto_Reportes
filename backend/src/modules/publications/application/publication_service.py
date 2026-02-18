@@ -22,6 +22,8 @@ class PublicationService:
     
     # Tiempo de validez de la caché en horas
     CACHE_MAX_AGE_HOURS = 24
+    EPN_AFFILIATION_ID = "60072054"
+    
     
     def __init__(
         self,
@@ -132,43 +134,100 @@ class PublicationService:
 
     def _transform_raw_publication(self, raw: Dict, scopus_author_id: str) -> Publication:
         """
-        Transforma los datos crudos de Scopus a una entidad Publication.
-        Ahora extrae también los ISSNs.
+        Transforma y aplica la lógica de validación de filiación estricta.
         """
         cover_date = raw.get("prism:coverDate", "")
         year = int(cover_date[:4]) if cover_date and len(cover_date) >= 4 else 0
         
-        affiliation_name, affiliation_id = self._get_author_affiliation(raw, scopus_author_id)
+        # Lógica central: Determinar si este autor, en este paper, firmó como EPN
+        affiliation_name, affiliation_id, is_epn = self._analyze_affiliation_link(
+            raw, scopus_author_id
+        )
         
-        # --- NUEVA LÓGICA DE EXTRACCIÓN DE ISSN ---
-        issns = []
-        # ISSN Impreso
-        if raw.get("prism:issn"):
-            issns.append(str(raw.get("prism:issn")).strip())
-        # ISSN Electrónico
-        if raw.get("prism:eIssn"):
-            issns.append(str(raw.get("prism:eIssn")).strip())
-        # ------------------------------------------
+        # Extracción del Sourceid de la revista/fuente
+        raw_source_id = raw.get("source-id")
+        source_id = str(raw_source_id).strip() if raw_source_id else None
 
         return Publication(
             scopus_id=raw.get("dc:identifier", "").replace("SCOPUS_ID:", ""),
             eid=raw.get("eid", ""),
             doi=raw.get("prism:doi"),
-            
-            # Asignamos la lista
-            issns=issns,
-            
+            source_id=source_id,
             title=raw.get("dc:title", "Sin título"),
             year=year,
             publication_date=cover_date,
             source_title=raw.get("prism:publicationName", ""),
             document_type=raw.get("subtypeDescription", raw.get("prism:aggregationType", "")),
+            
+            # Nuevos datos calculados
             affiliation_name=affiliation_name,
             affiliation_id=affiliation_id,
+            is_epn_affiliated=is_epn, # <--- La verdad de la milanesa
+            
             subject_areas=[],
             categories_with_quartiles=[],
             sjr_year_used=None
         )
+    
+    def _analyze_affiliation_link(self, raw: Dict, target_author_id: str) -> tuple[str, Optional[str], bool]:
+        """
+        Analiza si el author_id específico está vinculado al AF-ID de la EPN en este documento.
+        Retorna: (Nombre Filiación, ID Filiación, Es_EPN_Boolean)
+        """
+        # 1. Obtener lista de autores del paper
+        authors = raw.get("author", [])
+        if isinstance(authors, dict): authors = [authors]
+        
+        # 2. Obtener lista de afiliaciones globales del paper (para buscar nombres)
+        affiliations_metadata = raw.get("affiliation", [])
+        if isinstance(affiliations_metadata, dict): affiliations_metadata = [affiliations_metadata]
+        
+        # Diccionario auxiliar para buscar nombres de afiliaciones por ID rápido
+        aff_lookup = {
+            aff.get("afid"): aff.get("affilname", "Desconocida") 
+            for aff in affiliations_metadata if aff.get("afid")
+        }
+
+        # 3. Buscar al autor objetivo
+        target_author = next((a for a in authors if a.get("authid") == target_author_id), None)
+
+        if not target_author:
+            # Caso raro: El paper salió en la búsqueda pero el autor no aparece en la lista explícita
+            # Esto pasa en "Group Authors" a veces. Asumimos False por seguridad.
+            return "Autor no listado explícitamente", None, False
+
+        # 4. Obtener los IDs de filiación DE ESTE AUTOR en este paper
+        # Scopus devuelve 'afid' como un array de objetos (view=COMPLETE) o string
+        author_afids = []
+        raw_afids = target_author.get("afid", [])
+        
+        if isinstance(raw_afids, list):
+            # Formato: [{'@_fa': 'true', '$': '12345'}, ...] o ['12345']
+            for item in raw_afids:
+                if isinstance(item, dict):
+                    author_afids.append(item.get("$", ""))
+                else:
+                    author_afids.append(str(item))
+        elif isinstance(raw_afids, dict):
+             author_afids.append(raw_afids.get("$", ""))
+        elif isinstance(raw_afids, str):
+            # A veces viene separado por espacios si no es array
+            author_afids = raw_afids.split()
+
+        # 5. VERIFICACIÓN MAESTRA: ¿Está el ID de la EPN en los IDs de este autor?
+        is_epn = self.EPN_AFFILIATION_ID in author_afids
+
+        # 6. Resolver nombre de afiliación para mostrar
+        if is_epn:
+            # Si es EPN, forzamos que se muestre como tal y devolvemos el ID de EPN
+            return aff_lookup.get(self.EPN_AFFILIATION_ID, "Escuela Politécnica Nacional"), self.EPN_AFFILIATION_ID, True
+        
+        # Si no es EPN, devolvemos su primera afiliación (la principal externa)
+        if author_afids:
+            primary_afid = author_afids[0]
+            return aff_lookup.get(primary_afid, "Filiación Externa"), primary_afid, False
+            
+        return "Sin filiación", None, False
 
     def _get_author_affiliation(self, raw: Dict, scopus_author_id: str) -> tuple[str, Optional[str]]:
         authors = raw.get("author", [])
@@ -201,10 +260,10 @@ class PublicationService:
 
     def _enrich_with_sjr(self, publication: Publication) -> Publication:
         """
-        Enriquece usando ISSNs como búsqueda primaria, con fallback por nombre de revista.
+        Enriquece usando Sourceid como búsqueda primaria, con fallback por nombre de revista.
         """
         areas, categories_with_quartiles, sjr_year_used = self._sjr_repo.get_journal_data(
-            publication.issns, 
+            publication.source_id, 
             publication.year,
             publication.source_title
         )

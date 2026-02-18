@@ -38,7 +38,7 @@ class ScopusPublicationRepository(IPublicationRepository):
         """
         all_entries = []
         start = 0
-        count = 200  # Máximo permitido por la API de Scopus
+        count = 25  # Máximo permitido por la API de Scopus
         
         async with AsyncClient(timeout=self._timeout) as client:
             while True:
@@ -46,7 +46,8 @@ class ScopusPublicationRepository(IPublicationRepository):
                 params = {
                     "query": f"AU-ID({scopus_author_id})",
                     "start": start,
-                    "count": count
+                    "count": count,
+                    "view": "COMPLETE"  # Obtener datos completos para cada publicación
                 }
                 
                 response = await client.get(url, headers=self._headers, params=params)

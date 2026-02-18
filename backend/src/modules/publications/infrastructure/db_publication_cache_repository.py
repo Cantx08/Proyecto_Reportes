@@ -63,6 +63,7 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
                 "scopus_id": model.scopus_id,
                 "eid": model.eid,
                 "doi": model.doi,
+                "source_id": model.source_id,
                 "title": model.title,
                 "year": model.year,
                 "publication_date": model.publication_date,
@@ -130,6 +131,7 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
             scopus_id=model.scopus_id,
             eid=model.eid or "",
             doi=model.doi,
+            source_id=model.source_id,
             title=model.title,
             year=model.year,
             publication_date=model.publication_date or "",
@@ -152,6 +154,7 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
             scopus_id=pub.scopus_id,
             eid=pub.eid,
             doi=pub.doi,
+            source_id=pub.source_id,
             title=pub.title,
             year=pub.year,
             publication_date=pub.publication_date,
@@ -170,6 +173,7 @@ class DBPublicationCacheRepository(IPublicationCacheRepository):
         """Actualiza un modelo existente con datos nuevos."""
         model.eid = pub.eid
         model.doi = pub.doi
+        model.source_id = pub.source_id
         model.title = pub.title
         model.year = pub.year
         model.publication_date = pub.publication_date

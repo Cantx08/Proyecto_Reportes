@@ -26,8 +26,12 @@ class Publication:
     affiliation_name: str       # Nombre de la filiación del autor dueño del Scopus ID
     affiliation_id: Optional[str] = None  # ID de la filiación en Scopus
     
+    is_epn_affiliated: bool = False
+
+    # Identificador de la revista/fuente en Scopus/SJR
+    source_id: Optional[str] = None  # Sourceid de la revista (clave para mapeo SJR)
+    
     # Clasificación temática (del SJR histórico)
-    issns: List[str] = field(default_factory=list)  # ISSNs asociados a la publicación
     # Áreas temáticas generales (ej: ["Computer Science", "Engineering"])
     subject_areas: List[str] = field(default_factory=list)
     # Categorías con cuartiles tal como vienen del SJR (ej: ["Software (Q1)", "Artificial Intelligence (Q2)"])

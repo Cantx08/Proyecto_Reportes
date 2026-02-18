@@ -7,11 +7,14 @@ from sqlalchemy.orm import Session
 from .scopus_publication_repository import ScopusPublicationRepository
 from .sjr_file_repository import SJRFileRepository
 from .db_publication_cache_repository import DBPublicationCacheRepository
+from .scopus_author_subject_area_repository import ScopusAuthorSubjectAreaRepository
 from ..application.publication_dto import (
     PublicationResponseDTO, 
     AuthorPublicationsResponseDTO
 )
+from ..application.subject_area_dto import AuthorSubjectAreasResponseDTO
 from ..application.publication_service import PublicationService
+from ..application.subject_area_service import SubjectAreaService
 from ...scopus_accounts.infrastructure.db_scopus_account_repository import DBScopusAccountRepository
 from ....shared.database import get_db
 from ....container import get_container
@@ -45,6 +48,24 @@ def get_service(db: Session = Depends(get_db)) -> PublicationService:
         publication_repo=publication_repo,
         cache_repo=cache_repo,
         sjr_repo=sjr_repo,
+        scopus_account_repo=scopus_account_repo
+    )
+
+
+def get_subject_area_service(db: Session = Depends(get_db)) -> SubjectAreaService:
+    """
+    Factory para crear el servicio de áreas temáticas con sus dependencias.
+    """
+    container = get_container()
+
+    author_sa_repo = ScopusAuthorSubjectAreaRepository(
+        api_key=container.settings.SCOPUS_API_KEY
+    )
+
+    scopus_account_repo = DBScopusAccountRepository(db)
+
+    return SubjectAreaService(
+        author_sa_repo=author_sa_repo,
         scopus_account_repo=scopus_account_repo
     )
 
@@ -128,4 +149,35 @@ async def get_publication_stats(
         raise HTTPException(
             status_code=500,
             detail=f"Error al obtener estadísticas: {str(e)}"
+        )
+
+
+@router.get(
+    "/author/{author_id}/subject-areas",
+    response_model=AuthorSubjectAreasResponseDTO,
+    summary="Obtener áreas temáticas de un autor",
+    description="""
+    Obtiene las áreas temáticas del perfil de un autor consultando la API
+    Author Retrieval de Scopus para cada cuenta asociada.
+    
+    Fusiona las áreas temáticas de todas las cuentas eliminando duplicados.
+    """
+)
+async def get_author_subject_areas(
+    author_id: UUID,
+    service: SubjectAreaService = Depends(get_subject_area_service)
+):
+    """Endpoint para obtener áreas temáticas de un autor desde Scopus."""
+    try:
+        subject_areas = await service.get_subject_areas_by_author(author_id)
+        return AuthorSubjectAreasResponseDTO(
+            author_id=str(author_id),
+            subject_areas=subject_areas
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al obtener áreas temáticas: {str(e)}"
         )

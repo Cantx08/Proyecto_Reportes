@@ -38,6 +38,9 @@ class PublicationCacheModel(Base):
     source_title = Column(String(500), nullable=True)
     document_type = Column(String(100), nullable=True)
     
+    # Identificador de la revista/fuente (Sourceid de Scopus/SJR)
+    source_id = Column(String(50), nullable=True, index=True)
+    
     # Filiación
     affiliation_name = Column(String(500), nullable=True)
     affiliation_id = Column(String(50), nullable=True)
@@ -68,6 +71,7 @@ class PublicationCacheModel(Base):
             "scopus_id": self.scopus_id,
             "eid": self.eid or "",
             "doi": self.doi,
+            "source_id": self.source_id,
             "title": self.title,
             "year": self.year,
             "publication_date": self.publication_date or "",
