@@ -1,3 +1,5 @@
+""" Módulo de entidad de autor académico. """
+
 from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID

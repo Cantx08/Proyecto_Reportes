@@ -68,24 +68,6 @@ export const PublicationsList: React.FC<PublicationsListProps> = ({
         );
     };
 
-    // Renderizar áreas temáticas
-    const renderSubjectAreas = (areas: string[]) => {
-        if (!areas || areas.length === 0) return null;
-
-        return (
-            <div className="flex flex-wrap gap-1 mt-1">
-                {areas.map((area, idx) => (
-                    <span
-                        key={idx}
-                        className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-primary-50 text-primary-700 border border-primary-200"
-                    >
-                        {area}
-                    </span>
-                ))}
-            </div>
-        );
-    };
-
     if (publications.length === 0) {
         return (
             <div className="bg-white rounded-lg shadow-md border border-neutral-200 p-6">
@@ -128,14 +110,6 @@ export const PublicationsList: React.FC<PublicationsListProps> = ({
                             <div className="md:col-span-2">
                                 <span className="font-medium text-neutral-800">Filiación:</span> {pub.affiliation_name}
                             </div>
-
-                            {/* Áreas temáticas */}
-                            {pub.subject_areas && pub.subject_areas.length > 0 && (
-                                <div className="md:col-span-2">
-                                    <span className="font-medium text-neutral-800">Áreas temáticas:</span>
-                                    {renderSubjectAreas(pub.subject_areas)}
-                                </div>
-                            )}
 
                             {/* Categorías con cuartiles */}
                             <div className="md:col-span-2">

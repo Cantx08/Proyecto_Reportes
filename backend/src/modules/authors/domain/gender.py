@@ -1,3 +1,5 @@
+""" Módulo de género del docente. """
+
 from enum import Enum
 
 

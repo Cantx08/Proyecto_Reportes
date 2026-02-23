@@ -1,3 +1,5 @@
+""" Módulo de DTOs para autores. Define las estructuras de datos para la gestión de autores. """
+
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr
@@ -7,6 +9,7 @@ from ..domain.gender import Gender
 
 
 class AuthorCreateDTO(BaseModel):
+    """ DTO para la creación de un autor. """
     first_name: str
     last_name: str
     institutional_email: EmailStr
@@ -17,6 +20,7 @@ class AuthorCreateDTO(BaseModel):
 
 
 class AuthorUpdateDTO(BaseModel):
+    """ DTO para la actualización de un autor. """
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     title: Optional[str] = None
@@ -25,6 +29,7 @@ class AuthorUpdateDTO(BaseModel):
 
 
 class AuthorResponseDTO(BaseModel):
+    """ DTO para la respuesta de un autor. """
     author_id: UUID
     first_name: str
     last_name: str
@@ -36,6 +41,7 @@ class AuthorResponseDTO(BaseModel):
 
     @staticmethod
     def from_entity(author: Author) -> 'AuthorResponseDTO':
+        """ Crea un AuthorResponseDTO a partir de una entidad Author. """
         return AuthorResponseDTO(
             author_id=author.author_id,
             first_name=author.first_name,

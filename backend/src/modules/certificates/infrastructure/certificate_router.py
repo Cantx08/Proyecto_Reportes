@@ -21,7 +21,9 @@ from .report.publication_formatter import ReportLabPublicationFormatter
 from ...publications.infrastructure.scopus_publication_repository import ScopusPublicationRepository
 from ...publications.infrastructure.sjr_file_repository import SJRFileRepository
 from ...publications.infrastructure.db_publication_cache_repository import DBPublicationCacheRepository
+from ...publications.infrastructure.scopus_author_subject_area_repository import ScopusAuthorSubjectAreaRepository
 from ...publications.application.publication_service import PublicationService
+from ...publications.application.subject_area_service import SubjectAreaService
 from ...publications.domain.publication import Publication
 from ...scopus_accounts.infrastructure.db_scopus_account_repository import DBScopusAccountRepository
 from ....shared.database import get_db
@@ -67,6 +69,21 @@ def get_publication_service(db: Session = Depends(get_db)) -> PublicationService
     )
 
 
+def get_subject_area_service(db: Session = Depends(get_db)) -> SubjectAreaService:
+    """
+    Factory para crear el servicio de áreas temáticas del autor.
+    """
+    container = get_container()
+    author_sa_repo = ScopusAuthorSubjectAreaRepository(
+        api_key=container.settings.SCOPUS_API_KEY
+    )
+    scopus_account_repo = DBScopusAccountRepository(db)
+    return SubjectAreaService(
+        author_sa_repo=author_sa_repo,
+        scopus_account_repo=scopus_account_repo
+    )
+
+
 @router.post(
     "/generate",
     response_class=Response,
@@ -91,7 +108,8 @@ def get_publication_service(db: Session = Depends(get_db)) -> PublicationService
 async def generate_certificate(
     request: ReportRequestDTO,
     report_service: ReportService = Depends(get_report_service),
-    publication_service: PublicationService = Depends(get_publication_service)
+    publication_service: PublicationService = Depends(get_publication_service),
+    subject_area_service: SubjectAreaService = Depends(get_subject_area_service)
 ):
     """Endpoint para generar un certificado de publicaciones."""
     try:
@@ -129,7 +147,13 @@ async def generate_certificate(
                         sjr_year_used=pub_dto.sjr_year_used
                     )
                     all_publications.append(pub)
-                    all_subject_areas.update(pub_dto.subject_areas)
+                
+                # Obtener subject areas desde Author Retrieval API
+                try:
+                    author_areas = await subject_area_service.get_subject_areas_by_author(author_uuid)
+                    all_subject_areas.update(author_areas)
+                except ValueError:
+                    pass  # Autor sin cuentas Scopus, continuar
                     
             except ValueError:
                 # Si no es UUID, intentar como Scopus ID directamente
@@ -151,7 +175,13 @@ async def generate_certificate(
                         sjr_year_used=pub_dto.sjr_year_used
                     )
                     all_publications.append(pub)
-                    all_subject_areas.update(pub_dto.subject_areas)
+                
+                # Para Scopus ID directo, obtener subject areas desde Author Retrieval
+                try:
+                    scopus_areas = await subject_area_service.get_subject_areas_by_scopus_id(author_id)
+                    all_subject_areas.update(scopus_areas)
+                except Exception:
+                    pass  # Fallback: sin áreas para este ID
         
         # Eliminar duplicados basados en scopus_id
         seen_ids = set()

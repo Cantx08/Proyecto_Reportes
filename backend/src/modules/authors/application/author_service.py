@@ -1,3 +1,9 @@
+"""
+Módulo de servicio para la gestión de autores.
+Contiene la lógica de negocio para crear, actualizar, eliminar y consultar autores,
+así como la funcionalidad de importación desde CSV.
+"""
+
 import csv
 import io
 from typing import List, Dict
@@ -15,16 +21,19 @@ from ...job_positions.domain.job_position_repository import IJobPositionReposito
 class AuthorService:
     """Servicio de aplicación para la gestión de autores."""
 
-    def __init__(self, author_repo: IAuthorRepository, department_repo: IDepartmentRepository, position_repo: IJobPositionRepository):
+    def __init__(self, author_repo: IAuthorRepository, department_repo: IDepartmentRepository,
+                 position_repo: IJobPositionRepository):
         self.author_repo = author_repo
         self.department_repo = department_repo
         self.position_repo = position_repo
 
     async def get_all_authors(self) -> List[AuthorResponseDTO]:
+        """Obtiene todos los autores registrados."""
         authors = await self.author_repo.get_all()
         return [AuthorResponseDTO.from_entity(author) for author in authors]
 
     async def get_authors_by_department(self, dep_code: str) -> List[AuthorResponseDTO]:
+        """Obtiene autores filtrados por departamento."""
         if dep_code is None:
             raise ValueError("Se requiere las siglas del departamento.")
 
@@ -32,15 +41,17 @@ class AuthorService:
         return [AuthorResponseDTO.from_entity(author) for author in authors]
 
     async def get_author_by_id(self, author_id: UUID) -> AuthorResponseDTO:
+        """Obtiene un autor por su ID."""
         author = await self.author_repo.get_by_id(author_id)
         if not author:
-            raise ValueError(f"El autor no fue encontrado.")
+            raise ValueError("El autor no fue encontrado.")
         return AuthorResponseDTO.from_entity(author)
 
     async def create_author(self, author: AuthorCreateDTO) -> AuthorResponseDTO:
+        """Crea un nuevo autor. Verifica que el correo no esté asociado a otro autor."""
         existing_author = await self.author_repo.get_by_email(author.institutional_email)
         if existing_author:
-            raise ValueError(f"El correo ya fue asociado a otro autor.")
+            raise ValueError("El correo ya fue asociado a otro autor.")
         new_author = Author(
             author_id=uuid4(),
             first_name=author.first_name,
@@ -54,13 +65,14 @@ class AuthorService:
         saved_author = await self.author_repo.create(new_author)
         return AuthorResponseDTO.from_entity(saved_author)
 
-    async def update_author(self, researcher_id: UUID, author: AuthorUpdateDTO) -> AuthorResponseDTO:
-        existing = await self.author_repo.get_by_id(researcher_id)
+    async def update_author(self, res_id: UUID, author: AuthorUpdateDTO) -> AuthorResponseDTO:
+        """Actualiza un autor existente. Solo actualiza los campos proporcionados."""
+        existing = await self.author_repo.get_by_id(res_id)
         if not existing:
-            raise ValueError(f"El autor con ID {researcher_id} no existe.")
+            raise ValueError(f"El autor con ID {res_id} no existe.")
 
         updated_author = Author(
-            author_id=researcher_id,
+            author_id=res_id,
             first_name=author.first_name if author.first_name else existing.first_name,
             last_name=author.last_name if author.last_name else existing.last_name,
             institutional_email=existing.institutional_email,
@@ -70,11 +82,12 @@ class AuthorService:
             department_id=author.department_id if author.department_id else existing.department_id
         )
 
-        result = await self.author_repo.update(researcher_id, updated_author)
+        result = await self.author_repo.update(res_id, updated_author)
 
         return AuthorResponseDTO.from_entity(result)
 
     async def delete_author(self, author_id: UUID) -> bool:
+        """Elimina un autor por su ID."""
         existing = await self.author_repo.get_by_id(author_id)
         if not existing:
             raise ValueError(f"El autor con ID {author_id} no existe.")
@@ -178,7 +191,7 @@ class AuthorService:
                 await self.author_repo.create(new_author)
                 results["created"] += 1
 
-            except Exception as e:
+            except ImportError as e:
                 results["errors"].append(f"Fila {row_idx}: Error inesperado - {str(e)}")
 
             row_idx += 1
