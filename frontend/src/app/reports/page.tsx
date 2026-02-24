@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { 
   ClipboardCheck, 
   ArrowLeft,
-  AlertCircle
+  FileText,
+  Search
 } from 'lucide-react';
 
 import { usePublicationsContext } from '@/src/contexts/PublicationsContext';
@@ -13,6 +14,7 @@ import { PublicationsList } from '@/src/features/publications/components/Publica
 import { SubjectAreas } from '@/src/features/publications/components/SubjectAreas';
 import { DocumentsByYear } from '@/src/features/publications/components/DocumentsByYearChart';
 import ReportGenerator from '@/src/features/reports/components/ReportGenerator';
+import PdfDropZone from '@/src/features/reports/components/PdfDropZone';
 import { ErrorNotification } from '@/src/components/ErrorNotification';
 
 export default function CertificatePage() {
@@ -20,14 +22,12 @@ export default function CertificatePage() {
   const { data, hasData, clearPublicationsData } = usePublicationsContext();
   const [error, setError] = React.useState<string | null>(null);
 
-  // Log para debug
-  React.useEffect(() => {
-    console.log('[REPORTS PAGE] Context data:', data);
-    console.log('[REPORTS PAGE] Selected Author:', data?.selectedAuthor);
-  }, [data]);
-
   const handleBackToSearch = () => {
     clearPublicationsData();
+    router.push('/publications');
+  };
+
+  const handleGoToPublications = () => {
     router.push('/publications');
   };
 
@@ -39,7 +39,7 @@ export default function CertificatePage() {
     setError(null);
   };
 
-  // Estado vacío - redirigir a búsqueda
+  // Sin publicaciones - mostrar opciones: ir a buscar o subir borrador
   if (!hasData || !data) {
     return (
       <div className="max-w-7xl mx-auto">
@@ -58,26 +58,48 @@ export default function CertificatePage() {
           </div>
         </div>
 
-        {/* Empty State */}
-        <div className="bg-white rounded-lg border border-neutral-200 p-12">
-          <div className="text-center">
-            <AlertCircle className="mx-auto h-16 w-16 text-warning-400 mb-4" />
-            <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-              No hay publicaciones para certificar
-            </h2>
-            <p className="text-neutral-600 mb-6 max-w-md mx-auto">
-              Primero debe buscar las publicaciones de un autor en la sección de publicaciones.
-              Los resultados de la búsqueda se mostrarán aquí para generar el certificado.
-            </p>
-            <button
-              onClick={handleBackToSearch}
-              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center mx-auto"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Ir a Buscar Publicaciones
-            </button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Opción 1: Generar nuevo borrador */}
+          <div className="bg-white rounded-lg border border-neutral-200 p-8">
+            <div className="text-center">
+              <div className="mx-auto h-14 w-14 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+                <Search className="h-7 w-7 text-primary-500" />
+              </div>
+              <h2 className="text-lg font-semibold text-neutral-900 mb-2">
+                Generar nuevo borrador
+              </h2>
+              <p className="text-sm text-neutral-600 mb-6 max-w-sm mx-auto">
+                Busque las publicaciones de un autor en el módulo de publicaciones para generar un borrador de certificado.
+              </p>
+              <button
+                onClick={handleGoToPublications}
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center mx-auto font-medium"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Ir a Buscar Publicaciones
+              </button>
+            </div>
+          </div>
+
+          {/* Opción 2: Generar certificado final desde borrador */}
+          <div className="bg-white rounded-lg border border-neutral-200 p-8">
+            <div className="text-center mb-6">
+              <div className="mx-auto h-14 w-14 bg-success-50 rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-7 w-7 text-success-500" />
+              </div>
+              <h2 className="text-lg font-semibold text-neutral-900 mb-2">
+                Generar certificado final
+              </h2>
+              <p className="text-sm text-neutral-600 max-w-sm mx-auto">
+                Si ya tiene un borrador PDF, súbalo aquí para aplicarle la plantilla institucional y obtener el certificado final.
+              </p>
+            </div>
+            <PdfDropZone onError={handleReportError} />
           </div>
         </div>
+
+        {/* Error Notification */}
+        <ErrorNotification error={error} onDismiss={dismissError} />
       </div>
     );
   }
@@ -93,7 +115,7 @@ export default function CertificatePage() {
               Generación de Certificados
             </h1>
             <p className="text-neutral-600 mt-1">
-              Revise las publicaciones y genere el certificado oficial
+              Revise las publicaciones y genere el borrador del certificado
             </p>
           </div>
           <button
@@ -128,7 +150,7 @@ export default function CertificatePage() {
           </div>
         )}
 
-        {/* Formulario de Generación */}
+        {/* Formulario de Generación de Borrador */}
         <div className="bg-white rounded-lg border border-neutral-200 p-6">
           <div className="flex items-center mb-6">
             <ClipboardCheck className="h-6 w-6 text-primary-600 mr-3" />
@@ -136,6 +158,9 @@ export default function CertificatePage() {
               <h2 className="text-lg font-semibold text-neutral-900">
                 Datos del Certificado
               </h2>
+              <p className="text-sm text-neutral-500 mt-0.5">
+                Complete los datos y genere el borrador. Luego podrá aplicar la plantilla institucional desde el módulo de certificados.
+              </p>
             </div>
           </div>
           <ReportGenerator

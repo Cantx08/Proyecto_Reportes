@@ -13,6 +13,7 @@ export interface ReportRequest {
     firmante_nombre?: string;
     fecha?: string;
     elaborador?: string;
+    is_draft?: boolean;
 }
 
 /**

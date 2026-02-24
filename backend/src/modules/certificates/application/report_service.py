@@ -49,7 +49,10 @@ class ReportService:
 
             # Estadísticas
             subject_areas: List[str] = None,
-            documents_by_year: dict = None
+            documents_by_year: dict = None,
+
+            # Modo borrador
+            is_draft: bool = False
     ) -> bytes:
         """
         Genera un reporte de certificación de publicaciones en formato PDF.
@@ -90,8 +93,8 @@ class ReportService:
         )
         statistics = self._generate_publication_statistics(subject_areas, documents_by_year)
 
-        # Generar reporte (siempre genera formato final con plantilla)
-        return self._report_generator.generate_report(author_info, config, publications, statistics)
+        # Generar reporte (con o sin plantilla según modo borrador)
+        return self._report_generator.generate_report(author_info, config, publications, statistics, is_draft=is_draft)
 
     @staticmethod
     def _check_input_data(name: str, gender: str, department: str, role: str) -> None:

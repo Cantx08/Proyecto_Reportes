@@ -64,8 +64,8 @@ class IReportGenerator(ABC):
 
     @abstractmethod
     def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections,
-                        statistics: PublicationsStatistics) -> bytes:
-        """Genera el reporte completo en formato PDF con plantilla institucional."""
+                        statistics: PublicationsStatistics, is_draft: bool = False) -> bytes:
+        """Genera el reporte completo en formato PDF. Si is_draft=True, sin plantilla institucional."""
         pass
 
 

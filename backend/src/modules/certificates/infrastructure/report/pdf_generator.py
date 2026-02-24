@@ -45,8 +45,8 @@ class ReportLabReportGenerator(IReportGenerator):
         self._content_builder = content_builder
         self._template_service = TemplateOverlayService()
     
-    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics) -> bytes:
-        """Genera el reporte completo en formato PDF con plantilla institucional."""
+    def generate_report(self, author: AuthorInfo, config: ReportConfiguration, publications: PublicationCollections, statistics: PublicationsStatistics, is_draft: bool = False) -> bytes:
+        """Genera el reporte completo en formato PDF. Si is_draft=True, sin plantilla institucional."""
         buffer = io.BytesIO()
         doc = self._create_document(buffer)
         
@@ -58,8 +58,9 @@ class ReportLabReportGenerator(IReportGenerator):
         pdf_bytes = buffer.getvalue()
         buffer.close()
         
-        # Siempre aplicar plantilla institucional (ya no existe modo borrador)
-        pdf_bytes = self._template_service.overlay_content_on_template(pdf_bytes)
+        # Si es borrador, devolver sin plantilla; si no, aplicar plantilla institucional
+        if not is_draft:
+            pdf_bytes = self._template_service.overlay_content_on_template(pdf_bytes)
         
         return pdf_bytes
     

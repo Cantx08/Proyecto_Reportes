@@ -13,3 +13,12 @@ class ReportRequestDTO(BaseModel):
     firmante_nombre: Optional[str] = Field(None, description="Nombre del firmante (requerido para firmantes personalizados)")
     fecha: Optional[str] = Field(None, description="Fecha del reporte (opcional, usa fecha actual si no se especifica)")
     elaborador: str = Field("M. Vásquez", description="Nombre de quien elaboró el reporte (selección de opciones predefinidas o texto manual)")
+    is_draft: bool = Field(False, description="Si es True, genera borrador sin plantilla institucional")
+
+
+class ProcessDraftRequestDTO(BaseModel):
+    """DTO para solicitud de procesamiento de borrador PDF."""
+    memorando: Optional[str] = Field(None, description="Número de memorando")
+    firmante: Optional[int] = Field(None, description="Tipo de firmante")
+    firmante_nombre: Optional[str] = Field(None, description="Nombre del firmante")
+    fecha: Optional[str] = Field(None, description="Fecha del certificado")

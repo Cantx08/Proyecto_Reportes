@@ -55,36 +55,25 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
         let positionName = '';
         
         if (selectedAuthor.department_id) {
-          console.log('[REPORT GEN] Fetching department:', selectedAuthor.department_id);
           const dept = await getDepartment(selectedAuthor.department_id);
-          console.log('[REPORT GEN] Department fetched:', dept);
           if (dept) {
             departmentName = dept.dep_name;
-            console.log('[REPORT GEN] Department name:', departmentName);
           }
         }
         
         if (selectedAuthor.job_position_id) {
-          console.log('[REPORT GEN] Fetching position:', selectedAuthor.job_position_id);
           const pos = await getPosition(selectedAuthor.job_position_id);
-          console.log('[REPORT GEN] Position fetched:', pos);
           if (pos) {
             positionName = pos.pos_name;
-            console.log('[REPORT GEN] Position name:', positionName);
           }
         }
         
-        const newFormData = {
+        setFormData(prev => ({
+          ...prev,
           docente_nombre: fullName,
           docente_genero: selectedAuthor.gender || 'M',
           departamento: departmentName,
           cargo: positionName,
-        };
-        console.log('[REPORT GEN] Setting form data:', newFormData);
-        
-        setFormData(prev => ({
-          ...prev,
-          ...newFormData,
         }));
       }
     };
@@ -99,10 +88,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
     }));
   };
 
-  const handleGenerateReport = async () => {
+  const handleGenerateDraft = async () => {
     // Validar campos requeridos
-    console.log('[CERT] Form data before validation:', formData);
-    
     if (!formData.docente_nombre || !formData.departamento || !formData.cargo) {
       onError('Por favor complete todos los campos requeridos');
       return;
@@ -128,23 +115,21 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
         fecha: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
         elaborador: formData.elaborador || 'M. Vásquez',
       };
-      
-      console.log('[CERT] Sending request:', reportRequest);
 
-      const blob = await reportService.generateCertification(reportRequest);
+      const blob = await reportService.generateDraft(reportRequest);
       
-      // Crear URL para descargar el PDF
+      // Crear URL para descargar el PDF borrador
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `certificado_${formData.docente_nombre.replace(/\s+/g, '_')}.pdf`;
+      link.download = `borrador_${formData.docente_nombre.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'Error al generar el reporte');
+      onError(error instanceof Error ? error.message : 'Error al generar el borrador');
     } finally {
       setIsGenerating(false);
     }
@@ -156,7 +141,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
       {selectedAuthor && (
         <div className="mb-6 p-4 bg-info-50 border border-info-200 rounded-lg">
           <div className="flex items-start">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg className="h-5 w-5 text-info-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
@@ -279,11 +264,11 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
 
       <div className="flex justify-center flex-col items-center space-y-4">
         <button
-          onClick={handleGenerateReport}
+          onClick={handleGenerateDraft}
           disabled={isGenerating}
-          className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
+          className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
         >
-          {isGenerating ? 'Generando...' : '📄 Generar Certificado'}
+          {isGenerating ? 'Generando Borrador...' : '📝 Generar Borrador'}
         </button>
 
         {/* Loading State */}
@@ -292,7 +277,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             <div className="flex items-center flex-col">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
               <span className="text-lg font-medium text-blue-900 mb-2">
-                Generando certificado PDF...
+                Generando borrador PDF...
               </span>
               <div className="mt-3 text-center max-w-md">
                 <span className="text-sm text-blue-700 font-medium block mb-2">
@@ -316,6 +301,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
             </div>
           </div>
         )}
+
+        {/* Nota informativa */}
+        <p className="text-xs text-neutral-500 text-center max-w-lg">
+          El borrador se genera sin la plantilla institucional. Para obtener el certificado final, 
+          suba el borrador desde el módulo de certificados (acceso directo sin publicaciones).
+        </p>
       </div>
     </div>
   );
