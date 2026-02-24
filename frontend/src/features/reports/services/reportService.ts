@@ -1,5 +1,11 @@
 import { axiosInstance } from "@/src/lib/axios";
-import { ReportRequest, ElaboradorOption } from "@/src/features/reports/types";
+import {
+    ReportRequest,
+    ElaboradorOption,
+    SaveReportMetadataRequest,
+    UpdateReportMetadataRequest,
+    ReportMetadataResponse,
+} from "@/src/features/reports/types";
 import axios from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -128,5 +134,77 @@ export const reportService = {
     getElaboradores: async (): Promise<ElaboradorOption[]> => {
         const response = await axiosInstance.get('/certificates/elaboradores');
         return response.data;
+    },
+
+    // =========================================================================
+    // Métodos para metadatos de reportes
+    // =========================================================================
+
+    /**
+     * Guardar metadatos de un reporte (publicaciones + datos del formulario)
+     */
+    saveMetadata: async (data: SaveReportMetadataRequest): Promise<ReportMetadataResponse> => {
+        const response = await axiosInstance.post('/certificates/metadata', data);
+        return response.data;
+    },
+
+    /**
+     * Listar todos los reportes guardados
+     */
+    listMetadata: async (): Promise<ReportMetadataResponse[]> => {
+        const response = await axiosInstance.get('/certificates/metadata');
+        return response.data;
+    },
+
+    /**
+     * Obtener metadatos de un reporte por ID
+     */
+    getMetadata: async (id: string): Promise<ReportMetadataResponse> => {
+        const response = await axiosInstance.get(`/certificates/metadata/${id}`);
+        return response.data;
+    },
+
+    /**
+     * Actualizar solo los campos editables de un reporte guardado
+     */
+    updateMetadata: async (id: string, data: UpdateReportMetadataRequest): Promise<ReportMetadataResponse> => {
+        const response = await axiosInstance.put(`/certificates/metadata/${id}`, data);
+        return response.data;
+    },
+
+    /**
+     * Eliminar un reporte guardado
+     */
+    deleteMetadata: async (id: string): Promise<void> => {
+        await axiosInstance.delete(`/certificates/metadata/${id}`);
+    },
+
+    /**
+     * Regenerar borrador PDF desde metadatos guardados (sin volver a buscar publicaciones)
+     */
+    regenerateFromMetadata: async (id: string): Promise<Blob> => {
+        try {
+            const response = await reportAxiosInstance.post(
+                `/certificates/metadata/${id}/generate`,
+                {},
+                {
+                    responseType: 'blob',
+                }
+            );
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.code === 'ECONNABORTED') {
+                    throw new Error('La regeneración del borrador está tardando más de lo esperado.');
+                }
+                if (error.response?.status === 404) {
+                    throw new Error('No se encontraron los metadatos guardados.');
+                }
+                if (error.response?.status === 500) {
+                    throw new Error('Error al regenerar el borrador.');
+                }
+            }
+            throw error;
+        }
     },
 };

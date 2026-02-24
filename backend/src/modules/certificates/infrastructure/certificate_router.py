@@ -12,8 +12,15 @@ from sqlalchemy.orm import Session
 from ..application.report_dto import ReportRequestDTO
 from ..application.report_service import ReportService
 from ..application.draft_processor_service import DraftProcessorService
+from ..application.report_metadata_service import ReportMetadataService
+from ..application.report_metadata_dto import (
+    SaveReportMetadataDTO,
+    UpdateReportMetadataDTO,
+    ReportMetadataResponseDTO,
+)
 from ..domain.report_repository import IReportGenerator
 from ..domain.elaborador import Elaborador
+from .db_report_metadata_repository import DBReportMetadataRepository
 from .report.pdf_generator import ReportLabReportGenerator
 from .report.content_builder import ReportLabContentBuilder
 from .report.style_manager import ReportLabStyleManager
@@ -56,6 +63,14 @@ def get_draft_processor_service() -> DraftProcessorService:
     """
     template_service = TemplateOverlayService()
     return DraftProcessorService(template_service)
+
+
+def get_report_metadata_service(db: Session = Depends(get_db)) -> ReportMetadataService:
+    """
+    Factory para crear el servicio de metadatos de reportes.
+    """
+    repo = DBReportMetadataRepository(db)
+    return ReportMetadataService(repo)
 
 
 def get_publication_service(db: Session = Depends(get_db)) -> PublicationService:
@@ -367,11 +382,175 @@ def _filter_by_type(publications: List[Publication], source_name: str) -> List[P
             if "memoria_manual" in categories_str:
                 filtered.append(pub)
         
-        elif source_name == "libro":
-            if ("book" in document_type_lower or 
-                "chapter" in document_type_lower or 
-                "libro" in source_lower or
-                "capítulo" in source_lower):
-                filtered.append(pub)
+        #elif source_name == "libro":
+            #if ("book" in document_type_lower or 
+                #"chapter" in document_type_lower or 
+                #"libro" in source_lower or
+                #"capítulo" in source_lower):
+                #filtered.append(pub)
     
     return filtered
+
+
+# ============================================================================
+# Endpoints CRUD de metadatos de reportes
+# ============================================================================
+
+@router.post(
+    "/metadata",
+    response_model=ReportMetadataResponseDTO,
+    summary="Guardar metadatos de un reporte",
+    description="Almacena publicaciones, áreas temáticas y datos del formulario para regenerar "
+                "el certificado sin repetir la búsqueda."
+)
+async def save_metadata(
+    dto: SaveReportMetadataDTO,
+    service: ReportMetadataService = Depends(get_report_metadata_service),
+):
+    """Endpoint para guardar metadatos de un reporte."""
+    try:
+        return await service.save(dto)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al guardar metadatos: {str(e)}") from e
+
+
+@router.get(
+    "/metadata",
+    response_model=List[ReportMetadataResponseDTO],
+    summary="Listar metadatos guardados",
+    description="Retorna todos los reportes guardados, ordenados del más reciente al más antiguo."
+)
+async def list_metadata(
+    service: ReportMetadataService = Depends(get_report_metadata_service),
+):
+    """Endpoint para listar todos los metadatos guardados."""
+    return await service.get_all()
+
+
+@router.get(
+    "/metadata/{metadata_id}",
+    response_model=ReportMetadataResponseDTO,
+    summary="Obtener metadatos por ID",
+)
+async def get_metadata(
+    metadata_id: UUID,
+    service: ReportMetadataService = Depends(get_report_metadata_service),
+):
+    """Endpoint para obtener metadatos por su ID."""
+    result = await service.get_by_id(metadata_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Metadatos no encontrados")
+    return result
+
+
+@router.put(
+    "/metadata/{metadata_id}",
+    response_model=ReportMetadataResponseDTO,
+    summary="Actualizar metadatos editables",
+    description="Actualiza solo los campos editables: memorando, firmante, fecha, elaborador."
+)
+async def update_metadata(
+    metadata_id: UUID,
+    dto: UpdateReportMetadataDTO,
+    service: ReportMetadataService = Depends(get_report_metadata_service),
+):
+    """Endpoint para actualizar campos editables de metadatos."""
+    try:
+        return await service.update(metadata_id, dto)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al actualizar metadatos: {str(e)}") from e
+
+
+@router.delete(
+    "/metadata/{metadata_id}",
+    summary="Eliminar metadatos",
+)
+async def delete_metadata(
+    metadata_id: UUID,
+    service: ReportMetadataService = Depends(get_report_metadata_service),
+):
+    """Endpoint para eliminar metadatos por su ID."""
+    deleted = await service.delete(metadata_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Metadatos no encontrados")
+    return {"message": "Metadatos eliminados correctamente"}
+
+
+@router.post(
+    "/metadata/{metadata_id}/generate",
+    response_class=Response,
+    summary="Regenerar borrador desde metadatos guardados",
+    description="Usa los datos guardados (publicaciones, áreas, etc.) y los metadatos editables "
+                "actuales para regenerar el borrador PDF sin buscar publicaciones nuevamente."
+)
+async def regenerate_from_metadata(
+    metadata_id: UUID,
+    service: ReportMetadataService = Depends(get_report_metadata_service),
+    report_service: ReportService = Depends(get_report_service),
+):
+    """Regenera un borrador PDF usando los metadatos almacenados."""
+    metadata = await service.get_by_id(metadata_id)
+    if not metadata:
+        raise HTTPException(status_code=404, detail="Metadatos no encontrados")
+
+    try:
+        # Reconstruir publicaciones desde snapshots
+        pubs = []
+        for pub_dict in metadata.publications:
+            pubs.append(Publication(
+                scopus_id=pub_dict.get("scopus_id", ""),
+                eid=pub_dict.get("eid", ""),
+                doi=pub_dict.get("doi"),
+                title=pub_dict.get("title", ""),
+                year=pub_dict.get("year", 0),
+                publication_date=pub_dict.get("publication_date", ""),
+                source_title=pub_dict.get("source_title", ""),
+                document_type=pub_dict.get("document_type", ""),
+                affiliation_name=pub_dict.get("affiliation_name", ""),
+                affiliation_id=pub_dict.get("affiliation_id"),
+                source_id=pub_dict.get("source_id"),
+                subject_areas=pub_dict.get("subject_areas", []),
+                categories_with_quartiles=pub_dict.get("categories_with_quartiles", []),
+                sjr_year_used=pub_dict.get("sjr_year_used"),
+            ))
+
+        # Clasificar publicaciones
+        scopus_pubs = _filter_by_type(pubs, "scopus")
+        wos_pubs = _filter_by_type(pubs, "wos")
+        regional_pubs = _filter_by_type(pubs, "regional")
+        memories = _filter_by_type(pubs, "memoria")
+        book_chapters = _filter_by_type(pubs, "libro")
+
+        pdf_bytes = report_service.generate_report(
+            author_name=metadata.author_name,
+            author_gender=metadata.author_gender,
+            department=metadata.department,
+            role=metadata.position,
+            memorandum=metadata.memorandum or "",
+            signatory=metadata.signatory,
+            signatory_name=metadata.signatory_name or "",
+            report_date=metadata.report_date or "",
+            elaborador=metadata.elaborador or "M. Vásquez",
+            scopus_publications=scopus_pubs,
+            wos_publications=wos_pubs,
+            regional_publications=regional_pubs,
+            event_memory=memories,
+            book_chapters=book_chapters,
+            subject_areas=metadata.subject_areas,
+            documents_by_year=metadata.documents_by_year,
+            is_draft=True,
+        )
+
+        file_name = f"borrador_{metadata.author_name.replace(' ', '_')}.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename={file_name}"},
+        )
+
+    except Exception as e:
+        import traceback
+        print(f"[META-REGEN ERROR] {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Error al regenerar borrador: {str(e)}") from e

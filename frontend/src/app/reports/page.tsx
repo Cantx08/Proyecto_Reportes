@@ -15,6 +15,7 @@ import { SubjectAreas } from '@/src/features/publications/components/SubjectArea
 import { DocumentsByYear } from '@/src/features/publications/components/DocumentsByYearChart';
 import ReportGenerator from '@/src/features/reports/components/ReportGenerator';
 import PdfDropZone from '@/src/features/reports/components/PdfDropZone';
+import SavedReportsList from '@/src/features/reports/components/SavedReportsList';
 import { ErrorNotification } from '@/src/components/ErrorNotification';
 
 export default function CertificatePage() {
@@ -98,6 +99,22 @@ export default function CertificatePage() {
           </div>
         </div>
 
+        {/* Sección de reportes guardados */}
+        <div className="mt-8">
+          <div className="bg-white rounded-lg border border-neutral-200 p-6">
+            <div className="flex items-center mb-4">
+              <ClipboardCheck className="h-5 w-5 text-primary-500 mr-2" />
+              <h2 className="text-lg font-semibold text-neutral-900">
+                Reportes guardados
+              </h2>
+            </div>
+            <p className="text-sm text-neutral-500 mb-4">
+              Modifique datos como memorando, fecha, firmante o elaborador y regenere el borrador sin repetir la búsqueda de publicaciones.
+            </p>
+            <SavedReportsList onError={handleReportError} />
+          </div>
+        </div>
+
         {/* Error Notification */}
         <ErrorNotification error={error} onDismiss={dismissError} />
       </div>
@@ -166,6 +183,9 @@ export default function CertificatePage() {
           <ReportGenerator
             authorIds={data.authorIds}
             selectedAuthor={data.selectedAuthor}
+            publications={data.publications}
+            subjectAreas={data.subjectAreas}
+            documentsByYear={data.documentsByYear}
             onError={handleReportError}
           />
         </div>

@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ReportRequest } from '@/src/features/reports/types';
+import { ReportRequest, SaveReportMetadataRequest, PublicationSnapshot } from '@/src/features/reports/types';
 import { reportService } from '@/src/features/reports/services/reportService';
+import { Publication } from '@/src/features/publications/types';
 import { formatDateToSpanish } from '@/src/utils/helpers';
 import DepartmentSelect from '../../departments/components/DepartmentSelect';
 import JobPositionSelect from '../../job-positions/components/JobPositionSelect';
@@ -17,10 +18,16 @@ import {AuthorResponse} from "@/src/features/authors/types";
 interface ReportGeneratorProps {
   authorIds: string[];
   selectedAuthor?: AuthorResponse;
+  publications?: Publication[];
+  subjectAreas?: string[];
+  documentsByYear?: Record<string, number>;
   onError: (error: string) => void;
+  onMetadataSaved?: () => void;
 }
 
-const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAuthor, onError }) => {
+const ReportGenerator: React.FC<ReportGeneratorProps> = ({
+  authorIds, selectedAuthor, publications, subjectAreas, documentsByYear, onError, onMetadataSaved,
+}) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { getDepartment, fetchDepartments } = useDepartments();
   const { getPosition, fetchPositions } = useJobPositions();
@@ -127,6 +134,50 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ authorIds, selectedAu
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+
+      // Guardar metadatos automáticamente si hay datos de publicaciones
+      if (publications && publications.length > 0) {
+        try {
+          const pubSnapshots: PublicationSnapshot[] = publications.map(p => ({
+            scopus_id: p.scopus_id,
+            eid: p.eid,
+            doi: p.doi,
+            title: p.title,
+            year: p.year,
+            publication_date: p.publication_date,
+            source_title: p.source_title,
+            document_type: p.document_type,
+            affiliation_name: p.affiliation_name,
+            affiliation_id: p.affiliation_id,
+            source_id: p.source_id,
+            subject_areas: p.subject_areas,
+            categories_with_quartiles: p.categories_with_quartiles,
+            sjr_year_used: p.sjr_year_used,
+          }));
+
+          const metadataRequest: SaveReportMetadataRequest = {
+            author_name: formData.docente_nombre!,
+            author_gender: formData.docente_genero!,
+            department: formData.departamento!,
+            position: formData.cargo!,
+            author_ids: authorIds,
+            publications: pubSnapshots,
+            subject_areas: subjectAreas || [],
+            documents_by_year: documentsByYear || {},
+            memorandum: formData.memorando || undefined,
+            signatory: formData.firmante || 1,
+            signatory_name: formData.firmante_nombre || undefined,
+            report_date: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
+            elaborador: formData.elaborador || 'M. Vásquez',
+          };
+
+          await reportService.saveMetadata(metadataRequest);
+          onMetadataSaved?.();
+        } catch {
+          // No bloquear la experiencia si falla el guardado de metadatos
+          console.warn('[REPORT GEN] No se pudieron guardar los metadatos');
+        }
+      }
       
     } catch (error) {
       onError(error instanceof Error ? error.message : 'Error al generar el borrador');

@@ -99,7 +99,7 @@ class ReportsController:
             
             if source_name == "scopus":
                 # TODAS las publicaciones se consideran Scopus por defecto,
-                # a menos que sean explícitamente de otro tipo (libros, WOS, regionales)
+                # A menos que sean explícitamente de otro tipo (libros, WOS, regionales)
                 is_book = ("book" in document_type_lower or 
                           "chapter" in document_type_lower or 
                           "libro" in source_lower)
@@ -132,13 +132,13 @@ class ReportsController:
                 if "memoria_manual" in categories_str:  # Marcador para futuro
                     filtered.append(pub)
             
-            elif source_name == "libro":
-                # Libros y capítulos
-                if ("book" in document_type_lower or 
-                    "chapter" in document_type_lower or 
-                    "libro" in source_lower or
-                    "capítulo" in source_lower):
-                    filtered.append(pub)
+            # elif source_name == "libro":
+            #     # Libros y capítulos
+            #     if ("book" in document_type_lower or 
+            #         "chapter" in document_type_lower or 
+            #         "libro" in source_lower or
+            #         "capítulo" in source_lower):
+            #         filtered.append(pub)
         
         # Ordenar por año descendente (más reciente primero)
         filtered.sort(key=lambda p: p.year if p.year else 0, reverse=True)
