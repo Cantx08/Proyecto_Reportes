@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 # Importamos componentes compartidos
 from .shared.database import db_config
-# from src.shared.scopus_client import ScopusApiClient
 
 load_dotenv()
 
@@ -38,9 +37,6 @@ class Container:
     def __init__(self):
         self.settings = Settings()
         self.db_handler = db_config
-
-        # Inicializar Cliente Scopus
-        # self.scopus_client = ScopusApiClient(self.settings.SCOPUS_API_KEY)
 
         # Aquí podrías inicializar Redis, Logging centralizado, etc.
 

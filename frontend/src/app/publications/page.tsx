@@ -250,7 +250,7 @@ export default function PublicationsPage() {
                       {loadingProgress}
                     </span>
                     <span className="text-xs text-blue-600">
-                      Esta operación puede tardar varios minutos si el autor tiene múltiples cuentas Scopus o muchas publicaciones.
+                      La operación puede tardar varios minutos.
                     </span>
                   </div>
                 )}

@@ -14,6 +14,9 @@ export interface ReportRequest {
     fecha?: string;
     elaborador?: string;
     is_draft?: boolean;
+
+    /** Áreas temáticas del autor (obtenidas por el frontend desde Scopus Author Retrieval). */
+    subject_areas?: string[];
 }
 
 /**

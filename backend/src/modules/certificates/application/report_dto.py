@@ -15,6 +15,12 @@ class ReportRequestDTO(BaseModel):
     elaborador: str = Field("M. Vásquez", description="Nombre de quien elaboró el reporte (selección de opciones predefinidas o texto manual)")
     is_draft: bool = Field(False, description="Si es True, genera borrador sin plantilla institucional")
 
+    # Campos opcionales enviados desde el frontend (ya procesados con IP institucional)
+    subject_areas: Optional[List[str]] = Field(
+        None,
+        description="Áreas temáticas del autor (obtenidas por el frontend desde Scopus Author Retrieval). Si no se envían, se extraen de las publicaciones cacheadas."
+    )
+
 
 class ProcessDraftRequestDTO(BaseModel):
     """DTO para solicitud de procesamiento de borrador PDF."""
