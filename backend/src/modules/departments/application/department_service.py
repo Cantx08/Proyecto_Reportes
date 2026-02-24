@@ -32,31 +32,31 @@ class DepartmentService:
             raise ValueError(f"El departamento con ID {dept_id} no existe.")
         return DepartmentResponseDTO.from_entity(department)
 
-    async def create_department(self, dto: DepartmentCreateDTO) -> DepartmentResponseDTO:
+    async def create_department(self, dept: DepartmentCreateDTO) -> DepartmentResponseDTO:
         new_dept = Department(
             dep_id=uuid4(),
-            dep_name=dto.dep_name,
-            dep_code=dto.dep_code,
-            faculty=dto.faculty
+            dep_name=dept.dep_name,
+            dep_code=dept.dep_code,
+            faculty=dept.faculty
         )
         saved_dept = await self.dept_repo.create(new_dept)
         return DepartmentResponseDTO.from_entity(saved_dept)
 
-    async def update_department(self, dept_id: UUID, dto: DepartmentUpdateDTO) -> DepartmentResponseDTO:
+    async def update_department(self, dept_id: UUID, dept: DepartmentUpdateDTO) -> DepartmentResponseDTO:
         existing = await self.dept_repo.get_by_id(dept_id)
         if not existing:
             raise ValueError(f"El departamento con ID {dept_id} no existe.")
 
-        updated_entity = Department(
+        updated_dept = Department(
             dep_id=dept_id,
-            dep_name=dto.dep_name if dto.dep_name else existing.dep_name,
-            dep_code=dto.dep_code if dto.dep_code else existing.dep_code,
-            faculty=dto.faculty if dto.faculty else existing.faculty
+            dep_name=dept.dep_name if dept.dep_name else existing.dep_name,
+            dep_code=dept.dep_code if dept.dep_code else existing.dep_code,
+            faculty=dept.faculty if dept.faculty else existing.faculty
         )
 
-        result = await self.dept_repo.update(dept_id, updated_entity)
+        result = await self.dept_repo.update(dept_id, updated_dept)
 
         return DepartmentResponseDTO.from_entity(result)
 
-    async def delete_department(self, dep_id: UUID) -> bool:
-        return await self.dept_repo.delete(dep_id)
+    async def delete_department(self, dept_id: UUID) -> bool:
+        return await self.dept_repo.delete(dept_id)

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse, AxiosError } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -13,8 +13,8 @@ export const axiosInstance = axios.create({
 
 // 2. Interceptor para agregar el token de autenticación
 axiosInstance.interceptors.response.use(
-    (response) => response,
-    (error) => {
+    (response: AxiosResponse) => response,
+    (error: AxiosError) => {
         // TODO: Agregar un toast notification global de error si quisieras
         console.error('API Error:', error?.response?.data || error.message);
         return Promise.reject(error);

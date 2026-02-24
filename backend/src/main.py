@@ -10,6 +10,10 @@ from .container import get_container
 from .modules.departments.domain.faculty import Faculty
 from .modules.departments.infrastructure.department_router import router as department_router
 from .modules.job_positions.infrastructure.job_position_router import router as job_position_router
+from .modules.authors.infrastructure.author_router import router as author_router
+from .modules.scopus_accounts.infrastructure.scopus_account_router import router as account_router
+from .modules.publications.infrastructure.publication_router import router as publication_router
+from .modules.certificates.infrastructure.certificate_router import router as certificate_router
 
 # Obtener configuración
 container = get_container()
@@ -63,9 +67,10 @@ async def get_faculties():
 # ==============================================================================
 app.include_router(department_router)
 app.include_router(job_position_router)
-
-# app.include_router(authors_router)
-# app.include_router(reports_router)
+app.include_router(author_router)
+app.include_router(account_router)
+app.include_router(publication_router)
+app.include_router(certificate_router)
 
 
 # ==============================================================================

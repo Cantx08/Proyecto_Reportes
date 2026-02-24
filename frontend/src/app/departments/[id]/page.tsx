@@ -2,24 +2,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useDepartments } from '@/features/departments/hooks/useDepartments';
-import { FacultySelect } from '@/features/faculties/components/FacultySelect';
+import { useDepartments } from '@/src/features/departments/hooks/useDepartments';
+import { FacultySelect } from '@/src/features/faculties/components/FacultySelect';
+import {DepartmentUpdateRequest} from "@/src/features/departments/types";
 import { Building, ArrowLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import {DepartmentUpdateRequest} from "@/features/departments/types";
 
 export default function EditDepartmentPage() {
   const router = useRouter();
   const params = useParams();
-  const depId = params.id as string;
+  const dep_id = params.id as string;
   
   const { getDepartment, updateDepartment, updating } = useDepartments();
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
-    depCode: '',
-    depName: '',
-    facultyName: ''
+    dep_code: '',
+    dep_name: '',
+    faculty_name: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -27,12 +27,12 @@ export default function EditDepartmentPage() {
   useEffect(() => {
     const loadDepartment = async () => {
       try {
-        const department = await getDepartment(depId);
+        const department = await getDepartment(dep_id);
         if (department) {
           setFormData({
-            depCode: department.dep_code || department.dep_id,
-            depName: department.dep_name,
-            facultyName: department.faculty_name
+            dep_code: department.dep_code || department.dep_id,
+            dep_name: department.dep_name,
+            faculty_name: department.faculty_name
           });
         }
       } catch (error) {
@@ -42,24 +42,24 @@ export default function EditDepartmentPage() {
       }
     };
 
-    if (depId) {
+    if (dep_id) {
       loadDepartment();
     }
-  }, [depId, getDepartment]);
+  }, [dep_id, getDepartment]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.depCode.trim()) {
-      newErrors.depCode = 'El código del departamento es requerido';
+    if (!formData.dep_code.trim()) {
+      newErrors.dep_code = 'El código del departamento es requerido';
     }
 
-    if (!formData.depName.trim()) {
-      newErrors.depName = 'El nombre del departamento es requerido';
+    if (!formData.dep_name.trim()) {
+      newErrors.dep_name = 'El nombre del departamento es requerido';
     }
 
-    if (!formData.facultyName.trim()) {
-      newErrors.facultyName = 'La facultad es requerida';
+    if (!formData.faculty_name.trim()) {
+      newErrors.faculty_name = 'La facultad es requerida';
     }
 
     setErrors(newErrors);
@@ -84,13 +84,13 @@ export default function EditDepartmentPage() {
   const handleFacultyChange = (value: string) => {
     setFormData(prev => ({
       ...prev,
-      facultyName: value
+      faculty_name: value
     }));
     
-    if (errors.facultyName) {
+    if (errors.faculty_name) {
       setErrors(prev => ({
         ...prev,
-        facultyName: ''
+        faculty_name: ''
       }));
     }
   };
@@ -102,12 +102,12 @@ export default function EditDepartmentPage() {
     
     try {
       const updateData: DepartmentUpdateRequest = {
-        dep_code: formData.depCode,
-        dep_name: formData.depName,
-        faculty: formData.facultyName
+        dep_code: formData.dep_code,
+        dep_name: formData.dep_name,
+        faculty: formData.faculty_name
       };
       
-      const result = await updateDepartment(depId, updateData);
+      const result = await updateDepartment(dep_id, updateData);
       
       if (result) {
         router.push('/departments-and-positions');
@@ -154,22 +154,22 @@ export default function EditDepartmentPage() {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label htmlFor="depCode" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="dep_code" className="block text-sm font-medium text-neutral-700 mb-1">
               Código del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="depCode"
-              name="depCode"
-              value={formData.depCode}
+              id="dep_code"
+              name="dep_code"
+              value={formData.dep_code}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
-                errors.depCode ? 'border-error-500' : 'border-neutral-300'
+                errors.dep_code ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ejemplo: DCCO, DFIS, DICA"
             />
-            {errors.depCode && (
-              <p className="mt-1 text-sm text-error-600">{errors.depCode}</p>
+            {errors.dep_code && (
+              <p className="mt-1 text-sm text-error-600">{errors.dep_code}</p>
             )}
             <p className="mt-1 text-sm text-neutral-500">
               Código único del departamento (siglas)
@@ -177,33 +177,33 @@ export default function EditDepartmentPage() {
           </div>
 
           <div>
-            <label htmlFor="depName" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="dep_name" className="block text-sm font-medium text-neutral-700 mb-1">
               Nombre del Departamento <span className="text-error-500">*</span>
             </label>
             <input
               type="text"
-              id="depName"
-              name="depName"
-              value={formData.depName}
+              id="dep_name"
+              name="dep_name"
+              value={formData.dep_name}
               onChange={handleChange}
               className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors ${
-                errors.depName ? 'border-error-500' : 'border-neutral-300'
+                errors.dep_name ? 'border-error-500' : 'border-neutral-300'
               }`}
               placeholder="Ejemplo: Departamento de Ciencias de la Computación"
             />
-            {errors.depName && (
-              <p className="mt-1 text-sm text-error-600">{errors.depName}</p>
+            {errors.dep_name && (
+              <p className="mt-1 text-sm text-error-600">{errors.dep_name}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="facultyName" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label htmlFor="faculty_name" className="block text-sm font-medium text-neutral-700 mb-1">
               Facultad <span className="text-error-500">*</span>
             </label>
             <FacultySelect
-              value={formData.facultyName}
+              value={formData.faculty_name}
               onChange={handleFacultyChange}
-              error={errors.facultyName}
+              error={errors.faculty_name}
               required
             />
           </div>

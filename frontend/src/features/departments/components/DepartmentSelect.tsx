@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { useDepartments } from '@/features/departments/hooks/useDepartments';
-import {DepartmentResponse} from "@/features/departments/types";
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useDepartments } from '@/src/features/departments/hooks/useDepartments';
+import {DepartmentResponse} from "@/src/features/departments/types";
 
 interface DepartmentSelectProps {
   value: string;
@@ -19,26 +19,28 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
   className = '',
   placeholder = 'Escriba o seleccione un departamento'
 }) => {
-  const { departments, loading, error: fetchError } = useDepartments();
+  const { departments, loading, error: fetchError, fetchDepartments } = useDepartments();
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredDepartments, setFilteredDepartments] = useState<DepartmentResponse[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filtrar departamentos de acuerdo con el texto ingresado
+  // Cargar departamentos al montar
   useEffect(() => {
-    if (!departments || !departments.length) return;
-    
+    fetchDepartments();
+  }, [fetchDepartments]);
+
+  // Filtrar departamentos de acuerdo con el texto ingresado usando useMemo
+  const filteredDepartments = useMemo(() => {
+    if (!departments || !departments.length) return [];
+
     if (!value.trim()) {
-      setFilteredDepartments(departments);
-      return;
+      return departments;
     }
 
-    const filtered = departments.filter((dept: DepartmentResponse) => 
+    return departments.filter((dept: DepartmentResponse) =>
       dept.dep_name.toLowerCase().includes(value.toLowerCase()) ||
       dept.faculty_name.toLowerCase().includes(value.toLowerCase())
     );
-    setFilteredDepartments(filtered);
   }, [value, departments]);
 
   // Cerrar dropdown al hacer clic fuera
@@ -126,7 +128,7 @@ const DepartmentSelect: React.FC<DepartmentSelectProps> = ({
       {isOpen && !loading && !fetchError && value.trim() && filteredDepartments.length === 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-md shadow-lg p-3">
           <div className="text-neutral-500 text-sm">
-            No se encontraron departamentos que coincidan con "{value}".
+            No se encontraron departamentos que coincidan con &quot;{value}&quot;.
           </div>
         </div>
       )}

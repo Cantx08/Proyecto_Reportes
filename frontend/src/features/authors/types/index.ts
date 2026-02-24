@@ -1,59 +1,37 @@
-import {Publication} from "@/types/api";
-
-export interface Autor {
-    author_id: string;
-    publications_list: Publication[];
-    error?: string;
-}
-
-// Autor
-export interface Author {
-    author_id: string;
-    name: string;
-    surname: string;
-    dni: string;
-    title: string;
-    institutional_email?: string;
-    gender: string;
-    position: string;
-    department: string;
-}
-
 export interface AuthorCreateRequest {
-    author_id?: string;
-    name: string;
-    surname: string;
-    dni: string;
-    title: string;
+    first_name: string;
+    last_name: string;
     institutional_email?: string;
+    title?: string;
     gender: string;
-    position: string;
-    department: string;
+    job_position_id: string;
+    department_id: string;
 }
 
 export interface AuthorUpdateRequest {
-    name?: string;
-    surname?: string;
-    dni?: string;
+    first_name?: string;
+    last_name?: string;
     title?: string;
-    institutional_email?: string;
-    gender?: string;
-    position?: string;
-    department?: string;
+    job_position_id?: string;
+    department_id?: string;
 }
 
 export interface AuthorResponse {
     author_id: string;
-    name: string;
-    surname: string;
-    dni: string;
+    first_name: string;
+    last_name: string;
     title: string;
     institutional_email?: string;
     gender: string;
-    position: string;
-    department: string;
+    job_position_id: string;
+    department_id: string;
 }
 
-export interface AuthorsResponse {
-    authors: AuthorResponse[];
+export interface ImportAuthorsResponse {
+    message: string;
+    details: {
+        created: number;
+        updated: number;
+        errors?: string[];
+    };
 }

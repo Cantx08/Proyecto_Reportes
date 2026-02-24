@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import UUID
 from sqlalchemy.orm import Session
@@ -21,7 +21,7 @@ class DBDepartmentRepository(IDepartmentRepository):
         models = self.db.query(DepartmentModel).filter(DepartmentModel.faculty == faculty).all()
         return [model.to_entity() for model in models]
 
-    async def get_by_id(self, dep_id: UUID) -> Department:
+    async def get_by_id(self, dep_id: UUID) -> Optional[Department]:
         dept = self.db.query(DepartmentModel).filter(DepartmentModel.dep_id == dep_id).first()
         return dept.to_entity() if dept else None
 

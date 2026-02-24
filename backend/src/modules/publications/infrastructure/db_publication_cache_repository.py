@@ -1,0 +1,187 @@
+""""Repositorio de caché de publicaciones usando PostgreSQL."""
+
+from sqlalchemy.dialects.postgresql import insert
+from datetime import datetime, timedelta
+from typing import List, Optional
+from uuid import UUID
+
+from sqlalchemy.orm import Session
+
+from .publication_cache_model import PublicationCacheModel
+from ..domain.publication import Publication
+from ..domain.publication_cache_repository import IPublicationCacheRepository
+
+
+class DBPublicationCacheRepository(IPublicationCacheRepository):
+    """
+    Implementación del repositorio de caché de publicaciones usando PostgreSQL.
+    
+    Almacena las publicaciones consultadas desde Scopus para reducir
+    llamadas a la API y permitir consultas más rápidas.
+    """
+
+    def __init__(self, db: Session):
+        self._db = db
+
+    async def get_by_scopus_account(self, scopus_account_id: UUID) -> List[Publication]:
+        """Obtiene todas las publicaciones cacheadas de una cuenta Scopus."""
+        models = self._db.query(PublicationCacheModel).filter(
+            PublicationCacheModel.scopus_account_id == scopus_account_id
+        ).all()
+        
+        return [self._model_to_entity(m) for m in models]
+
+    async def get_by_scopus_id(self, scopus_id: str) -> Optional[Publication]:
+        """Obtiene una publicación específica de la caché."""
+        model = self._db.query(PublicationCacheModel).filter(
+            PublicationCacheModel.scopus_id == scopus_id
+        ).first()
+        
+        if model:
+            # Actualizar last_accessed
+            model.last_accessed = datetime.utcnow()
+            self._db.commit()
+            return self._model_to_entity(model)
+        
+        return None
+
+    async def save_publications(
+        self, 
+        publications: List[Publication], 
+        scopus_account_id: UUID
+    ) -> int:
+        """Guarda o actualiza masivamente usando un solo query (Bulk Upsert)."""
+        if not publications:
+            return 0
+
+        # Preparamos los diccionarios de datos
+        records = []
+        for pub in publications:
+            model = self._entity_to_model(pub, scopus_account_id)
+            # Convertimos el modelo SQLAlchemy a diccionario para el insert core
+            record = {
+                "scopus_id": model.scopus_id,
+                "eid": model.eid,
+                "doi": model.doi,
+                "source_id": model.source_id,
+                "title": model.title,
+                "year": model.year,
+                "publication_date": model.publication_date,
+                "source_title": model.source_title,
+                "document_type": model.document_type,
+                "affiliation_name": model.affiliation_name,
+                "affiliation_id": model.affiliation_id,
+                "subject_areas": model.subject_areas,
+                "categories_with_quartiles": model.categories_with_quartiles,
+                "sjr_year_used": model.sjr_year_used,
+                "scopus_account_id": model.scopus_account_id,
+                "cached_at": model.cached_at
+            }
+            records.append(record)
+
+        # Definimos la sentencia de inserción
+        stmt = insert(PublicationCacheModel).values(records)
+
+        # Definimos qué hacer en caso de conflicto (si el scopus_id ya existe)
+        # Excluimos 'scopus_id' del update porque es la clave
+        update_dict = {
+            col.name: col
+            for col in stmt.excluded
+            if col.name not in ['scopus_id', 'scopus_account_id'] # No actualizar IDs clave
+        }
+
+        # Agregamos la cláusula ON CONFLICT
+        stmt = stmt.on_conflict_do_update(
+            index_elements=['scopus_id'], # Asumiendo que scopus_id es unique o PK
+            set_=update_dict
+        )
+
+        try:
+            self._db.execute(stmt)
+            self._db.commit()
+            return len(publications)
+        except Exception as e:
+            self._db.rollback()
+            raise e
+
+    async def is_cache_valid(self, scopus_account_id: UUID, max_age_hours: int = 24) -> bool:
+        """Verifica si la caché está vigente (no más antigua que max_age_hours)."""
+        cutoff_time = datetime.utcnow() - timedelta(hours=max_age_hours)
+        
+        # Buscar la publicación más reciente cacheada
+        newest = self._db.query(PublicationCacheModel).filter(
+            PublicationCacheModel.scopus_account_id == scopus_account_id,
+            PublicationCacheModel.cached_at >= cutoff_time
+        ).first()
+        
+        return newest is not None
+
+    async def invalidate_cache(self, scopus_account_id: UUID) -> int:
+        """Elimina todas las publicaciones cacheadas de una cuenta."""
+        deleted = self._db.query(PublicationCacheModel).filter(
+            PublicationCacheModel.scopus_account_id == scopus_account_id
+        ).delete()
+        
+        self._db.commit()
+        return deleted
+
+    def _model_to_entity(self, model: PublicationCacheModel) -> Publication:
+        """Convierte un modelo de BD a entidad de dominio."""
+        return Publication(
+            scopus_id=model.scopus_id,
+            eid=model.eid or "",
+            doi=model.doi,
+            source_id=model.source_id,
+            title=model.title,
+            year=model.year,
+            publication_date=model.publication_date or "",
+            source_title=model.source_title or "",
+            document_type=model.document_type or "",
+            affiliation_name=model.affiliation_name or "",
+            affiliation_id=model.affiliation_id,
+            subject_areas=model.subject_areas or [],
+            categories_with_quartiles=model.categories_with_quartiles or [],
+            sjr_year_used=model.sjr_year_used
+        )
+
+    def _entity_to_model(
+        self, 
+        pub: Publication, 
+        scopus_account_id: UUID
+    ) -> PublicationCacheModel:
+        """Convierte una entidad de dominio a modelo de BD."""
+        return PublicationCacheModel(
+            scopus_id=pub.scopus_id,
+            eid=pub.eid,
+            doi=pub.doi,
+            source_id=pub.source_id,
+            title=pub.title,
+            year=pub.year,
+            publication_date=pub.publication_date,
+            source_title=pub.source_title,
+            document_type=pub.document_type,
+            affiliation_name=pub.affiliation_name,
+            affiliation_id=pub.affiliation_id,
+            subject_areas=pub.subject_areas,
+            categories_with_quartiles=pub.categories_with_quartiles,
+            sjr_year_used=pub.sjr_year_used,
+            scopus_account_id=scopus_account_id,
+            cached_at=datetime.utcnow()
+        )
+
+    def _update_model(self, model: PublicationCacheModel, pub: Publication) -> None:
+        """Actualiza un modelo existente con datos nuevos."""
+        model.eid = pub.eid
+        model.doi = pub.doi
+        model.source_id = pub.source_id
+        model.title = pub.title
+        model.year = pub.year
+        model.publication_date = pub.publication_date
+        model.source_title = pub.source_title
+        model.document_type = pub.document_type
+        model.affiliation_name = pub.affiliation_name
+        model.affiliation_id = pub.affiliation_id
+        model.subject_areas = pub.subject_areas
+        model.categories_with_quartiles = pub.categories_with_quartiles
+        model.sjr_year_used = pub.sjr_year_used
+        model.cached_at = datetime.utcnow()

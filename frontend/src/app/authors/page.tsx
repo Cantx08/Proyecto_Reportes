@@ -2,7 +2,6 @@
 
 import React, {useState, useEffect} from 'react';
 import Link from 'next/link';
-import {useAuthors} from '@/hooks/useAuthors';
 import {
     Plus,
     Edit,
@@ -14,75 +13,83 @@ import {
     X,
     ChevronLeft,
     ChevronRight,
-    Download,
     Upload
 } from 'lucide-react';
+import {useAuthors} from "@/src/features/authors/hooks/useAuthors";
+import {Faculty} from "@/src/features/faculties/types";
+import {DepartmentResponse} from "@/src/features/departments/types";
+import {JobPositionResponse} from "@/src/features/job-positions/types";
+import {facultyService} from "@/src/features/faculties/services/facultyService";
+import {departmentService} from "@/src/features/departments/services/departmentService";
+import {jobPositionService} from "@/src/features/job-positions/services/jobPositionService";
 
-interface Faculty {
-    key: string;
-    value: string;
-}
-
-interface Department {
-    dep_id: string;
-    dep_name: string;
-    fac_name: string;
-}
 
 export default function AuthorsPage() {
-    const {authors, loading, error, fetchAuthors, deleteAuthor} = useAuthors();
+    const {authors, loading, error, fetchAuthors, deleteAuthor, importAuthors} = useAuthors();
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
     const [faculties, setFaculties] = useState<Faculty[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
+    const [departments, setDepartments] = useState<DepartmentResponse[]>([]);
+    const [jobPositions, setJobPositions] = useState<JobPositionResponse[]>([]);
     const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
+
+    // Handler para cambiar facultad y resetear departamento
+    const handleFacultyChange = (facultyId: string) => {
+        setSelectedFaculty(facultyId);
+        setSelectedDepartment('all');
+        setCurrentPage(1);
+    };
     const [currentPage, setCurrentPage] = useState(1);
     const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-    const [exporting, setExporting] = useState(false);
     const [importing, setImporting] = useState(false);
-    const [importResult, setImportResult] = useState<{ success: boolean; message: string } | null>(null);
+    const [importResult, setImportResult] = useState<{ success: boolean; errors: string } | null>(null);
     const itemsPerPage = 10;
 
 
     useEffect(() => {
-        fetchAuthors();
+            fetchAuthors();
 
-        // Cargar facultades
-        const loadFaculties = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/faculties');
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    setFaculties(data);
-                } else if (data.data && Array.isArray(data.data)) {
-                    // Por si acaso tu backend usa un wrapper de respuesta
-                    setFaculties(data.data);
+            // Cargar facultades
+            const loadFaculties = async () => {
+                try {
+                    const data = await facultyService.getFaculties()
+                    setFaculties(Array.isArray(data) ? data : []);
+                } catch (error) {
+                    console.error('Error loading faculties:', error);
                 }
+            };
 
-            } catch (error) {
-                console.error('Error loading faculties:', error);
-            }
-        };
-
-        // Cargar departamentos
-        const loadDepartments = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/departments');
-                const data = await response.json();
-                if (data.success) {
-                    setDepartments(data.data);
+            // Cargar departamentos
+            const loadDepartments = async () => {
+                try {
+                    const data = await departmentService.getAll()
+                    setDepartments(Array.isArray(data) ? data : []);
+                } catch (error) {
+                    console.error('Error loading departments:', error);
                 }
-            } catch (error) {
-                console.error('Error loading departments:', error);
-            }
-        };
+            };
 
-        loadFaculties();
-        loadDepartments();
-    }, [fetchAuthors]);
+            // Cargar puestos
+            const loadJobPositions = async () => {
+                try {
+                    const data = await jobPositionService.getAll()
+                    setJobPositions(Array.isArray(data) ? data : []);
+                } catch (error) {
+                    console.error('Error loading job positions:', error);
+                }
+            };
 
-    // Manejar eliminación de autor
+            loadFaculties();
+            loadDepartments();
+            loadJobPositions();
+        }
+        ,
+        [fetchAuthors]
+    )
+    ;
+
+// Manejar eliminación de autor
     const handleDelete = async (authorId: string) => {
         const success = await deleteAuthor(authorId);
         if (success) {
@@ -91,39 +98,30 @@ export default function AuthorsPage() {
         }
     };
 
-    // Filtrar departamentos por facultad seleccionada
+// Filtrar departamentos por facultad seleccionada
     const filteredDepartmentsByFaculty = selectedFaculty === 'all'
         ? departments
-        : departments.filter(dept => dept.fac_name === selectedFaculty);
+        : departments.filter(dept => dept.faculty_code === selectedFaculty);
 
-    // Filtrar autores según los filtros aplicados
+// Filtrar autores según los filtros aplicados
     const filteredAuthors = authors.filter(author => {
         const matchesSearch =
-            author.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            author.position.toLowerCase().includes(searchTerm.toLowerCase());
+            author.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.department_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            author.job_position_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesFaculty = selectedFaculty === 'all' ||
-            departments.find(d => d.dep_name === author.department)?.fac_name === selectedFaculty;
+        const authorDept = departments.find(dept => dept.dep_id === author.department_id);
+        const matchesFaculty = selectedFaculty === 'all' || authorDept?.faculty_code === selectedFaculty;
 
         const matchesDepartment = selectedDepartment === 'all' ||
-            author.department === selectedDepartment;
+            author.department_id === selectedDepartment;
 
         return matchesSearch && matchesFaculty && matchesDepartment;
     });
 
-    // Reset department filter when faculty changes
-    useEffect(() => {
-        setSelectedDepartment('all');
-    }, [selectedFaculty]);
 
-    // Reset department filter when faculty changes
-    useEffect(() => {
-        setSelectedDepartment('all');
-    }, [selectedFaculty]);
-
-    // Función para limpiar todos los filtros
+// Función para limpiar todos los filtros
     const clearFilters = () => {
         setSearchTerm('');
         setSelectedFaculty('all');
@@ -131,107 +129,47 @@ export default function AuthorsPage() {
         setCurrentPage(1);
     };
 
-    // Verificar si hay filtros activos
+// Verificar si hay filtros activos
     const hasActiveFilters = searchTerm !== '' || selectedFaculty !== 'all' || selectedDepartment !== 'all';
 
-    // Función para exportar autores a CSV
-    const handleExportAuthors = async () => {
-
-        setExporting(true);
-        try {
-            const token = localStorage.getItem('auth_token');
-            const response = await fetch('http://localhost:8000/authors/export', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al exportar autores');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'autores_export.csv';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Error exporting authors:', error);
-            alert('Error al exportar autores. Por favor intente de nuevo.');
-        } finally {
-            setExporting(false);
-        }
-    };
-
-    // Función para importar autores desde CSV
+// Función para importar autores desde CSV
     const handleImportAuthors = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) return;
 
-        // Validar que sea un archivo CSV
         if (!file.name.endsWith('.csv')) {
-            setImportResult({success: false, message: 'El archivo debe ser un CSV'});
+            setImportResult({success: false, errors: 'El archivo debe ser un CSV'});
             return;
         }
 
         setImporting(true);
         setImportResult(null);
 
-        try {
-            const token = localStorage.getItem('auth_token');
-            const formData = new FormData();
-            formData.append('file', file);
+        // Mijo, mira qué limpio queda esto llamando al hook
+        const result = await importAuthors(file);
 
-            const response = await fetch('http://localhost:8000/authors/import', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: formData,
-            });
+        setImportResult({
+            success: result.success,
+            errors: result.message
+        });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.detail || 'Error al importar autores');
-            }
-
-            setImportResult({
-                success: true,
-                message: result.message || `Importación completada. Creados: ${result.data?.created || 0}, Actualizados: ${result.data?.updated || 0}`
-            });
-
-            // Recargar la lista de autores
-            await fetchAuthors();
-
-        } catch (error) {
-            console.error('Error importing authors:', error);
-            setImportResult({
-                success: false,
-                message: error instanceof Error ? error.message : 'Error al importar autores'
-            });
-        } finally {
-            setImporting(false);
-            // Limpiar el input para permitir subir el mismo archivo de nuevo
-            event.target.value = '';
-        }
+        setImporting(false);
+        event.target.value = ''; // Limpiar input
     };
 
-    // Paginación
+// Paginación
     const totalPages = Math.ceil(filteredAuthors.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
+
+    // Auto-reset page cuando cambian los filtros
+    const validCurrentPage = currentPage > totalPages ? 1 : currentPage;
+    const startIndex = (validCurrentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedAuthors = filteredAuthors.slice(startIndex, endIndex);
 
-    // Reset page when filters change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, selectedFaculty, selectedDepartment]);
+    // Actualizar currentPage si es inválida
+    if (currentPage !== validCurrentPage && totalPages > 0) {
+        setCurrentPage(validCurrentPage);
+    }
 
     if (loading) {
         return (
@@ -329,25 +267,7 @@ export default function AuthorsPage() {
                                 </>
                             )}
                         </label>
-                        <button
-                            onClick={handleExportAuthors}
-                            disabled={exporting}
-                            className="px-4 py-2 bg-secondary-500 hover:bg-secondary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Exportar autores a CSV"
-                        >
-                            {exporting ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 mr-2 animate-spin"/>
-                                    Exportando...
-                                </>
-                            ) : (
-                                <>
-                                    <Download className="h-4 w-4 mr-2"/>
-                                    Exportar CSV
-                                </>
-                            )}
-                        </button>
-                        <Link href="/authors/authors-new">
+                        <Link href="/authors/new">
                             <button
                                 className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center shadow-sm">
                                 <Plus className="h-4 w-4 mr-2"/>
@@ -409,7 +329,7 @@ export default function AuthorsPage() {
                                     </h3>
                                     <div
                                         className={`mt-2 text-sm ${importResult.success ? 'text-success-700' : 'text-error-700'}`}>
-                                        <p>{importResult.message}</p>
+                                        <p>{importResult.errors}</p>
                                     </div>
                                 </div>
                             </div>
@@ -452,7 +372,7 @@ export default function AuthorsPage() {
                         {/* Faculty Filter */}
                         <select
                             value={selectedFaculty}
-                            onChange={(e) => setSelectedFaculty(e.target.value)}
+                            onChange={(e) => handleFacultyChange(e.target.value)}
                             className={`w-64 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all ${
                                 selectedFaculty !== 'all' ? 'border-secondary-400 bg-secondary-50' : 'border-neutral-300'
                             }`}
@@ -476,7 +396,7 @@ export default function AuthorsPage() {
                         >
                             <option value="all">Todos los Departamentos</option>
                             {filteredDepartmentsByFaculty.map((department) => (
-                                <option key={department.dep_id} value={department.dep_name}>
+                                <option key={department.dep_id} value={department.dep_id}>
                                     {department.dep_name}
                                 </option>
                             ))}
@@ -508,7 +428,7 @@ export default function AuthorsPage() {
                             {searchTerm && (
                                 <span
                                     className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 text-xs font-medium rounded-full">
-                  Búsqueda: "{searchTerm.length > 20 ? searchTerm.substring(0, 20) + '...' : searchTerm}"
+                  Búsqueda: &quot;{searchTerm.length > 20 ? searchTerm.substring(0, 20) + '...' : searchTerm}&quot;
                   <button onClick={() => setSearchTerm('')} className="hover:bg-primary-200 rounded-full p-0.5">
                     <X className="h-3 w-3"/>
                   </button>
@@ -518,7 +438,7 @@ export default function AuthorsPage() {
                                 <span
                                     className="inline-flex items-center gap-1 px-3 py-1 bg-secondary-100 text-secondary-800 text-xs font-medium rounded-full">
                   Facultad
-                  <button onClick={() => setSelectedFaculty('all')}
+                  <button onClick={() => handleFacultyChange('all')}
                           className="hover:bg-secondary-200 rounded-full p-0.5">
                     <X className="h-3 w-3"/>
                   </button>
@@ -559,47 +479,56 @@ export default function AuthorsPage() {
                         </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-neutral-200">
-                        {paginatedAuthors.map((author) => (
-                            <tr
-                                key={author.author_id}
-                                className="hover:bg-primary-50 transition-colors"
-                                onMouseEnter={() => setHoveredRow(author.author_id)}
-                                onMouseLeave={() => setHoveredRow(null)}
-                            >
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-neutral-900">
-                                        {author.title} {author.name} {author.surname}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
-                                    {author.department}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
-                                    {author.position}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div className={`flex space-x-3 transition-opacity duration-200 ${
-                                        hoveredRow === author.author_id ? 'opacity-100' : 'opacity-0'
-                                    }`}>
-                                        <Link href={`/authors/${author.author_id}`}>
+                        {paginatedAuthors.map((author) => {
+                            const departmentName = departments.find(
+                                (dept) => dept.dep_id === author.department_id
+                            )?.dep_name || author.department_id;
+
+                            const jobPositionName = jobPositions.find(
+                                (position) => position.pos_id = author.job_position_id
+                            )?.pos_name || author.job_position_id;
+                            return (
+                                <tr
+                                    key={author.author_id}
+                                    className="hover:bg-primary-50 transition-colors"
+                                    onMouseEnter={() => setHoveredRow(author.author_id)}
+                                    onMouseLeave={() => setHoveredRow(null)}
+                                >
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm font-medium text-neutral-900">
+                                            {author.title} {author.first_name} {author.last_name}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
+                                        {departmentName}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-700">
+                                        {jobPositionName}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className={`flex space-x-3 transition-opacity duration-200 ${
+                                            hoveredRow === author.author_id ? 'opacity-100' : 'opacity-0'
+                                        }`}>
+                                            <Link href={`/authors/${author.author_id}`}>
+                                                <button
+                                                    className="p-2 text-success-600 hover:text-success-900 hover:bg-success-50 rounded-lg transition-colors"
+                                                    title="Editar autor"
+                                                >
+                                                    <Edit className="h-4 w-4"/>
+                                                </button>
+                                            </Link>
                                             <button
-                                                className="p-2 text-success-600 hover:text-success-900 hover:bg-success-50 rounded-lg transition-colors"
-                                                title="Editar autor"
+                                                onClick={() => setDeleteConfirm(author.author_id)}
+                                                className="p-2 text-error-600 hover:text-error-900 hover:bg-error-50 rounded-lg transition-colors"
+                                                title="Eliminar autor"
                                             >
-                                                <Edit className="h-4 w-4"/>
+                                                <Trash2 className="h-4 w-4"/>
                                             </button>
-                                        </Link>
-                                        <button
-                                            onClick={() => setDeleteConfirm(author.author_id)}
-                                            className="p-2 text-error-600 hover:text-error-900 hover:bg-error-50 rounded-lg transition-colors"
-                                            title="Eliminar autor"
-                                        >
-                                            <Trash2 className="h-4 w-4"/>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>

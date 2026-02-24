@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Loader2} from 'lucide-react';
-import {Faculty} from "@/features/faculties/types";
-import {facultyService} from "@/features/faculties/services/facultyService";
+import {Faculty} from "@/src/features/faculties/types";
+import {facultyService} from "@/src/features/faculties/services/facultyService";
 
 interface FacultySelectProps {
     value: string;

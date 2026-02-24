@@ -2,9 +2,6 @@
 
 import React, {useEffect, useState} from 'react';
 import Link from 'next/link';
-import {useDepartments} from '@/features/departments/hooks/useDepartments';
-import {useJobPositions} from '@/features/job-positions/hooks/useJobPositions';
-import {ErrorNotification} from '@/components/ErrorNotification';
 import {
   Briefcase,
   Building,
@@ -18,10 +15,13 @@ import {
   Trash2,
   X
 } from 'lucide-react';
-import {DepartmentResponse} from "@/features/departments/types";
-import {JobPositionResponse} from "@/features/job-positions/types";
-import {Faculty} from "@/features/faculties/types";
-import {facultyService} from "@/features/faculties/services/facultyService";
+import {useDepartments} from '@/src/features/departments/hooks/useDepartments';
+import {useJobPositions} from '@/src/features/job-positions/hooks/useJobPositions';
+import {DepartmentResponse} from "@/src/features/departments/types";
+import {JobPositionResponse} from "@/src/features/job-positions/types";
+import {Faculty} from "@/src/features/faculties/types";
+import {facultyService} from "@/src/features/faculties/services/facultyService";
+import {ErrorNotification} from "@/src/components/ErrorNotification";
 
 type ViewMode = 'departments' | 'positions';
 
@@ -56,6 +56,10 @@ const DepartmentsAndPositionsPage: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
   useEffect(() => {
+    // Cargar datos iniciales
+    fetchDepartments();
+    fetchPositions();
+
     // Cargar facultades
     const loadFaculties = async () => {
       try {
@@ -66,20 +70,16 @@ const DepartmentsAndPositionsPage: React.FC = () => {
       }
     };
     loadFaculties();
-  }, []);
+  }, [fetchDepartments, fetchPositions]);
 
-  // Reset search when changing view
-  useEffect(() => {
+  // Handler para cambiar el modo de vista
+  const handleViewModeChange = (mode: 'departments' | 'positions') => {
+    setViewMode(mode);
     setSearchTerm('');
     setDeleteConfirm(null);
     setSelectedFaculty('all');
-    setCurrentPage(1); // Reset to first page when changing view
-  }, [viewMode]);
-
-  // Reset page when search or filter changes
-  useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedFaculty]);
+  };
 
   const filteredDepartments = departments.filter((department: DepartmentResponse) => {
     const matchesSearch = 
@@ -109,9 +109,17 @@ const DepartmentsAndPositionsPage: React.FC = () => {
   // Pagination logic
   const currentData = viewMode === 'departments' ? filteredDepartments : filteredPositions;
   const totalPages = Math.ceil(currentData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
+
+  // Auto-reset page cuando cambian los filtros o los datos
+  const validCurrentPage = currentPage > totalPages && totalPages > 0 ? 1 : currentPage;
+  const startIndex = (validCurrentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedData = currentData.slice(startIndex, endIndex);
+
+  // Actualizar currentPage si es inválida
+  if (currentPage !== validCurrentPage && totalPages > 0) {
+    setCurrentPage(validCurrentPage);
+  }
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -194,7 +202,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
         {/* View Mode Tabs */}
         <div className="flex space-x-2 mb-6 border-b border-neutral-200">
           <button
-            onClick={() => setViewMode('departments')}
+            onClick={() => handleViewModeChange('departments')}
             className={`px-6 py-3 text-sm font-medium transition-all relative ${
               viewMode === 'departments'
                 ? 'text-primary-600 border-b-2 border-primary-600'
@@ -207,7 +215,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
             </div>
           </button>
           <button
-            onClick={() => setViewMode('positions')}
+            onClick={() => handleViewModeChange('positions')}
             className={`px-6 py-3 text-sm font-medium transition-all relative ${
               viewMode === 'positions'
                 ? 'text-primary-600 border-b-2 border-primary-600'
@@ -282,7 +290,7 @@ const DepartmentsAndPositionsPage: React.FC = () => {
             <div className="mt-3 flex flex-wrap gap-2">
               {searchTerm && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-700 border border-primary-200">
-                  Búsqueda: "{searchTerm}"
+                  Búsqueda: &quot;{searchTerm}&quot;
                   <button
                     onClick={() => setSearchTerm('')}
                     className="ml-2 hover:text-primary-900"

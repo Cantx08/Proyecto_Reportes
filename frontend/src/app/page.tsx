@@ -6,10 +6,7 @@ import {
     Users,
     Building2,
     FileText,
-    ClipboardCheck,
-    TrendingUp,
-    Calendar,
-    Award
+    ClipboardCheck
 } from 'lucide-react';
 
 const modules = [
