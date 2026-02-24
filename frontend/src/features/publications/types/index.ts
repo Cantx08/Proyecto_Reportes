@@ -70,3 +70,35 @@ export interface PublicationFilters {
     documentType?: string;
     searchQuery?: string;
 }
+
+// -----------------------------------------------------------------------
+// Tipos para el flujo frontend-Scopus (IP institucional)
+// -----------------------------------------------------------------------
+
+/**
+ * Estado de caché de una cuenta Scopus del autor.
+ * Devuelto por GET /publications/author/{id}/scopus-ids
+ */
+export interface ScopusAccountStatus {
+    account_id: string;
+    scopus_id: string;
+    cache_valid: boolean;
+}
+
+/**
+ * Respuesta del endpoint GET /publications/author/{id}/scopus-ids
+ */
+export interface AuthorScopusStatusResponse {
+    author_id: string;
+    scopus_accounts: ScopusAccountStatus[];
+}
+
+/**
+ * Respuesta del endpoint POST /publications/process-account
+ */
+export interface ProcessAccountResponse {
+    account_id: string;
+    scopus_author_id: string;
+    total_processed: number;
+    publications: Publication[];
+}
