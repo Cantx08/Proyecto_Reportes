@@ -1,10 +1,6 @@
 """
 Router para el módulo de certificados.
 Define los endpoints para generar certificados de publicaciones académicas.
-
-Nota: Ningún endpoint llama a la API de Scopus.
-Las publicaciones se obtienen desde la caché local (previamente poblada por
-el frontend que usa la IP institucional para consultar Elsevier).
 """
 from typing import List
 from uuid import UUID
@@ -31,9 +27,12 @@ from .report.style_manager import ReportLabStyleManager
 from .report.chart_generator import MatplotlibChartGenerator
 from .report.publication_formatter import ReportLabPublicationFormatter
 from .report.template_overlay_service import TemplateOverlayService
+from ...publications.infrastructure.scopus_publication_repository import ScopusPublicationRepository
 from ...publications.infrastructure.sjr_file_repository import SJRFileRepository
 from ...publications.infrastructure.db_publication_cache_repository import DBPublicationCacheRepository
+from ...publications.infrastructure.scopus_author_subject_area_repository import ScopusAuthorSubjectAreaRepository
 from ...publications.application.publication_service import PublicationService
+from ...publications.application.subject_area_service import SubjectAreaService
 from ...publications.domain.publication import Publication
 from ...scopus_accounts.infrastructure.db_scopus_account_repository import DBScopusAccountRepository
 from ....shared.database import get_db
@@ -76,18 +75,37 @@ def get_report_metadata_service(db: Session = Depends(get_db)) -> ReportMetadata
 
 def get_publication_service(db: Session = Depends(get_db)) -> PublicationService:
     """
-    Factory para crear el servicio de publicaciones (sin Scopus).
+    Factory para crear el servicio de publicaciones con sus dependencias.
     """
     container = get_container()
-
+    
+    publication_repo = ScopusPublicationRepository(
+        api_key=container.settings.SCOPUS_API_KEY
+    )
     cache_repo = DBPublicationCacheRepository(db)
     sjr_repo = SJRFileRepository(csv_path=container.settings.SJR_CSV_PATH)
     scopus_account_repo = DBScopusAccountRepository(db)
-
+    
     return PublicationService(
+        publication_repo=publication_repo,
         cache_repo=cache_repo,
         sjr_repo=sjr_repo,
-        scopus_account_repo=scopus_account_repo,
+        scopus_account_repo=scopus_account_repo
+    )
+
+
+def get_subject_area_service(db: Session = Depends(get_db)) -> SubjectAreaService:
+    """
+    Factory para crear el servicio de áreas temáticas del autor.
+    """
+    container = get_container()
+    author_sa_repo = ScopusAuthorSubjectAreaRepository(
+        api_key=container.settings.SCOPUS_API_KEY
+    )
+    scopus_account_repo = DBScopusAccountRepository(db)
+    return SubjectAreaService(
+        author_sa_repo=author_sa_repo,
+        scopus_account_repo=scopus_account_repo
     )
 
 
@@ -116,15 +134,9 @@ async def generate_certificate(
     request: ReportRequestDTO,
     report_service: ReportService = Depends(get_report_service),
     publication_service: PublicationService = Depends(get_publication_service),
+    subject_area_service: SubjectAreaService = Depends(get_subject_area_service)
 ):
-    """
-    Endpoint para generar un certificado de publicaciones.
-
-    Obtiene publicaciones desde la CACHÉ local (previamente poblada por el
-    frontend usando la IP institucional).  Las áreas temáticas se reciben
-    opcionalmente en el body del request; si no vienen, se extraen de las
-    publicaciones cacheadas.
-    """
+    """Endpoint para generar un certificado de publicaciones."""
     try:
         # Log de datos recibidos
         print(f"[CERT] Datos recibidos: {request.model_dump()}")
@@ -132,17 +144,18 @@ async def generate_certificate(
         print(f"[CERT] Departamento: {request.departamento}")
         print(f"[CERT] Cargo: {request.cargo}")
         
-        # Recolectar publicaciones de todos los author_ids desde CACHÉ
+        # Recolectar publicaciones de todos los author_ids
         all_publications: List[Publication] = []
         all_subject_areas: set = set()
         
         for author_id in request.author_ids:
             try:
+                # Intentar como UUID
                 author_uuid = UUID(author_id)
-                # Usar datos cacheados – NO llama a Scopus
-                author_pubs = await publication_service.get_cached_publications_by_author(author_uuid)
+                author_pubs = await publication_service.get_publications_by_author(author_uuid)
                 
                 for pub_dto in author_pubs.publications:
+                    # Convertir DTO a Publication entity
                     pub = Publication(
                         scopus_id=pub_dto.scopus_id,
                         eid=pub_dto.eid,
@@ -159,19 +172,41 @@ async def generate_certificate(
                         sjr_year_used=pub_dto.sjr_year_used
                     )
                     all_publications.append(pub)
+                
+                # Obtener subject areas desde Author Retrieval API
+                try:
+                    author_areas = await subject_area_service.get_subject_areas_by_author(author_uuid)
+                    all_subject_areas.update(author_areas)
+                except ValueError:
+                    pass  # Autor sin cuentas Scopus, continuar
                     
-                    # Extraer subject areas de las publicaciones como fallback
-                    for area in pub_dto.subject_areas:
-                        all_subject_areas.add(area)
-
             except ValueError:
-                # author_id no es UUID – ignorar (el flujo directo por
-                # Scopus ID se maneja desde el frontend)
-                print(f"[CERT] author_id '{author_id}' no es UUID, ignorando.")
-
-        # Si el frontend envió subject_areas explícitamente, usarlas
-        if request.subject_areas:
-            all_subject_areas = set(request.subject_areas)
+                # Si no es UUID, intentar como Scopus ID directamente
+                pubs = await publication_service.get_publications_by_scopus_id(author_id)
+                for pub_dto in pubs:
+                    pub = Publication(
+                        scopus_id=pub_dto.scopus_id,
+                        eid=pub_dto.eid,
+                        doi=pub_dto.doi,
+                        title=pub_dto.title,
+                        year=pub_dto.year,
+                        publication_date=pub_dto.publication_date,
+                        source_title=pub_dto.source_title,
+                        document_type=pub_dto.document_type,
+                        affiliation_name=pub_dto.affiliation_name,
+                        affiliation_id=pub_dto.affiliation_id,
+                        subject_areas=pub_dto.subject_areas,
+                        categories_with_quartiles=pub_dto.categories_with_quartiles,
+                        sjr_year_used=pub_dto.sjr_year_used
+                    )
+                    all_publications.append(pub)
+                
+                # Para Scopus ID directo, obtener subject areas desde Author Retrieval
+                try:
+                    scopus_areas = await subject_area_service.get_subject_areas_by_scopus_id(author_id)
+                    all_subject_areas.update(scopus_areas)
+                except Exception:
+                    pass  # Fallback: sin áreas para este ID
         
         # Eliminar duplicados basados en scopus_id
         seen_ids = set()

@@ -155,6 +155,7 @@ export function useAuthors(): UseAuthorsState & UseAuthorsActions {
 
             return {
                 success: true,
+                // OJO: Aquí usamos 'detalles' que es lo que manda tu backend
                 message: `Importación completada. Creados: ${response.details.created}, Actualizados: ${response.details.updated}`
             };
         } catch (error) {

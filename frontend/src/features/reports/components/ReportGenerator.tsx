@@ -121,7 +121,6 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         firmante_nombre: formData.firmante_nombre || undefined,
         fecha: formData.fecha ? formatDateToSpanish(formData.fecha) : undefined,
         elaborador: formData.elaborador || 'M. Vásquez',
-        subject_areas: subjectAreas,
       };
 
       const blob = await reportService.generateDraft(reportRequest);
@@ -318,7 +317,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <button
           onClick={handleGenerateDraft}
           disabled={isGenerating}
-          className="w-full sm:w-auto bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
+          className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
         >
           {isGenerating ? 'Generando Borrador...' : '📝 Generar Borrador'}
         </button>
@@ -356,8 +355,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 
         {/* Nota informativa */}
         <p className="text-xs text-neutral-500 text-center max-w-lg">
-          A continuación se generará un borrador en formato PDF. Para obtener el certificado final, 
-          suba el borrador desde el módulo de certificados.
+          El borrador se genera sin la plantilla institucional. Para obtener el certificado final, 
+          suba el borrador desde el módulo de certificados (acceso directo sin publicaciones).
         </p>
       </div>
     </div>
