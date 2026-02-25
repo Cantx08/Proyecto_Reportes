@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 from pydantic import BaseModel
 from ..domain.publication import Publication
 
@@ -64,51 +64,3 @@ class PublicationsStatsResponseDTO(BaseModel):
     total_publications: int
     documents_by_year: List[DocumentsByYearDTO]
     documents_by_type: dict
-
-
-# ---------------------------------------------------------------------------
-# DTOs para el flujo frontend-Scopus (refactoring IP institucional)
-# ---------------------------------------------------------------------------
-
-class ScopusAccountStatusDTO(BaseModel):
-    """Estado de caché de una cuenta Scopus del autor."""
-    account_id: str   # UUID como string
-    scopus_id: str
-    cache_valid: bool
-
-
-class AuthorScopusStatusResponseDTO(BaseModel):
-    """Respuesta del endpoint /author/{id}/scopus-ids."""
-    author_id: str
-    scopus_accounts: List[ScopusAccountStatusDTO]
-
-
-class ProcessAccountRequestDTO(BaseModel):
-    """
-    Solicitud de procesamiento de publicaciones crudas desde el frontend.
-
-    El frontend obtiene estas publicaciones directamente desde la API de
-    Scopus usando la IP institucional, y las envía aquí para que el backend
-    aplique la transformación de filiación, el enriquecimiento SJR y las
-    guarde en caché.
-    """
-    account_id: str           # UUID de la ScopusAccount (string)
-    scopus_author_id: str     # Scopus ID numérico del autor
-    raw_publications: List[Dict[str, Any]]  # Entradas crudas del JSON de Scopus
-
-
-class ProcessAccountResponseDTO(BaseModel):
-    """Respuesta del endpoint POST /process-account."""
-    account_id: str
-    scopus_author_id: str
-    total_processed: int
-    publications: List[PublicationResponseDTO]
-
-
-class PreviewPublicationsRequestDTO(BaseModel):
-    """
-    Solicitud para previsualizar publicaciones crudas de Scopus
-    sin necesidad de un account_id (cuenta aún no asociada).
-    """
-    scopus_author_id: str
-    raw_publications: List[Dict[str, Any]]

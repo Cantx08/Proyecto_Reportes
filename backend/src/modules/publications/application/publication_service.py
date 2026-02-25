@@ -1,19 +1,15 @@
-"""
-Servicio de aplicación para gestión de publicaciones.
+""" Servicio de aplicación para gestión de publicaciones. """
 
-Arquitectura (post-refactoring IP institucional):
-  - El frontend llama a Scopus directamente (IP institucional).
-  - El backend se encarga de transformar, enriquecer con SJR y cachear.
-  - Los datos se devuelven desde la caché local.
-"""
-
+import asyncio
 from typing import List, Dict, Optional
 from uuid import UUID
 import logging
 from .publication_dto import PublicationResponseDTO, AuthorPublicationsResponseDTO
 from ..domain.publication import Publication
+from ..domain.publication_repository import IPublicationRepository
 from ..domain.publication_cache_repository import IPublicationCacheRepository
 from ..domain.sjr_repository import ISJRRepository
+from ...scopus_accounts.domain.scopus_account import ScopusAccount
 from ...scopus_accounts.domain.scopus_account_repository import IScopusAccountRepository
 
 logger = logging.getLogger(__name__)
@@ -22,9 +18,6 @@ logger = logging.getLogger(__name__)
 class PublicationService:
     """
     Servicio de aplicación para gestión de publicaciones.
-
-    Ya NO llama a la API de Scopus.  Recibe datos crudos del frontend
-    (que usa la IP institucional) y los procesa / cachea localmente.
     """
     
     # Tiempo de validez de la caché en horas
@@ -34,13 +27,110 @@ class PublicationService:
     
     def __init__(
         self,
+        publication_repo: IPublicationRepository,
         cache_repo: Optional[IPublicationCacheRepository],
         sjr_repo: ISJRRepository,
         scopus_account_repo: IScopusAccountRepository
     ):
+        self._publication_repo = publication_repo
         self._cache_repo = cache_repo
         self._sjr_repo = sjr_repo
         self._scopus_account_repo = scopus_account_repo
+
+    async def get_publications_by_author(
+        self, 
+        author_id: UUID,
+        force_refresh: bool = False
+    ) -> AuthorPublicationsResponseDTO:
+        logger.info(f"Obteniendo publicaciones del autor {author_id}, force_refresh={force_refresh}")
+        
+        # 1. Obtener las cuentas Scopus del autor
+        scopus_accounts = await self._scopus_account_repo.get_by_author(author_id)
+        
+        if not scopus_accounts:
+            logger.warning(f"Autor {author_id} no tiene cuentas Scopus asociadas")
+            raise ValueError(f"El autor no tiene cuentas Scopus asociadas.")
+        
+        logger.info(f"Autor tiene {len(scopus_accounts)} cuenta(s) Scopus")
+        scopus_ids = [account.scopus_id for account in scopus_accounts]
+        
+        tasks = [
+            self._get_publications_with_cache(account, force_refresh=force_refresh)
+            for account in scopus_accounts
+        ]
+
+        result_lists = await asyncio.gather(*tasks)
+
+        # 2. Obtener publicaciones de todas las cuentas Scopus
+        all_publications: List[Publication] = []
+        seen_scopus_ids = set()
+        
+        for publications in result_lists:
+            for pub in publications:
+                if pub.scopus_id not in seen_scopus_ids:
+                    seen_scopus_ids.add(pub.scopus_id)
+                    all_publications.append(pub)
+        
+        # 3. Ordenar por año descendente
+        all_publications.sort(key=lambda p: p.year, reverse=True)
+        
+        logger.info(f"Total de {len(all_publications)} publicaciones únicas obtenidas para el autor {author_id}")
+        
+        return AuthorPublicationsResponseDTO(
+            author_id=str(author_id),
+            scopus_ids=scopus_ids,
+            total_publications=len(all_publications),
+            publications=[PublicationResponseDTO.from_entity(p) for p in all_publications]
+        )
+
+    async def _get_publications_with_cache(
+        self, 
+        account: ScopusAccount,
+        force_refresh: bool = False
+    ) -> List[Publication]:
+        if self._cache_repo is None:
+            return await self._fetch_from_scopus(account.scopus_id)
+        
+        if not force_refresh:
+            cache_valid = await self._cache_repo.is_cache_valid(
+                account.account_id, 
+                self.CACHE_MAX_AGE_HOURS
+            )
+            
+            if cache_valid:
+                cached_pubs = await self._cache_repo.get_by_scopus_account(account.account_id)
+                if cached_pubs:
+                    return cached_pubs
+        
+        publications = await self._fetch_from_scopus(account.scopus_id)
+        
+        if publications:
+            await self._cache_repo.save_publications(publications, account.account_id)
+        
+        return publications
+
+    async def _fetch_from_scopus(self, scopus_id: str) -> List[Publication]:
+        """Obtiene publicaciones desde la API de Scopus y las enriquece con SJR."""
+        raw_publications = await self._publication_repo.get_publications_by_scopus_id(scopus_id)
+        
+        publications = []
+        for raw_pub in raw_publications:
+            pub = self._transform_raw_publication(raw_pub, scopus_id)
+            pub = self._enrich_with_sjr(pub)
+            publications.append(pub)
+        
+        return publications
+
+    async def get_publications_by_scopus_id(
+        self, 
+        scopus_id: str
+    ) -> List[PublicationResponseDTO]:
+        publications = await self._fetch_from_scopus(scopus_id)
+        publications.sort(key=lambda p: p.year, reverse=True)
+        return [PublicationResponseDTO.from_entity(p) for p in publications]
+
+    async def refresh_author_publications(self, author_id: UUID) -> AuthorPublicationsResponseDTO:
+        return await self.get_publications_by_author(author_id, force_refresh=True)
 
     def _transform_raw_publication(self, raw: Dict, scopus_author_id: str) -> Publication:
         """
@@ -119,7 +209,7 @@ class PublicationService:
                 else:
                     author_afids.append(str(item))
         elif isinstance(raw_afids, dict):
-            author_afids.append(raw_afids.get("$", ""))
+             author_afids.append(raw_afids.get("$", ""))
         elif isinstance(raw_afids, str):
             # A veces viene separado por espacios si no es array
             author_afids = raw_afids.split()
@@ -185,11 +275,7 @@ class PublicationService:
         return publication
 
     async def get_statistics_by_author(self, author_id: UUID) -> Dict:
-        """
-        Obtiene estadísticas de publicaciones desde la caché local.
-        No llama a la API de Scopus.
-        """
-        author_pubs = await self.get_cached_publications_by_author(author_id)
+        author_pubs = await self.get_publications_by_author(author_id)
         
         by_year: Dict[int, int] = {}
         by_type: Dict[str, int] = {}
@@ -204,117 +290,3 @@ class PublicationService:
             "by_year": dict(sorted(by_year.items(), reverse=True)),
             "by_type": by_type
         }
-
-    # ------------------------------------------------------------------
-    # Métodos para el flujo frontend-Scopus (refactoring IP institucional)
-    # El frontend llama a Scopus directamente con la IP institucional y
-    # envía los datos crudos al backend para transformación, enriquecimiento
-    # SJR y caché.
-    # ------------------------------------------------------------------
-
-    async def get_scopus_account_status(self, author_id: UUID) -> dict:
-        """
-        Devuelve las cuentas Scopus del autor con su estado de caché,
-        SIN realizar ninguna llamada a la API de Scopus.
-
-        Uso: el frontend llama a este endpoint primero para saber:
-        - qué Scopus IDs debe consultar directamente
-        - cuáles ya están en caché y no necesitan re-consulta
-        """
-        scopus_accounts = await self._scopus_account_repo.get_by_author(author_id)
-        if not scopus_accounts:
-            raise ValueError("El autor no tiene cuentas Scopus asociadas.")
-
-        result = []
-        for account in scopus_accounts:
-            cache_valid = False
-            if self._cache_repo:
-                cache_valid = await self._cache_repo.is_cache_valid(
-                    account.account_id, self.CACHE_MAX_AGE_HOURS
-                )
-            result.append({
-                "account_id": str(account.account_id),
-                "scopus_id": account.scopus_id,
-                "cache_valid": cache_valid,
-            })
-
-        return {"author_id": str(author_id), "scopus_accounts": result}
-
-    async def get_cached_publications_by_author(self, author_id: UUID) -> AuthorPublicationsResponseDTO:
-        """
-        Devuelve las publicaciones almacenadas en caché para el autor,
-        fusionando y deduplicando todas sus cuentas Scopus.
-
-        No realiza ninguna llamada a la API de Scopus.
-        Útil cuando el frontend ya sabe que la caché es válida.
-        """
-        scopus_accounts = await self._scopus_account_repo.get_by_author(author_id)
-        if not scopus_accounts:
-            raise ValueError("El autor no tiene cuentas Scopus asociadas.")
-
-        scopus_ids = [acc.scopus_id for acc in scopus_accounts]
-        all_publications: List[Publication] = []
-
-        for account in scopus_accounts:
-            if self._cache_repo:
-                cached = await self._cache_repo.get_by_scopus_account(account.account_id)
-                all_publications.extend(cached)
-
-        # Deduplicar por scopus_id
-        seen: Dict[str, Publication] = {}
-        for pub in all_publications:
-            seen[pub.scopus_id] = pub
-        unique_pubs = sorted(seen.values(), key=lambda p: p.year, reverse=True)
-
-        return AuthorPublicationsResponseDTO(
-            author_id=str(author_id),
-            scopus_ids=scopus_ids,
-            total_publications=len(unique_pubs),
-            publications=[PublicationResponseDTO.from_entity(p) for p in unique_pubs],
-        )
-
-    async def process_account_publications(
-        self,
-        account_id: UUID,
-        scopus_author_id: str,
-        raw_publications: List[Dict],
-    ) -> List[Publication]:
-        """
-        Transforma datos crudos de Scopus, los enriquece con SJR y los
-        guarda en caché.
-
-        Flujo esperado (llamado desde el frontend):
-        1. Frontend obtiene entradas crudas de Scopus (view=COMPLETE)
-        2. Envía account_id + scopus_author_id + raw_publications a este endpoint
-        3. El backend transforma, enriquece y cachea
-        4. Devuelve las publicaciones procesadas
-        """
-        publications: List[Publication] = []
-        for raw in raw_publications:
-            pub = self._transform_raw_publication(raw, scopus_author_id)
-            pub = self._enrich_with_sjr(pub)
-            publications.append(pub)
-
-        if publications and self._cache_repo:
-            await self._cache_repo.save_publications(publications, account_id)
-
-        return publications
-
-    async def process_raw_publications_preview(
-        self,
-        scopus_author_id: str,
-        raw_publications: List[Dict],
-    ) -> List[Publication]:
-        """
-        Transforma y enriquece datos crudos de Scopus SIN guardar en caché.
-
-        Útil para previsualizar publicaciones de un Scopus ID que aún no
-        está asociado como cuenta (no existe account_id).
-        """
-        publications: List[Publication] = []
-        for raw in raw_publications:
-            pub = self._transform_raw_publication(raw, scopus_author_id)
-            pub = self._enrich_with_sjr(pub)
-            publications.append(pub)
-        publications.sort(key=lambda p: p.year, reverse=True)
-        return publications
