@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Publication } from '@/features/publications/types';
-import { AuthorResponse } from '@/features/authors/types';
+import { Publication } from '../features/publications/types';
+import { AuthorResponse } from '../features/authors/types';
 
 /**
  * Datos de publicaciones para generar certificados

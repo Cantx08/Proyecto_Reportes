@@ -139,7 +139,7 @@ class PublicationService:
         cover_date = raw.get("prism:coverDate", "")
         year = int(cover_date[:4]) if cover_date and len(cover_date) >= 4 else 0
         
-        # Lógica central: Determinar si este autor, en este paper, firmó como EPN
+        # Validar si este autor, pertenecía a la EPN durante esta publicación
         affiliation_name, affiliation_id, is_epn = self._analyze_affiliation_link(
             raw, scopus_author_id
         )
@@ -162,7 +162,7 @@ class PublicationService:
             # Nuevos datos calculados
             affiliation_name=affiliation_name,
             affiliation_id=affiliation_id,
-            is_epn_affiliated=is_epn, # <--- La verdad de la milanesa
+            is_epn_affiliated=is_epn,
             
             subject_areas=[],
             categories_with_quartiles=[],
