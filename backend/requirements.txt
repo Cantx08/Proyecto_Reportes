@@ -7,12 +7,9 @@ pydantic
 pydantic[email]
 pypdf
 psycopg2
+psycopg2-binary
 requests
 reportlab
 matplotlib
 sqlalchemy
-python-multipart
-python-jose[cryptography]
-passlib[bcrypt]
-bcrypt
 httpx

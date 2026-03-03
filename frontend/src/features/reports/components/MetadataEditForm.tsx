@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Save, FileDown, Loader2 } from 'lucide-react';
 import { ReportMetadataResponse, UpdateReportMetadataRequest } from '@/src/features/reports/types';
-import { formatDateToSpanish } from '@/src/utils/helpers';
+import { formatDateToSpanish, parseDateFromSpanish } from '@/src/utils/helpers';
 import FirmanteSelect from './SignatorySelect';
 import ElaboradorSelect from './ElaboradorSelect';
 
@@ -25,7 +25,8 @@ const MetadataEditForm: React.FC<MetadataEditFormProps> = ({
     memorandum: report.memorandum || '',
     signatory: report.signatory || 1,
     signatory_name: report.signatory_name || '',
-    report_date: report.report_date || '',
+    // Convertir la fecha española a ISO para el input type="date"
+    report_date: report.report_date ? parseDateFromSpanish(report.report_date) || report.report_date : '',
     elaborador: report.elaborador || 'M. Vásquez',
     label: report.label || '',
   });
@@ -37,7 +38,14 @@ const MetadataEditForm: React.FC<MetadataEditFormProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave(formData);
+      // Convertir la fecha de ISO a formato español antes de enviar al backend
+      const dataToSave: UpdateReportMetadataRequest = {
+        ...formData,
+        report_date: formData.report_date
+          ? formatDateToSpanish(formData.report_date)
+          : formData.report_date,
+      };
+      await onSave(dataToSave);
     } finally {
       setIsSaving(false);
     }

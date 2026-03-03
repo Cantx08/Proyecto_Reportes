@@ -113,6 +113,30 @@ export const slugify = (text: string): string => {
 };
 
 /**
+ * Convierte una fecha en formato español (dd de mes de yyyy) al formato ISO (YYYY-MM-DD)
+ * Retorna cadena vacía si el formato no es reconocido.
+ */
+export const parseDateFromSpanish = (spanishDate: string): string => {
+  if (!spanishDate) return '';
+
+  const months: Record<string, string> = {
+    enero: '01', febrero: '02', marzo: '03', abril: '04',
+    mayo: '05', junio: '06', julio: '07', agosto: '08',
+    septiembre: '09', octubre: '10', noviembre: '11', diciembre: '12',
+  };
+
+  // Formato esperado: "12 de mayo de 2025"
+  const match = spanishDate.trim().match(/^(\d{1,2}) de (\w+) de (\d{4})$/);
+  if (!match) return '';
+
+  const [, day, monthName, year] = match;
+  const month = months[monthName.toLowerCase()];
+  if (!month) return '';
+
+  return `${year}-${month}-${day.padStart(2, '0')}`;
+};
+
+/**
  * Formatea una fecha del formato ISO (YYYY-MM-DD) al formato español (dd de mes de yyyy)
  */
 export const formatDateToSpanish = (isoDate: string): string => {

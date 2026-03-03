@@ -121,8 +121,8 @@ const PdfDropZone: React.FC<PdfDropZoneProps> = ({ onError }) => {
           ${isDragOver
             ? 'border-primary-500 bg-primary-50 scale-[1.01]'
             : selectedFile
-              ? 'border-success-300 bg-success-50 hover:border-success-400'
-              : 'border-neutral-300 bg-neutral-50 hover:border-primary-400 hover:bg-primary-50/50'
+              ? 'border-success-300 hover:border-success-400'
+              : 'border-neutral-300 hover:border-primary-400'
           }
         `}
       >
@@ -144,7 +144,7 @@ const PdfDropZone: React.FC<PdfDropZoneProps> = ({ onError }) => {
             </div>
             <div>
               <p className="text-sm font-medium text-neutral-700">
-                {isDragOver ? 'Suelte el archivo aquí' : 'Arrastre un PDF borrador aquí'}
+                {isDragOver ? 'Suelte el archivo aquí' : 'Arrastre el archivo PDF aquí'}
               </p>
               <p className="text-xs text-neutral-500 mt-1">
                 o haga clic para seleccionar un archivo (máx. 10MB)
@@ -154,8 +154,8 @@ const PdfDropZone: React.FC<PdfDropZoneProps> = ({ onError }) => {
         ) : (
           <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-50 rounded-lg">
-                <FileText className="h-6 w-6 text-red-500" />
+              <div className="p-2 rounded-lg">
+                <FileText className="h-6 w-6 text-success-500" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-medium text-neutral-800 truncate max-w-xs">
@@ -198,16 +198,16 @@ const PdfDropZone: React.FC<PdfDropZoneProps> = ({ onError }) => {
             ) : (
               <>
                 <FileText className="h-4 w-4 mr-2" />
-                Aplicar Plantilla Institucional
+                Generar Certificado
               </>
             )}
           </button>
 
           {processSuccess && (
-            <div className="flex items-center space-x-2 text-success-700 bg-success-50 border border-success-200 rounded-lg px-4 py-2">
+            <div className="flex items-center space-x-2 text-success-700 rounded-lg px-4 py-2">
               <CheckCircle className="h-4 w-4" />
               <span className="text-sm font-medium">
-                Certificado final generado y descargado exitosamente
+                Certificado generado exitosamente
               </span>
             </div>
           )}

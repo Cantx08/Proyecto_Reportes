@@ -317,14 +317,14 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         <button
           onClick={handleGenerateDraft}
           disabled={isGenerating}
-          className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
+          className="w-full sm:w-auto bg-blue-900 hover:bg-blue-950 disabled:bg-neutral-400 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-md transition-colors duration-200 shadow-sm"
         >
-          {isGenerating ? 'Generando Borrador...' : '📝 Generar Borrador'}
+          {isGenerating ? 'Generando Borrador...' : 'Generar Borrador'}
         </button>
 
         {/* Loading State */}
         {isGenerating && (
-          <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="w-full border border-b-gray-400 rounded-lg p-6">
             <div className="flex items-center flex-col">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
               <span className="text-lg font-medium text-blue-900 mb-2">

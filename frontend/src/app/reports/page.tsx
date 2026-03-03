@@ -85,15 +85,12 @@ export default function CertificatePage() {
           {/* Opción 2: Generar certificado final desde borrador */}
           <div className="bg-white rounded-lg border border-neutral-200 p-8">
             <div className="text-center mb-6">
-              <div className="mx-auto h-14 w-14 bg-success-50 rounded-full flex items-center justify-center mb-4">
-                <FileText className="h-7 w-7 text-success-500" />
+              <div className="mx-auto h-14 w-14 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-7 w-7 text-primary-500" />
               </div>
               <h2 className="text-lg font-semibold text-neutral-900 mb-2">
                 Generar certificado final
               </h2>
-              <p className="text-sm text-neutral-600 max-w-sm mx-auto">
-                Si ya tiene un borrador PDF, súbalo aquí para aplicarle la plantilla institucional y obtener el certificado final.
-              </p>
             </div>
             <PdfDropZone onError={handleReportError} />
           </div>
